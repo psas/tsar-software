@@ -2,10 +2,12 @@
 #define TSAR_MCP342X
 
 #include <iostream>
+#include <fstream>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
+#include <string.h>
 
 //Raw Config Bit Definitions
 #define CFG_RDY 1<<7
@@ -48,13 +50,11 @@ class mcp342x{
     int address;
     int file_descriptor;
     char* device;
-    int register_size;
-    char* register_data;
 
   public:
     // Constructor / destructor stuff
     mcp342x();
-    mcp342x(const int, const char*, const int);
+    mcp342x(const int, const char*);
     ~mcp342x();
 
     // Function stuff
@@ -62,9 +62,10 @@ class mcp342x{
     const bool set_channel();
     void start_read();
     const bool is_ready();
-    const int read();
-    const int read(const int, const char*);
+    const int read_register(const int, const char*&);
     const int write();
+
+	friend std::ostream& operator <<(std::ostream&, const mcp342x&);
 };
 
 #endif

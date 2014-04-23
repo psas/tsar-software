@@ -8,12 +8,16 @@ int main(const int argc, const char** argv) {
     // CommandControl CC;
     // CC.start_system();
 
-    mcp342x adc(0x68, "/dev/i2c-1", 10);
+    mcp342x adc(0x68, "/dev/i2c-1");
 
-    cout << "Entering main loop..." << endl;
+    cout << "Created ADC: " << adc << endl << "Entering main loop..." << endl;
 
     while(true){
-  		adc.read();
+		char buffer[3];
+
+  		int response = adc.read_register(3, buffer);
+
+		cout << "Got response from chip: " << response << endl;
   		usleep(S);
   	}
 
