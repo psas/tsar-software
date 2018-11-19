@@ -4,9 +4,10 @@
 #ifndef LIVE_DATA
 #include <cstdlib> // rand
 #endif
-//#include <wiringPi.h> // raspberry pi I2C
+#include <wiringPi.h> // raspberry pi I2C
 
 namespace hardware_library {
+    int example_i2c(int addr);
 #ifndef LIVE_DATA
     int random_int(int addr);
     float random_float(int addr);

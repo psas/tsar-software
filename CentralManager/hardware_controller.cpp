@@ -105,7 +105,7 @@ update_frame() {
     frame.time = get_time() - epoch;
 
 #ifdef LIVE_DATA
-    printf("no sensors yet\n");
+    frame.test_int_0 = hardware_library::example_i2c(EX_ADDR);
 #else
     frame.test_int_0 = hardware_library::random_int(TEST_ADDR);
     frame.test_int_1 = hardware_library::random_int(TEST_ADDR);
