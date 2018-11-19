@@ -24,10 +24,6 @@ link_logger::
     }
 }
 
-void link_logger::
-start_server() {
-    serv_thread = new std::thread(&server::driver_loop, &serv);
-}
 
 // server wrapper for link thread
 void link_logger::
@@ -41,13 +37,21 @@ driver_loop() {
     driver_running = 1;
     while(driver_running) {
         send_q.dequeue(temp_send_data); 
-        make_send_string(temp_send_data, output_string);
-        serv.send_string(output_string);
-        save(output_string);
+        if(data_changed(temp_send_data)) { // if data is different than last
+            make_send_string(temp_send_data, output_string);
+            serv.send_string(output_string);
+            save(output_string);
+        }
         nanosleep(&driver_delay, NULL);
     }
 
     std::cout << "Link Logger Stopped\n";
+}
+
+
+void link_logger::
+start_server() {
+    serv_thread = new std::thread(&server::driver_loop, &serv);
 }
 
 
@@ -56,6 +60,14 @@ void link_logger::
 kill_driver() { 
     driver_running = 0;
     serv.kill_driver();
+}
+
+
+int link_logger::
+data_changed(send_data input) const {
+    if(input.flag == FRAME)
+        return memcmp(&input.sensor_frame, &last_frame.sensor_frame, sensor_frame_size);
+    return memcmp(&input.seq_status, &last_frame.seq_status, seq_status_size);
 }
 
 

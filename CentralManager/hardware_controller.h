@@ -7,9 +7,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <wiringSerial.h> // raspberry pi UART
-#ifdef PRINT_DATA_FRAME
-#include <iostream>
-#endif // PRINT_DATA_FRAME
+#include <iostream> 
 
 #include "hardware_library.h"
 #include "sensor_data_frame.h"
@@ -17,14 +15,14 @@
 #include "link_logger.h"
 #endif // LINK_ON
 
-#define HDW_DRIVER_DELAY 50000 // Mircoseconds
+#define HDW_DRIVER_DELAY 500000 // Mircoseconds
 
 // raspberry pi gpio pins
 #define TEST_PIN 1 // example
 
 // raspberry pi i2c senors
 #define TEST_ADDR 0x00 // for testing, DO NOT REMOVE
-#define EX_ADDR 0x68 // example
+#define THERMO0 0x68 // example
 
 
 class hardware_controller {

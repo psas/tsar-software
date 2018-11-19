@@ -4,7 +4,7 @@
 # 1 on, 0 off
 
 # select which files to debug
-DEBUG_ALL ?= 0# this will turn in all others
+DEBUG_ALL ?= 1# this will turn in all others
 DEBUG_HARDWARE ?= 1
 DEBUG_LINK ?= 1# this will turn on server too
 DEBUG_SERVER ?= 1

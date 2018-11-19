@@ -46,6 +46,8 @@ hardware_controller::
 
 void hardware_controller::
 driver_loop() {
+    std::cout << "Hardware Controller Running\n";
+
     driver_running = 1;
     while(driver_running == 1) {
         update_frame();
@@ -58,6 +60,8 @@ driver_loop() {
 #endif // LINK_ON
         nanosleep(&driver_delay, NULL);
     }
+
+    std::cout << "Hardware Controller Stopped\n";
     return;
 }
 
@@ -105,7 +109,7 @@ update_frame() {
     frame.time = get_time() - epoch;
 
 #ifdef LIVE_DATA
-    frame.test_int_0 = hardware_library::example_i2c(EX_ADDR);
+    printf("no sensors yet\n");
 #else
     frame.test_int_0 = hardware_library::random_int(TEST_ADDR);
     frame.test_int_1 = hardware_library::random_int(TEST_ADDR);
