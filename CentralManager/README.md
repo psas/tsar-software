@@ -38,7 +38,7 @@ Server thread
     - [x] Thread Driver
     - [x] Test RNG data
     - [ ] I2C
-    - [ ] GPIO pins
+    - [x] GPIO pins
     - [ ] UART 
   - [x] LinkLogger
     - [x] Make Server Thread
