@@ -36,11 +36,12 @@ driver_loop() {
 
     driver_running = 1;
     while(driver_running) {
-        send_q.dequeue(temp_send_data); 
-        if(data_changed(temp_send_data)) { // if data is different than last
-            make_send_string(temp_send_data, output_string);
-            serv.send_string(output_string);
-            save(output_string);
+        while(send_q.dequeue(temp_send_data) == 1) { 
+            if(data_changed(temp_send_data) != 0) { // if data is different than last
+                make_send_string(temp_send_data, output_string);
+                serv.send_string(output_string);
+                save(output_string);
+            }
         }
         nanosleep(&driver_delay, NULL);
     }

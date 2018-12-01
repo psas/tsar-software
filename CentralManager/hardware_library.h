@@ -1,15 +1,20 @@
 #ifndef _HARDWARE_LIBRARY_H_
 #define _HARDWARE_LIBRARY_H_
 
-#ifndef LIVE_DATA
+#include <iostream>  // cout
+
+#ifdef LIVE_DATA
+#include <wiringPiI2C.h> // raspberry pi I2C
+#else
 #include <cstdlib> // rand
 #endif
-//#include <wiringPi.h> // raspberry pi I2C
 
 namespace hardware_library {
-#ifndef LIVE_DATA
-    int random_int(int addr);
-    float random_float(int addr);
+#ifdef LIVE_DATA
+    int mcp3424(int addr, int reg);
+#else
+    int random_int();
+    float random_float();
 #endif // LIVE_DATA
 }
 

@@ -1,5 +1,6 @@
 #CentralManager makefile
 
+
 # debug setttings
 # 1 on, 0 off
 
@@ -19,9 +20,7 @@ PRINT_DATA ?= 0
 
 
 CC=g++
-CPP_FLAGS=-std=c++14 -pthread -Wall
-WPI=-lwiringPi
-
+CPP_FLAGS=-std=c++14 -pthread -Wall -lwiringPi
 
 PROGS=CentralManager
 HARDWAREFILES=hardware_controller.cpp hardware_library.cpp

@@ -88,13 +88,13 @@ int sequencer::
 sequence() { 
     switch(status.current_state) {
         case 1 :
-            //hdw_ctrl->light_on();
+            hdw_ctrl->light_on();
             if(last_frame.test_int_0 > 80)
                 status.current_state = 2;
             else
                 break;
         default :
-            //hdw_ctrl->light_off();
+            hdw_ctrl->light_off();
             if(last_frame.test_int_1 < 80)
                 status.current_state = 1;
             break;

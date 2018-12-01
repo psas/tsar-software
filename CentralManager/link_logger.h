@@ -16,7 +16,7 @@
 #include "client_command.h"
 
 #define FILENAME "saved_output/CM_data.txt"
-#define LINK_LOGGER_DELAY 10 // ms  
+#define LINK_LOGGER_DELAY 3 // ms  
 
 /* link_logger:
  * Acts as a wrapper class for the server class. This class main jobs is to 

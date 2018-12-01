@@ -26,7 +26,7 @@ enqueue(const send_data & input) {
     ++current_enqueue %= queue_length;
     if(current_enqueue == current_dequeue) { // queue is full
         ++current_dequeue %= queue_length;
-        std::cout << "QUEUE IS FULL\n";
+        std::cout << "SEND DATA QUEUE IS FULL\n";
         queue_mutex.unlock();
         return 0;
     }

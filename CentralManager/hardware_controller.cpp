@@ -7,8 +7,6 @@ hardware_controller() : driver_running(0) {
 #ifdef LINK_ON
     ll = NULL;
 #endif // LINK_ON
-    //wiringPiSetup();
-
     epoch = get_time();
 
     driver_delay.tv_sec = 0;
@@ -22,8 +20,6 @@ hardware_controller() : driver_running(0) {
 #ifdef LINK_ON
 hardware_controller::
 hardware_controller(link_logger * input) : ll(input), driver_running(0) {
-    //wiringPiSetup();
-
     epoch = get_time();
 
     driver_delay.tv_sec = 0;
@@ -46,6 +42,15 @@ hardware_controller::
 
 void hardware_controller::
 driver_loop() {
+    if(wiringPiSetup() == -1){
+        std::cout << "wiringPiSettup failed\n";
+        return;
+    }
+
+#ifdef LIVE_DATA
+    i2c_setup();
+#endif // LIVE_DATA
+
     std::cout << "Hardware Controller Running\n";
 
     driver_running = 1;
@@ -65,12 +70,28 @@ driver_loop() {
     return;
 }
 
+#ifdef LIVE_DATA
+int hardware_controller::
+i2c_setup(){
+    int ri =0;
+
+    adc1_fd = wiringPiI2CSetup(ADC1);
+    if(adc1_fd == -1) {
+        std::cout << errno << std::endl;
+        ri--;
+    }
+
+    return ri;
+}
+#endif
+
+
 
 #ifdef PRINT_DATA_FRAME
 void hardware_controller::
 print_current_frame() const {
 #ifdef LIVE_DATA
-    std::cout << "time: " << frame.time << "no sensor data\n";
+    std::cout << "time: " << frame.time << ", adc0 " << frame.adc0 << std::endl;
 #else
     std::cout << "time: " << frame.time << ", int0: " << frame.test_int_0 << ", int1: " << frame.test_int_1 
          << ", float0: " << frame.test_float_0 << ", float1 " << frame.test_float_1 << std::endl;
@@ -109,13 +130,27 @@ update_frame() {
     frame.time = get_time() - epoch;
 
 #ifdef LIVE_DATA
-    printf("no sensors yet\n");
+    frame.adc0 = hardware_library::mcp3424(adc1_fd, 0x0);
 #else
-    frame.test_int_0 = hardware_library::random_int(TEST_ADDR);
-    frame.test_int_1 = hardware_library::random_int(TEST_ADDR);
-    frame.test_float_0 = hardware_library::random_float(TEST_ADDR);
-    frame.test_float_1 = hardware_library::random_float(TEST_ADDR);
+    frame.test_int_0 = hardware_library::random_int();
+    frame.test_int_1 = hardware_library::random_int();
+    frame.test_float_0 = hardware_library::random_float();
+    frame.test_float_1 = hardware_library::random_float();
 #endif // LIVE_DATA
 
+    return 1;
+}
+
+int hardware_controller::
+light_on() const {
+    pinMode(LIGHT_GPIO, OUTPUT);
+    digitalWrite(LIGHT_GPIO, HIGH);
+    return 1;
+}
+
+int hardware_controller::
+light_off() const {
+    pinMode(LIGHT_GPIO, OUTPUT);
+    digitalWrite(LIGHT_GPIO, LOW);
     return 1;
 }

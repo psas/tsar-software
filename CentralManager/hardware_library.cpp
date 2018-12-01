@@ -1,6 +1,17 @@
 #include "hardware_library.h"
 
-#ifndef LIVE_DATA
-int hardware_library::random_int(int addr) { return rand() % 100; }
-float hardware_library::random_float(int addr) { return (float)(rand() % 100); }
+#ifdef LIVE_DATA
+int hardware_library::
+mcp3424(int addr, int reg) {
+    int ri = wiringPiI2CRead(addr);
+    std::cout << ri << std::endl;
+    return ri;
+}
+#else
+int hardware_library::
+random_int() { return rand() % 100; }
+
+float hardware_library::
+random_float() { return (float)(rand() % 100); }
 #endif
+

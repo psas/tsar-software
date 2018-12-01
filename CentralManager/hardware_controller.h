@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <wiringSerial.h> // raspberry pi UART
+#include <wiringPi.h>
 #include <iostream> 
 
 #include "hardware_library.h"
@@ -15,14 +16,13 @@
 #include "link_logger.h"
 #endif // LINK_ON
 
-#define HDW_DRIVER_DELAY 500000 // Mircoseconds
+#define HDW_DRIVER_DELAY 5000 // Mircoseconds
 
 // raspberry pi gpio pins
-#define TEST_PIN 1 // example
+#define LIGHT_GPIO 0 //gpio 17 or pin 11 on pi
 
 // raspberry pi i2c senors
-#define TEST_ADDR 0x00 // for testing, DO NOT REMOVE
-#define THERMO0 0x68 // example
+#define ADC1 0x68 // example
 
 
 class hardware_controller {
@@ -36,7 +36,12 @@ class hardware_controller {
         void driver_loop();
         int kill_driver();
         int get_frame(struct sensor_data_frame & input) const;
+        int light_on() const;
+        int light_off() const;
     private:
+#ifdef LIVE_DATA
+        int i2c_setup();
+#endif // LIVE_DATA
         int update_frame();
         int get_time() const;
 #ifdef PRINT_DATA_FRAME
@@ -46,6 +51,10 @@ class hardware_controller {
 #ifdef LINK_ON
         link_logger * ll;
 #endif // LINK_ON
+
+#ifdef LIVE_DATA
+        int adc1_fd;
+#endif // LIVE_DATA
 
         struct timespec driver_delay;
         struct sensor_data_frame frame;
