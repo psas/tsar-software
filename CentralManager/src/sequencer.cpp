@@ -50,7 +50,7 @@ driver_loop_high() {
         nanosleep(&high_driver_delay, NULL);
     }
     
-    std::cout << "Sequencer stoped\n";
+    std::cout << "Sequencer High stoped\n";
     
     return;
 }
@@ -61,18 +61,18 @@ void sequencer::
 driver_loop_main() {
     struct client_command new_command;
 
-    std::cout << "Sequencer running\n";
+    std::cout << "Sequencer Main running\n";
 
     main_driver_running = 1;
     while(main_driver_running == 1) {
-        if(link->recv(new_command) == 1)
-            std::cout << "new command\n"; // replace with command stuff later
+        //if(link->recv(new_command) == 1)
+        //    std::cout << "new command\n"; // replace with command stuff later
         sequence(); // control
         link->send(status); // update clients on progress
         nanosleep(&main_driver_delay, NULL);
     }
     
-    std::cout << "Sequencer stoped\n";
+    std::cout << "Sequencer Main stoped\n";
     
     return;
 }
@@ -88,13 +88,13 @@ int sequencer::
 sequence() { 
     switch(status.current_state) {
         case 1 :
-            //hdw_ctrl->light_on();
+            hdw_ctrl->light_on();
             if(last_frame.test_int_0 > 80)
                 status.current_state = 2;
             else
                 break;
         default :
-            //hdw_ctrl->light_off();
+            hdw_ctrl->light_off();
             if(last_frame.test_int_1 < 80)
                 status.current_state = 1;
             break;
@@ -113,8 +113,8 @@ kill_driver() {
 
 int sequencer::
 emergency_state() {
-    if(last_frame.test_int_1 % 40) { // placeholder for later logic
-        std::cout << "EMERGENCY HALT\n";
+    if(last_frame.test_int_1%20 == 1) { // placeholder for later logic
+        //std::cout << "EMERGENCY HALT\n";
         status.current_state = -1;
         link->send(status);
         return 1;

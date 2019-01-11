@@ -47,6 +47,10 @@ kill_all_threads() {
     link.kill_driver();
     hdw.kill_driver();
     seq.kill_driver();
+
+    link_thread->join();
+    hdw_thread->join();
+    seq_thread->join();
 }
 
 // check for root, thread priority can't used without root

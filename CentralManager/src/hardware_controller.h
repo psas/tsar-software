@@ -1,15 +1,14 @@
 #ifndef _HARDWARE_CONTROLLER_H_
 #define _HARDWARE_CONTROLLER_H_
 
-#include <ctime>
-#include <cstring>
-#include <sys/resource.h>
-#include <unistd.h>
+#include <ctime>                // for delays (waits)
+#include <cstring>              // memcpy
+//#include <sys/resource.h>
+//#include <unistd.h>
 #include <stdlib.h>
-//#include <wiringSerial.h> // raspberry pi UART
-#ifdef PRINT_DATA_FRAME
-#include <iostream>
-#endif // PRINT_DATA_FRAME
+#include <wiringPi.h>           // raspberry pi UART/GPIO
+#include <wiringSerial.h>       // raspberry pi UART
+#include <iostream>             // cout
 
 #include "hardware_library.h"
 #include "sensor_data_frame.h"
@@ -17,14 +16,21 @@
 #include "link_logger.h"
 #endif // LINK_ON
 
-#define HDW_DRIVER_DELAY 50000 // Mircoseconds
+#define HDW_DRIVER_DELAY 5000   // Mircoseconds
+#define BUAD_RATE 115200        // UART buad rate
+#define PATH "/dev/ttyAMA0"     // UART path
 
 // raspberry pi gpio pins
-#define TEST_PIN 1 // example
+#define LIGHT_GPIO 0            //gpio 17 or pin 11 on pi
 
 // raspberry pi i2c senors
-#define TEST_ADDR 0x00 // for testing, DO NOT REMOVE
-#define THERMO0 0x68 // example
+#define MPL3115A2_ADDRESS 0x60              // example MPL3115A2
+#define GHOST_SENSOR_ADDRESS 0x00           // sensor that does not exist for testing only
+
+struct sensor_fds_list {
+    int MPL3115A2;
+    int ghost;
+};
 
 
 class hardware_controller {
@@ -38,7 +44,12 @@ class hardware_controller {
         void driver_loop();
         int kill_driver();
         int get_frame(struct sensor_data_frame & input) const;
+        int light_on() const;
+        int light_off() const;
     private:
+#ifdef LIVE_DATA
+        int i2c_setup();
+#endif // LIVE_DATA
         int update_frame();
         int get_time() const;
 #ifdef PRINT_DATA_FRAME
@@ -49,8 +60,13 @@ class hardware_controller {
         link_logger * ll;
 #endif // LINK_ON
 
+#ifdef LIVE_DATA
+        int adc1_fd;
+#endif // LIVE_DATA
+
         struct timespec driver_delay;
         struct sensor_data_frame frame;
+        struct sensor_fds_list fd_list;
         int frame_size;
         int epoch;
         bool driver_running;

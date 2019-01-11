@@ -14,7 +14,7 @@
 
 #define PORT 8080
 #define PSELECT_TIMEOUT 5 // milliseconds
-#define SERVER_DELAY 20 // milliseconds
+#define SERVER_DELAY 2 // milliseconds
 #define SEND_STRING_MAX_LEN 2048
 #define RECV_STRING_MAX_LEN 128
 #define SEND_STRING_Q_MAX_LEN 50

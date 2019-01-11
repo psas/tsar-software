@@ -7,14 +7,13 @@ hardware_controller() : driver_running(0) {
 #ifdef LINK_ON
     ll = NULL;
 #endif // LINK_ON
-    //wiringPiSetup();
-
     epoch = get_time();
 
     driver_delay.tv_sec = 0;
     driver_delay.tv_nsec = HDW_DRIVER_DELAY*1000;
     frame_size = sizeof(struct sensor_data_frame);
 
+    wiringPiSetup();
     //add more as needed
     //pinMode(TEST_PIN, OUTPUT);
 }
@@ -22,30 +21,40 @@ hardware_controller() : driver_running(0) {
 #ifdef LINK_ON
 hardware_controller::
 hardware_controller(link_logger * input) : ll(input), driver_running(0) {
-    //wiringPiSetup();
-
     epoch = get_time();
 
     driver_delay.tv_sec = 0;
     driver_delay.tv_nsec = HDW_DRIVER_DELAY*1000;
     frame_size = sizeof(struct sensor_data_frame);
 
+    wiringPiSetup();
     //add more as needed
     //pinMode(TEST_PIN, OUTPUT);
 }
 #endif // LINK_ON
 
+
 #ifdef LINK_ON
 hardware_controller::
 ~hardware_controller() {
-    ll = NULL;
+    ll = NULL; // central manager class will hand link logger deconstruction
 }
 #endif // HARDHWARE TESTS
 
 
-
 void hardware_controller::
 driver_loop() {
+    if(wiringPiSetup() == -1){
+        std::cout << "wiringPiSettup failed\n";
+        return;
+    }
+
+#ifdef LIVE_DATA
+    i2c_setup();
+#endif // LIVE_DATA
+
+    std::cout << "Hardware Controller Running\n";
+
     driver_running = 1;
     while(driver_running == 1) {
         update_frame();
@@ -58,15 +67,30 @@ driver_loop() {
 #endif // LINK_ON
         nanosleep(&driver_delay, NULL);
     }
+
+    std::cout << "Hardware Controller Stopped\n";
     return;
 }
+
+#ifdef LIVE_DATA
+int hardware_controller::
+i2c_setup(){
+    int ri =0;
+
+    fd_list.MPL3115A2 = hardware_library::MPL3115A2_setup(MPL3115A2_ADDRESS);
+    fd_list.ghost = -1; //hardware_library::ghost_setup(GHOST_SENOSR_ADDRESS);
+
+    return ri;
+}
+#endif
+
 
 
 #ifdef PRINT_DATA_FRAME
 void hardware_controller::
 print_current_frame() const {
 #ifdef LIVE_DATA
-    std::cout << "time: " << frame.time << "no sensor data\n";
+    std::cout << "time: " << frame.time << ", temperature1: " << frame.temp_1 << ", pressure1: " << frame.pres_1 << std::endl;
 #else
     std::cout << "time: " << frame.time << ", int0: " << frame.test_int_0 << ", int1: " << frame.test_int_1 
          << ", float0: " << frame.test_float_0 << ", float1 " << frame.test_float_1 << std::endl;
@@ -105,13 +129,28 @@ update_frame() {
     frame.time = get_time() - epoch;
 
 #ifdef LIVE_DATA
-    printf("no sensors yet\n");
+    frame.pres_1 = hardware_library::MPL3115A2_pres(fd_list.MPL3115A2);
+    frame.temp_1 = hardware_library::MPL3115A2_temp(fd_list.MPL3115A2);
 #else
-    frame.test_int_0 = hardware_library::random_int(TEST_ADDR);
-    frame.test_int_1 = hardware_library::random_int(TEST_ADDR);
-    frame.test_float_0 = hardware_library::random_float(TEST_ADDR);
-    frame.test_float_1 = hardware_library::random_float(TEST_ADDR);
+    frame.test_int_0 = hardware_library::random_int();
+    frame.test_int_1 = hardware_library::random_int();
+    frame.test_float_0 = hardware_library::random_float();
+    frame.test_float_1 = hardware_library::random_float();
 #endif // LIVE_DATA
 
+    return 1;
+}
+
+int hardware_controller::
+light_on() const {
+    pinMode(LIGHT_GPIO, OUTPUT);
+    digitalWrite(LIGHT_GPIO, HIGH);
+    return 1;
+}
+
+int hardware_controller::
+light_off() const {
+    pinMode(LIGHT_GPIO, OUTPUT);
+    digitalWrite(LIGHT_GPIO, LOW);
     return 1;
 }

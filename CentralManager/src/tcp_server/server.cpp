@@ -58,10 +58,9 @@ driver_loop() {
     while(driver_running == 1) { 
         check_new_and_read(); //this will also handle enqueuing into recv_q
 
-        if(send_q.dequeue(message) == 1) // has data to send
+        while(send_q.dequeue(message) == 1) // has data to send
             send_to_all(message);
-        else // no data
-            nanosleep(&driver_delay, NULL);
+        nanosleep(&driver_delay, NULL);
     }
 
     std::cout << "Server connection closed\n";

@@ -1,18 +1,18 @@
 #ifndef _CM_H_
 #define _CM_H_
 
-#include <thread> // thread
-#include <unistd.h> // getuid
-#include <iostream> // cout
+#include <thread>           // thread
+#include <unistd.h>         // getuid
+#include <iostream>         // cout
 
 #include "sequencer.h"
 #include "link_logger.h"
 #include "hardware_controller.h"
 
-#define HDW_PRIO 20 
-#define SEQ_HIGH_PRIO 30
-#define SEQ_LOW_PRIO 10
-#define LINK_PRIO 5
+#define HDW_PRIO 20         // hardware thread priority
+#define SEQ_HIGH_PRIO 30    // sequencer high thread priority
+#define SEQ_LOW_PRIO 10     // sequencer low thread priority
+#define LINK_PRIO 5         // link logger thread priority
 
 /* Governor:
  * Its main job is build and control all threads aswell as getting the 
