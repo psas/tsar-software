@@ -11,7 +11,9 @@
 
 namespace hardware_library {
 #ifdef LIVE_DATA
-    int mcp3424(int addr, int reg);
+    int MPL3115A2_setup(int reg);
+    float MPL3115A2_pres(int fd);
+    float MPL3115A2_temp(int fd);
 #else
     int random_int();
     float random_float();

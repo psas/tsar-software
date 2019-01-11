@@ -4,7 +4,8 @@
 #ifdef LIVE_DATA
 struct sensor_data_frame {
     int time;
-    int adc0;
+    float temp_1;
+    float pres_1;    
 };
 #else
 struct sensor_data_frame {

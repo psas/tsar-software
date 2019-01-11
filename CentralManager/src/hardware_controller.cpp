@@ -13,6 +13,7 @@ hardware_controller() : driver_running(0) {
     driver_delay.tv_nsec = HDW_DRIVER_DELAY*1000;
     frame_size = sizeof(struct sensor_data_frame);
 
+    wiringPiSetup();
     //add more as needed
     //pinMode(TEST_PIN, OUTPUT);
 }
@@ -26,18 +27,19 @@ hardware_controller(link_logger * input) : ll(input), driver_running(0) {
     driver_delay.tv_nsec = HDW_DRIVER_DELAY*1000;
     frame_size = sizeof(struct sensor_data_frame);
 
+    wiringPiSetup();
     //add more as needed
     //pinMode(TEST_PIN, OUTPUT);
 }
 #endif // LINK_ON
 
+
 #ifdef LINK_ON
 hardware_controller::
 ~hardware_controller() {
-    ll = NULL;
+    ll = NULL; // central manager class will hand link logger deconstruction
 }
 #endif // HARDHWARE TESTS
-
 
 
 void hardware_controller::
@@ -75,11 +77,8 @@ int hardware_controller::
 i2c_setup(){
     int ri =0;
 
-    adc1_fd = wiringPiI2CSetup(ADC1);
-    if(adc1_fd == -1) {
-        std::cout << errno << std::endl;
-        ri--;
-    }
+    fd_list.MPL3115A2 = hardware_library::MPL3115A2_setup(MPL3115A2_ADDRESS);
+    fd_list.ghost = -1; //hardware_library::ghost_setup(GHOST_SENOSR_ADDRESS);
 
     return ri;
 }
@@ -91,7 +90,7 @@ i2c_setup(){
 void hardware_controller::
 print_current_frame() const {
 #ifdef LIVE_DATA
-    std::cout << "time: " << frame.time << ", adc0 " << frame.adc0 << std::endl;
+    std::cout << "time: " << frame.time << ", temperature1: " << frame.temp_1 << ", pressure1: " << frame.pres_1 << std::endl;
 #else
     std::cout << "time: " << frame.time << ", int0: " << frame.test_int_0 << ", int1: " << frame.test_int_1 
          << ", float0: " << frame.test_float_0 << ", float1 " << frame.test_float_1 << std::endl;
@@ -130,7 +129,8 @@ update_frame() {
     frame.time = get_time() - epoch;
 
 #ifdef LIVE_DATA
-    frame.adc0 = hardware_library::mcp3424(adc1_fd, 0x0);
+    frame.pres_1 = hardware_library::MPL3115A2_pres(fd_list.MPL3115A2);
+    frame.temp_1 = hardware_library::MPL3115A2_temp(fd_list.MPL3115A2);
 #else
     frame.test_int_0 = hardware_library::random_int();
     frame.test_int_1 = hardware_library::random_int();

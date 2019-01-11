@@ -6,13 +6,13 @@
 
 # select which files to debug
 DEBUG_ALL ?= 0# this will turn in all others
-DEBUG_HARDWARE ?= 0
+DEBUG_HARDWARE ?= 1
 DEBUG_LINK ?= 0# this will turn on server too
-DEBUG_SERVER ?= 1
+DEBUG_SERVER ?= 0
 
 # optional debug settings, this are only avaible in debug mode
-LIVE_DATA ?= 0
-PRINT_DATA ?= 0
+LIVE_DATA ?= 1
+PRINT_DATA ?= 1
 
 
 ##############################################################################
@@ -22,13 +22,14 @@ PRINT_DATA ?= 0
 CC=g++
 CPP_FLAGS=-std=c++14 -pthread -Wall -lwiringPi
 
-PROGS=CentralManager
-HARDWAREFILES=hardware_controller.cpp hardware_library.cpp
-SERVERFILES=server.cpp string_queue.cpp
-LINKFILES=link_logger.cpp send_data_queue.cpp $(SERVERFILES)
-SEQUENCERFILES=sequencer.cpp
-CMFILES=central_manager.cpp
-MAIN=main.cpp
+PROGS=CentralManagerDebug
+
+HARDWAREFILES=../hardware_controller.cpp ../hardware_library.cpp
+SERVERFILES=../tcp_server/server.cpp ../tcp_server/string_queue.cpp
+LINKFILES=../link_logger.cpp ../send_data_queue.cpp $(SERVERFILES)
+SEQUENCERFILES=../sequencer.cpp
+CMFILES=../central_manager.cpp
+MAIN=debug_main.cpp
 ALLFILES= $(MAIN) $(CMFILES) $(SEQUENCERFILES) $(LINKFILES) $(HARDWAREFILES)
 
 
@@ -65,8 +66,6 @@ DEBUG_FLAGS+= -DPRINT_DATA_FRAME
 endif
 
 
-run:
-	$(CC) $(CPP_FLAGS) -o $(PROGS) $(ALLFILES) -DLINK_ON
 debug:
 	$(CC) $(CPP_FLAGS) -g -o $(PROGS) $(MAIN) $(DEBUGFILES) $(DEBUG_FLAGS)
 clean:

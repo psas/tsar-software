@@ -1,22 +1,22 @@
 #ifndef _LINK_LOGGER_H_
 #define _LINK_LOGGER_H_
 
-#include <fstream>
-#include <iostream>
-#include <cstring>
-#include <thread>
+#include <fstream>                          // file io
+#include <iostream>                         // cout
+#include <cstring>                          // string
+#include <thread>                           // threading
 
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
+#include "../../thirdparty/rapidjson/document.h"       // rapidjson
+#include "../../thirdparty/rapidjson/writer.h"         // rapidjson
+#include "../../thirdparty/rapidjson/stringbuffer.h"   // rapidjson
 
-#include "server.h"
+#include "tcp_server/server.h"
 #include "send_data.h"
 #include "send_data_queue.h"
 #include "client_command.h"
 
-#define FILENAME "saved_output/CM_data.txt"
-#define LINK_LOGGER_DELAY 3 // ms  
+#define FILENAME "saved_output/CM_data.txt" // output filename
+#define LINK_LOGGER_DELAY 3                 // ms  
 
 /* link_logger:
  * Acts as a wrapper class for the server class. This class main jobs is to 
