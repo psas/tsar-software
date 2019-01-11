@@ -37,7 +37,7 @@ Server thread
   - [ ] Hardware Controller
     - [x] Thread Driver
     - [x] Test RNG data
-    - [ ] I2C
+    - [x] I2C
     - [x] GPIO pins
     - [ ] UART 
   - [x] LinkLogger
