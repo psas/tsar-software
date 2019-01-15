@@ -8,6 +8,10 @@ MPL3115A2_setup(int reg) {
         std::cout << "Can't setup the I2C device\n" << std::endl;
         return -1;
     }
+
+    wiringPiI2CWriteReg8(fd,0x13, 0x07);
+    wiringPiI2CWriteReg8(fd,0x26, 0x39);
+
     return fd;
 }
 
