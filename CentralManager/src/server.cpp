@@ -1,4 +1,4 @@
-#include "server_array.h"
+#include "server.h"
 
 
 // defualt constuctor
@@ -70,14 +70,14 @@ driver_loop() {
 #ifdef SERVER_TEST
 void server::
 test_driver_loop() {
-    std::array<char, RECV_STRING_LENGTH> send_message = "THIS IS A TEST\n";
+    std::array<char, SEND_STRING_LENGTH> send_message = {"THIS IS A TEST\n"};
     std::array<char, RECV_STRING_LENGTH> recv_message;
 
     std::cout << "Server connection open\n";
     
     while(1) { 
         if(check_new_and_read()) {
-            std::cout << "Message recv: " << recv_message << std::endl;
+            std::cout << "Message recv" << std::endl;
             recv_string(recv_message); // so recv queue doesnt become full
         }
         send_to_all(send_message);

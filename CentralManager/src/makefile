@@ -25,8 +25,8 @@ CPP_FLAGS=-std=c++17 -Wall
 PROGS=CentralManager
 
 HARDWAREFILES=hardware_controller.cpp hardware_library.cpp
-SERVERFILES=tcp_server/server.cpp tcp_server/string_queue.cpp
-LINKFILES=link_logger.cpp send_data_queue.cpp $(SERVERFILES)
+SERVERFILES=server.cpp
+LINKFILES=link_logger.cpp $(SERVERFILES)
 SEQUENCERFILES=sequencer.cpp
 CMFILES=central_manager.cpp
 MAIN=main.cpp
