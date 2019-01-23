@@ -3,6 +3,7 @@
 
 #include <ctime>
 #include <iostream>
+#include <cstdint>
 
 #include "sensor_data_frame.h"
 #include "hardware_controller.h"
@@ -17,7 +18,6 @@
  */
 class sequencer {
     public:
-        sequencer();
         sequencer(link_logger * link, hardware_controller * hdw_ctrl);
         ~sequencer();
 
@@ -34,11 +34,11 @@ class sequencer {
 
         struct sensor_data_frame last_frame;
         struct sequence_status status;
-        int status_size;
+        uint32_t status_size;
 
         struct timespec high_driver_delay;
         struct timespec main_driver_delay;
-        int main_driver_running;
-        int high_driver_running;
+        uint32_t main_driver_running;
+        uint32_t high_driver_running;
 };
 #endif

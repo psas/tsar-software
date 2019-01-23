@@ -1,10 +1,9 @@
-#include "server.h"
+#include "server_array.h"
 
 
 // defualt constuctor
 server::
-server() : send_q(SEND_STRING_Q_MAX_LEN, SEND_STRING_MAX_LEN), 
-    recv_q(RECV_STRING_Q_MAX_LEN, RECV_STRING_MAX_LEN), driver_running(0) {
+server() : send_q(SEND_Q_LENGTH), recv_q(RECV_Q_LENGTH), driver_running(0) {
 
     // clear the fds_master_list and temp sets
     FD_ZERO(&fds_master_list);
@@ -14,8 +13,8 @@ server() : send_q(SEND_STRING_Q_MAX_LEN, SEND_STRING_MAX_LEN),
         std::cout << "Socket Error\n";
 
     // listener setsockopt
-    int yes = 1; // don't why it takes a pointer to 1
-    if(setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+    int option_value = 1;
+    if(setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(int)) == -1)
         std::cout << "SetScoketOpt Error\n";
 
     address_len = sizeof(struct sockaddr_in);
@@ -50,7 +49,7 @@ server() : send_q(SEND_STRING_Q_MAX_LEN, SEND_STRING_MAX_LEN),
  */
 void server::
 driver_loop() {
-    char message[SEND_STRING_MAX_LEN];
+    std::array<char, SEND_STRING_LENGTH> message;
 
     std::cout << "Server connection open\n";
 
@@ -71,8 +70,8 @@ driver_loop() {
 #ifdef SERVER_TEST
 void server::
 test_driver_loop() {
-    char send_message[SEND_STRING_MAX_LEN] = "THIS IS A TEST\n";
-    char recv_message[RECV_STRING_MAX_LEN];
+    std::array<char, RECV_STRING_LENGTH> send_message = "THIS IS A TEST\n";
+    std::array<char, RECV_STRING_LENGTH> recv_message;
 
     std::cout << "Server connection open\n";
     
@@ -110,7 +109,8 @@ check_new_and_read() {
     else if(is_data == 0) // pselect_timeout, no data
         return 0;
 
-    char buf[RECV_STRING_MAX_LEN];
+    std::array<char, RECV_STRING_LENGTH> temp;
+    char buf[RECV_STRING_LENGTH];
     struct sockaddr_in clientaddr; // address for new client
     int new_fd;
 
@@ -136,7 +136,7 @@ check_new_and_read() {
             }
             else { // handle data from a client
                 // testing neeed on this, how does it handle no data? <<<<<<<<<
-                if(recv(i, buf, RECV_STRING_MAX_LEN, 0) <= 0) {
+                if(recv(i, buf, RECV_STRING_LENGTH, 0) <= 0) {
                     // got error (1) or connection closed by client (0)
                     std::cout << "Socket " << i << " disconnected/errored\n";
                     close(i);
@@ -144,9 +144,9 @@ check_new_and_read() {
                 }
                 else{ // got data from a client, add it to queue
                     std::cout << "Command Accepted\n";
-                    // json to struct convert
-                    buf[RECV_STRING_Q_MAX_LEN-1] = '\0'; // just incase
-                    recv_q.enqueue(buf);
+                    buf[RECV_STRING_LENGTH-1] = '\0'; // just incase
+                    std::copy(std::begin(buf), std::end(buf), std::begin(temp));
+                    recv_q.enqueue(temp);
                 }
             }
         }
@@ -157,15 +157,14 @@ check_new_and_read() {
 
 // sends input string to all clients
 int server::
-send_to_all(const char * message) {
-    int len = strlen(message);
-    if(len == 0)
-        return 0;
+send_to_all(const std::array<char, SEND_STRING_LENGTH> & message) {
+    char temp[SEND_STRING_LENGTH];
+    std::copy(std::begin(message), std::end(message), std::begin(temp));
 
     // check intial i value <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     for(int i=0; i <= fd_count; i++) { // send to each client
         if(FD_ISSET(i, &fds_master_list) && (i != listener)) {
-            if(send(i, message, len+1, 0) <= 0) { 
+            if(send(i, temp, SEND_STRING_LENGTH, 0) <= 0) { 
                 // error or connection closed
                 std::cout << "Socket " << i << " disconnected/errored\n";
                 close(i);
@@ -184,15 +183,13 @@ kill_driver() { driver_running = 0; }
 
 // enqueue message to be send
 int server::
-send_string(const char * message) {
-    if(strlen(message) == 0)
-        return 0;
+send_string(const std::array<char, SEND_STRING_LENGTH> & message) {
     return send_q.enqueue(message); 
 }
 
 
 // dequeue oldest recieve message
 int server::
-recv_string(char * message) { 
+recv_string(std::array<char, RECV_STRING_LENGTH> & message) {
     return recv_q.dequeue(message);
 }

@@ -3,7 +3,7 @@
 
 // default constructor
 link_logger::
-link_logger() : serv_thread(NULL), driver_running(0) {
+link_logger() : serv_thread(NULL), send_data(SEND_DATA_Q_LEN), driver_running(0) {
     send_data_size = sizeof(struct send_data);
     sensor_frame_size = sizeof(struct sensor_data_frame);
     seq_status_size = sizeof(struct sequence_status);

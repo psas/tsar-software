@@ -1,19 +1,6 @@
 #include "sequencer.h"
 
 
-// default constructor
-sequencer::
-sequencer() : link(NULL), hdw_ctrl(NULL), main_driver_running(0), high_driver_running(0) {
-    std::cout << "Default constructor called!\n";
-    status.current_state = 0;
-    high_driver_delay.tv_sec = 0;
-    high_driver_delay.tv_nsec = (long)SEQ_HIGH_DRIVER_DELAY * 1000000;
-    main_driver_delay.tv_sec = 0;
-    main_driver_delay.tv_nsec = (long)SEQ_MAIN_DRIVER_DELAY * 1000000;
-    status_size = sizeof(struct sequence_status);
-}
-
-
 // main constructor
 sequencer::
 sequencer(link_logger * link_input, hardware_controller * hdw_ctrl_input)
@@ -33,8 +20,8 @@ sequencer(link_logger * link_input, hardware_controller * hdw_ctrl_input)
 sequencer::
 ~sequencer() {
     // governor will delete these
-    link = NULL; 
-    hdw_ctrl = NULL;
+    link = nullptr; 
+    hdw_ctrl = nullptr;
 }
 
 
@@ -47,7 +34,7 @@ driver_loop_high() {
     while(high_driver_running == 1) {
         hdw_ctrl->get_frame(last_frame); //update internal frame
         emergency_state();
-        nanosleep(&high_driver_delay, NULL);
+        nanosleep(&high_driver_delay, nullptr);
     }
     
     std::cout << "Sequencer High stoped\n";
@@ -69,7 +56,7 @@ driver_loop_main() {
         //    std::cout << "new command\n"; // replace with command stuff later
         sequence(); // control
         link->send(status); // update clients on progress
-        nanosleep(&main_driver_delay, NULL);
+        nanosleep(&main_driver_delay, nullptr);
     }
     
     std::cout << "Sequencer Main stoped\n";

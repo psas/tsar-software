@@ -1,7 +1,5 @@
-#include "hardware_controller.h"
 
-
-//default constructor
+//default constructor, only use for test/debuging
 hardware_controller::
 hardware_controller() : driver_running(0) {
 #ifdef LINK_ON

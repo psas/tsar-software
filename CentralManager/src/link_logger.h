@@ -6,17 +6,18 @@
 #include <cstring>                          // string
 #include <thread>                           // threading
 
-#include "../../thirdparty/rapidjson/document.h"       // rapidjson
-#include "../../thirdparty/rapidjson/writer.h"         // rapidjson
-#include "../../thirdparty/rapidjson/stringbuffer.h"   // rapidjson
+#include "../thirdparty/rapidjson/document.h"       // rapidjson
+#include "../thirdparty/rapidjson/writer.h"         // rapidjson
+#include "../thirdparty/rapidjson/stringbuffer.h"   // rapidjson
 
-#include "tcp_server/server.h"
+#include "server.h"
 #include "send_data.h"
-#include "send_data_queue.h"
+#include "fixed_queue.h"
 #include "client_command.h"
 
 #define FILENAME "saved_output/CM_data.txt" // output filename
 #define LINK_LOGGER_DELAY 3                 // ms  
+#define SEND_DATA_Q_LENGTH 250
 
 /* link_logger:
  * Acts as a wrapper class for the server class. This class main jobs is to 
@@ -47,7 +48,7 @@ class link_logger {
 
         std::thread * serv_thread;
         server serv;
-        send_data_queue send_q;
+        fixed_queue<struct send_data> send_q;
 
         struct timespec driver_delay;
         struct send_data last_frame; // last input data

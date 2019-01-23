@@ -3,6 +3,7 @@
 
 #include <ctime>                // for delays (waits)
 #include <cstring>              // memcpy
+#include <cstdint>
 //#include <sys/resource.h>
 //#include <unistd.h>
 #include <stdlib.h>
@@ -36,6 +37,7 @@ struct sensor_fds_list {
 class hardware_controller {
     public:
         hardware_controller();
+        hardware_library(const hardware_controller &) = delete;
 #ifdef LINK_ON
         hardware_controller(link_logger * input);
         ~hardware_controller();

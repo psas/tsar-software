@@ -1,5 +1,5 @@
 #if defined(SERVER_TEST)
-#include "server.h"
+#include "tcp_server/server.h"
 int
 main() {
     server serv;

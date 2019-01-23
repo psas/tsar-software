@@ -1,9 +1,9 @@
 #include "hardware_library.h"
 
 #ifdef LIVE_DATA
-int hardware_library::
-MPL3115A2_setup(int reg) {
-    int fd = wiringPiI2CSetup(reg);
+int32_t hardware_library::
+MPL3115A2_setup(const uint32_t reg) {
+    int32_t fd = wiringPiI2CSetup(reg);
     if(fd == -1) {
         std::cout << "Can't setup the I2C device\n" << std::endl;
         return -1;
@@ -17,10 +17,10 @@ MPL3115A2_setup(int reg) {
 
 
 float hardware_library::
-MPL3115A2_pres(int fd) {
-    int msb;                    // pressure most significant bits
-    int csb;                    // pressure central significant bits
-    int lsb;                    // pressure least significant bits
+MPL3115A2_pres(const uint32_t fd) {
+    int32_t msb;                    // pressure most significant bits
+    int32_t csb;                    // pressure central significant bits
+    int32_t lsb;                    // pressure least significant bits
     float pres;                 // return value (pressure in kPa)
 
     msb = wiringPiI2CReadReg8(fd,0x01);
@@ -40,9 +40,9 @@ MPL3115A2_pres(int fd) {
 
 
 float hardware_library::
-MPL3115A2_temp(int fd) {
-    int msb;                    // temperature most significant bits
-    int lsb;                    // temperature least significant bits
+MPL3115A2_temp(const uint32_t fd) {
+    int32_t msb;                    // temperature most significant bits
+    int32_t lsb;                    // temperature least significant bits
     float temp;                 // return value (temperature in C)
 
     msb = wiringPiI2CReadReg8(fd,0x04);
@@ -58,8 +58,8 @@ MPL3115A2_temp(int fd) {
     return temp;
 }
 #else
-int hardware_library::
-random_int() { return rand() % 100; }
+int32_t hardware_library::
+random_int32_t() { return rand() % 100; }
 
 
 float hardware_library::
