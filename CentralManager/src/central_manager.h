@@ -14,10 +14,8 @@
 #define SEQ_LOW_PRIO 10     // sequencer low thread priority
 #define LINK_PRIO 5         // link logger thread priority
 
-/* Governor:
- * Its main job is build and control all threads aswell as getting the 
- * sensor_data_frame and sequence_status to pass to the link_logger to 
- * send data to clients.
+/* Central Manager:
+ * Its main job is to setup the hardware, sequencer, and link logger classes and threads.
  */
 class central_manager {
     public:
@@ -31,9 +29,9 @@ class central_manager {
         int check_sudo();
 
         // ---------- data -------------
-        std::thread * hdw_thread;
-        std::thread * link_thread;
-        std::thread * seq_thread;
+        std::shared_ptr<std::thread> hdw_thread;
+        std::shared_ptr<std::thread> link_thread;
+        std::shared_ptr<std::thread> seq_thread;
 
         link_logger link;
         hardware_controller hdw;

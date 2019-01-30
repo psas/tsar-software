@@ -1,21 +1,22 @@
 #include "server.h"
 
-
 // defualt constuctor
 server::
-server() : send_q(SEND_Q_LENGTH), recv_q(RECV_Q_LENGTH), driver_running(0) {
+server() : send_q(SEND_Q_LENGTH, std::vector<char>(SEND_VECTOR_INIT_SIZE)),  
+        recv_q(RECV_Q_LENGTH, std::vector<char>(RECV_VECTOR_BUFF_SIZE)), 
+        driver_running(0) {
 
     // clear the fds_master_list and temp sets
     FD_ZERO(&fds_master_list);
 
     // listener
     if((listener = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-        std::cout << "Socket Error\n";
+        throw ServerException("Socket Error");
 
     // listener setsockopt
     int option_value = 1;
     if(setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(int)) == -1)
-        std::cout << "SetScoketOpt Error\n";
+        throw ServerException("SetSocketOpt Error");
 
     address_len = sizeof(struct sockaddr_in);
 
@@ -24,14 +25,13 @@ server() : send_q(SEND_Q_LENGTH), recv_q(RECV_Q_LENGTH), driver_running(0) {
     serveraddr.sin_family = AF_INET;
     serveraddr.sin_addr.s_addr = INADDR_ANY;
     serveraddr.sin_port = htons(PORT);
-    memset(&(serveraddr.sin_zero), '\0', 8);
-    if(bind(listener, (struct sockaddr *)&serveraddr, 
-                sizeof(struct sockaddr_in)) == -1)
-        std::cout << "Bind Error\n";
+    memset(&(serveraddr.sin_zero), '\0', 8); // to avoid undefined behavior in padding bytes
+    if(bind(listener, (struct sockaddr *)&serveraddr, sizeof(struct sockaddr_in)) == -1)
+        throw ServerException("Bind Error");
 
     // listen
     if(listen(listener, 10) == -1)
-        std::cout << "Listen Error\n";
+        throw ServerException("Listen Error");
 
     FD_SET(listener, &fds_master_list); // add listener to master list
     fd_count = listener; // keep track of the largest descriptor
@@ -41,6 +41,8 @@ server() : send_q(SEND_Q_LENGTH), recv_q(RECV_Q_LENGTH), driver_running(0) {
     pselect_timeout.tv_nsec = PSELECT_TIMEOUT * 1000000;
     driver_delay.tv_sec = 0;
     driver_delay.tv_nsec = SERVER_DELAY * 1000000;    
+
+    driver_running = 0;
 }
 
 
@@ -49,46 +51,27 @@ server() : send_q(SEND_Q_LENGTH), recv_q(RECV_Q_LENGTH), driver_running(0) {
  */
 void server::
 driver_loop() {
-    std::array<char, SEND_STRING_LENGTH> message;
+    std::vector<char> message(SEND_VECTOR_INIT_SIZE);
 
-    std::cout << "Server connection open\n";
+    std::cout << "server connection opened\n";
 
     driver_running = 1;
     while(driver_running == 1) { 
+        try {
         check_new_and_read(); //this will also handle enqueuing into recv_q
-
         while(send_q.dequeue(message) == 1) // has data to send
             send_to_all(message);
-        nanosleep(&driver_delay, NULL);
-    }
-
-    std::cout << "Server connection closed\n";
-    return;
-}
-
-
-#ifdef SERVER_TEST
-void server::
-test_driver_loop() {
-    std::array<char, SEND_STRING_LENGTH> send_message = {"THIS IS A TEST\n"};
-    std::array<char, RECV_STRING_LENGTH> recv_message;
-
-    std::cout << "Server connection open\n";
-    
-    while(1) { 
-        if(check_new_and_read()) {
-            std::cout << "Message recv" << std::endl;
-            recv_string(recv_message); // so recv queue doesnt become full
         }
-        send_to_all(send_message);
+        catch (ServerException & e){
+            std::cout << e.what() << std::endl;
+            break; //TODO: change this
+        }
         nanosleep(&driver_delay, NULL);
     }
-    
-    std::cout << "Server connection closed\n";
-    
+
+    std::cout << "server connection closed\n";
     return;
 }
-#endif
 
 
 /* this will read any mnd all message from client(s) 
@@ -97,22 +80,17 @@ test_driver_loop() {
 int server::
 check_new_and_read() {
     fd_set fds_read_list = fds_master_list; // copy it
+    std::vector<char> buffer(RECV_VECTOR_BUFF_SIZE);
+    struct sockaddr_in clientaddr; // address for new client
+    int new_fd;
 
     // this will search this list for new data received until pselect_timeout, 0 is no data
     int is_data = pselect(fd_count+1, &fds_read_list, NULL, NULL, 
             &pselect_timeout, NULL);
-    if(is_data == -1) {
-        std::cout << "Select Error -- pselect\n";
-        return -1;
-        // remove all clients??? <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    }
-    else if(is_data == 0) // pselect_timeout, no data
+    if(is_data == 0) // pselect_timeout, no data
         return 0;
-
-    std::array<char, RECV_STRING_LENGTH> temp;
-    char buf[RECV_STRING_LENGTH];
-    struct sockaddr_in clientaddr; // address for new client
-    int new_fd;
+    else if(is_data == -1)
+        throw  ServerException("Pselect Error");
 
     // checking all existing connections looking for data to be received
     // also will handle any new client
@@ -126,17 +104,15 @@ check_new_and_read() {
                     if(new_fd > fd_count) // keep track of the maximum
                         fd_count = new_fd;
                     std::cout << "New connection from " 
-                         << inet_ntoa(clientaddr.sin_addr) << " on socket "
-                         << new_fd << std::endl;
+                              << inet_ntoa(clientaddr.sin_addr) << " on socket "
+                              << new_fd << std::endl;
                 }
-                else {
-                    std::cout << "Accept Error -- Receiver\n";
-                    return 0;
-                }
+                else
+                    throw ServerException("Accept Error");
+                    // TODO fd_zero, all fd_data is assume to be bad
             }
             else { // handle data from a client
-                // testing neeed on this, how does it handle no data? <<<<<<<<<
-                if(recv(i, buf, RECV_STRING_LENGTH, 0) <= 0) {
+                if(recv(i, &buffer[0], RECV_VECTOR_BUFF_SIZE, 0) <= 0) {
                     // got error (1) or connection closed by client (0)
                     std::cout << "Socket " << i << " disconnected/errored\n";
                     close(i);
@@ -144,9 +120,8 @@ check_new_and_read() {
                 }
                 else{ // got data from a client, add it to queue
                     std::cout << "Command Accepted\n";
-                    buf[RECV_STRING_LENGTH-1] = '\0'; // just incase
-                    std::copy(std::begin(buf), std::end(buf), std::begin(temp));
-                    recv_q.enqueue(temp);
+                    buffer[RECV_VECTOR_BUFF_SIZE-1] = '\0'; // just incase
+                    recv_q.enqueue(buffer);
                 }
             }
         }
@@ -157,14 +132,10 @@ check_new_and_read() {
 
 // sends input string to all clients
 int server::
-send_to_all(const std::array<char, SEND_STRING_LENGTH> & message) {
-    char temp[SEND_STRING_LENGTH];
-    std::copy(std::begin(message), std::end(message), std::begin(temp));
-
-    // check intial i value <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+send_to_all(const std::vector<char> & message) {
     for(int i=0; i <= fd_count; i++) { // send to each client
-        if(FD_ISSET(i, &fds_master_list) && (i != listener)) {
-            if(send(i, temp, SEND_STRING_LENGTH, 0) <= 0) { 
+        if(FD_ISSET(i, &fds_master_list) && (i != listener)) {// don't send to listener and itself (the server)
+            if(send(i, &message[0], strlen(&message[0])+1, 0) <= 0) { 
                 // error or connection closed
                 std::cout << "Socket " << i << " disconnected/errored\n";
                 close(i);
@@ -178,18 +149,30 @@ send_to_all(const std::array<char, SEND_STRING_LENGTH> & message) {
 
 //stops driver_loop, only use to end server
 void server::
-kill_driver() { driver_running = 0; }
+kill_driver() { 
+    serv_mutex.lock();
+    driver_running = 0; 
+    serv_mutex.unlock();
+}
 
 
 // enqueue message to be send
 int server::
-send_string(const std::array<char, SEND_STRING_LENGTH> & message) {
-    return send_q.enqueue(message); 
+send_string(const std::vector<char> & message) {
+    int ri = 0;
+    serv_mutex.lock();
+    ri = send_q.enqueue(message); 
+    serv_mutex.unlock();
+    return ri;
 }
 
 
 // dequeue oldest recieve message
 int server::
-recv_string(std::array<char, RECV_STRING_LENGTH> & message) {
-    return recv_q.dequeue(message);
+recv_string(std::vector<char> & message) {
+    int ri = 0;
+    serv_mutex.lock();
+    ri = recv_q.dequeue(message);
+    serv_mutex.unlock();
+    return ri;
 }

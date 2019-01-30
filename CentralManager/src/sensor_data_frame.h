@@ -1,20 +1,22 @@
 #ifndef _SENSOR_DATA_FRAME_H_
 #define _SENSOR_DATA_FRAME_H_
 
-#ifdef LIVE_DATA
-struct sensor_data_frame {
-    int time;
-    float temp_1;
-    float pres_1;    
+#include <vector>
+
+#include "../thirdparty/rapidjson/document.h"       // rapidjson
+#include "../thirdparty/rapidjson/writer.h"         // rapidjson
+#include "../thirdparty/rapidjson/stringbuffer.h"   // rapidjson
+
+class sensor_data_frame {
+    public:
+        int make_JSON(std::vector<char> & output);
+        int make_JSON_diff(const sensor_data_frame & other, std::vector<char> & output);
+
+        int time;
+        int temp_1;
+        int pres_1;
+        int random_int;
+        float random_float;
 };
-#else
-struct sensor_data_frame {
-    int time;
-    int test_int_0;
-    int test_int_1;
-    float test_float_0;
-    float test_float_1;
-};
-#endif // LIVE_DATA
 
 #endif // _SENSOR_DATA_FRAME_H_

@@ -1,9 +1,15 @@
+#include <iostream>
+
 #if defined(SERVER_TEST)
 #include "server.h"
 int
 main() {
+    try {
     server serv;
-    serv.test_driver_loop();
+    serv.driver_loop();
+    } catch(ServerException& e){
+        std::cout << e.what() << std::endl;
+    }
     return 0;
 }
 #elif defined(HARDWARE_TEST)

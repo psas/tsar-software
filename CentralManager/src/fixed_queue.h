@@ -4,10 +4,14 @@
 #include <mutex>
 #include <vector>
 
+/*
+ * This class implament ad fixed length queue by a using an array to 
+ */
 template <typename T>
 class fixed_queue {
     public:
         fixed_queue(const unsigned int in_q_len);
+        fixed_queue(const unsigned int in_q_len, const T & input);
 
         int enqueue(const T & input);
         int dequeue(T & output);
@@ -21,11 +25,18 @@ class fixed_queue {
         std::mutex queue_mutex;
 };
 
-// constructor
+// constructor, with vector default constructor
 template <typename T>
 fixed_queue<T>::
 fixed_queue(const unsigned int in_q_len) : 
         data(in_q_len+1), length(in_q_len), current_count(0), 
+        current_enqueue(0), current_dequeue(0) {}
+
+// constructor, with vector fill constructor
+template <typename T>
+fixed_queue<T>::
+fixed_queue(const unsigned int in_q_len, const T & input) : 
+        data(in_q_len+1, input), length(in_q_len), current_count(0), 
         current_enqueue(0), current_dequeue(0) {}
 
 

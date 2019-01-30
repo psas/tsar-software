@@ -1,7 +1,5 @@
 #include "central_manager.h"
 
-central_manager::
-central_manager() : hdw_thread(NULL), link_thread(NULL), seq_thread(NULL), link(), hdw(&link), seq(&link, &hdw) {}
 
 central_manager::
 ~central_manager() {
@@ -31,15 +29,17 @@ start_system() {
 
 void central_manager::
 start_threads() {
+    std::cout << "Hardware Controller thread started" << endl;
     hdw_thread = new std::thread(&hardware_controller::driver_loop, &hdw);
     //pthread_setschedparam(hdw_thread.native_handle(), SCHED_RR, HDW_PRIO);
 
+    std::cout << "Link Logger thread started" << endl;
     link_thread = new std::thread(&link_logger::driver_loop, &link);
     //pthread_setschedparam(link_thread.native_handle(), SCHED_RR, LINK_PRIO);
 
+    std::cout << "Sequencer thread started" << endl;
     seq_thread = new std::thread(&sequencer::driver_loop_main, &seq);
    // pthread_setschedparam(seq_thread.native_handle(), SCHED_RR, SEQ_MAIN_PRIO);
-
 }
 
 void central_manager::

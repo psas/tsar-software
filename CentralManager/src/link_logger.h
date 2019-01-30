@@ -5,10 +5,7 @@
 #include <iostream>                         // cout
 #include <cstring>                          // string
 #include <thread>                           // threading
-
-#include "../thirdparty/rapidjson/document.h"       // rapidjson
-#include "../thirdparty/rapidjson/writer.h"         // rapidjson
-#include "../thirdparty/rapidjson/stringbuffer.h"   // rapidjson
+#include <mutex>                            // mutex
 
 #include "server.h"
 #include "send_data.h"
@@ -20,12 +17,11 @@
 #define SEND_DATA_Q_LENGTH 250
 
 /* link_logger:
- * Acts as a wrapper class for the server class. This class main jobs is to 
- * convert sensor_frame & sequencer_status structs into a string and pass
- * on the new string to the server class to be sent. This will also handle 
- * recieved strings by converting them into command struct for the sequencer
- * to process. This will also save all strings made for later data/system 
- * analysis.
+ * Acts as a wrapper class for the server class. The main of this class is to convert data 
+ * given by the hardware_controller and sequencer classes into strings and passing them
+ * to the server class to be sent. This will also convert recieved strings from client(s)
+ * into a command class object for the sequencer to process. 
+ * This will also save all strings made for later data/system analysis.
  */
 class link_logger {
     public:
@@ -56,5 +52,7 @@ class link_logger {
         int send_data_size; // send data frame struct size
         int seq_status_size; // sequencer status struct size
         bool driver_running;
+        send_data new_data;
+        std::mutex ll_mutex;
 };
 #endif

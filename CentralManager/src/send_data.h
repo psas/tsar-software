@@ -8,8 +8,8 @@
 #define FRAME 0
 
 struct send_data {
-    struct sensor_data_frame sensor_frame;
-    struct sequence_status seq_status;
+    class sensor_data_frame sensor_frame;
+    class sequence_status seq_status;
     bool flag; // 0 for sensor, 1 for sequence
 };
 

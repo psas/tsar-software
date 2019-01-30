@@ -6,16 +6,17 @@
 #include <cstdint>
 //#include <sys/resource.h>
 //#include <unistd.h>
+#include <mutex>                // muxtex
 #include <stdlib.h>
 #include <wiringPi.h>           // raspberry pi UART/GPIO
 #include <wiringSerial.h>       // raspberry pi UART
-#include <iostream>             // cout
+#include <iostream>             // cout, cerr
 
 #include "hardware_library.h"
 #include "sensor_data_frame.h"
-#ifdef LINK_ON
+#ifndef LINK_OFF
 #include "link_logger.h"
-#endif // LINK_ON
+#endif // LINK_OFF
 
 #define HDW_DRIVER_DELAY 5000   // Mircoseconds
 #define BUAD_RATE 115200        // UART buad rate
@@ -38,10 +39,10 @@ class hardware_controller {
     public:
         hardware_controller();
         hardware_library(const hardware_controller &) = delete;
-#ifdef LINK_ON
+#ifndef LINK_OFF
         hardware_controller(link_logger * input);
         ~hardware_controller();
-#endif // LINK_ON
+#endif // LINK_OFF
         
         void driver_loop();
         int kill_driver();
@@ -49,28 +50,23 @@ class hardware_controller {
         int light_on() const;
         int light_off() const;
     private:
-#ifdef LIVE_DATA
         int i2c_setup();
-#endif // LIVE_DATA
+        int gpio_setup();
         int update_frame();
         int get_time() const;
 #ifdef PRINT_DATA_FRAME
         void print_current_frame() const;
 #endif // PRINT_DATA_FRAME
 
-#ifdef LINK_ON
+#ifndef LINK_OFF
         link_logger * ll;
-#endif // LINK_ON
-
-#ifdef LIVE_DATA
-        int adc1_fd;
-#endif // LIVE_DATA
-
-        struct timespec driver_delay;
-        struct sensor_data_frame frame;
-        struct sensor_fds_list fd_list;
+#endif // LINK_OFF
+        timespec driver_delay;
+        sensor_data_frame frame;
+        sensor_fds_list fd_list;
         int frame_size;
         int epoch;
         bool driver_running;
+        std::mutex hdw_mutex;
 };
 #endif

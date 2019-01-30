@@ -40,5 +40,6 @@ class sequencer {
         struct timespec main_driver_delay;
         uint32_t main_driver_running;
         uint32_t high_driver_running;
+        //std::mutex seq_mutex; TODO mutex?
 };
 #endif

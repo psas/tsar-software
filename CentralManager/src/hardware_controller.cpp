@@ -1,10 +1,8 @@
 
+#ifdef LINK_OFF
 //default constructor, only use for test/debuging
 hardware_controller::
 hardware_controller() : driver_running(0) {
-#ifdef LINK_ON
-    ll = NULL;
-#endif // LINK_ON
     epoch = get_time();
 
     driver_delay.tv_sec = 0;
@@ -15,8 +13,9 @@ hardware_controller() : driver_running(0) {
     //add more as needed
     //pinMode(TEST_PIN, OUTPUT);
 }
+#endif // LINK_OFF
 
-#ifdef LINK_ON
+#ifndef LINK_OFF
 hardware_controller::
 hardware_controller(link_logger * input) : ll(input), driver_running(0) {
     epoch = get_time();
@@ -29,15 +28,15 @@ hardware_controller(link_logger * input) : ll(input), driver_running(0) {
     //add more as needed
     //pinMode(TEST_PIN, OUTPUT);
 }
-#endif // LINK_ON
+#endif // LINK_OFF
 
 
-#ifdef LINK_ON
+#ifndef LINK_OFF
 hardware_controller::
 ~hardware_controller() {
     ll = NULL; // central manager class will hand link logger deconstruction
 }
-#endif // HARDHWARE TESTS
+#endif // LINK_OFF
 
 
 void hardware_controller::
@@ -47,9 +46,8 @@ driver_loop() {
         return;
     }
 
-#ifdef LIVE_DATA
     i2c_setup();
-#endif // LIVE_DATA
+    gpio_setup();
 
     std::cout << "Hardware Controller Running\n";
 
@@ -70,7 +68,6 @@ driver_loop() {
     return;
 }
 
-#ifdef LIVE_DATA
 int hardware_controller::
 i2c_setup(){
     int ri =0;
@@ -80,19 +77,20 @@ i2c_setup(){
 
     return ri;
 }
-#endif
+
+int hardware_controller::
+gpio_setup(){
+    digitalWrite(LIGHT_GPIO, LOW);
+}
 
 
 
 #ifdef PRINT_DATA_FRAME
 void hardware_controller::
 print_current_frame() const {
-#ifdef LIVE_DATA
-    std::cout << "time: " << frame.time << ", temperature1: " << frame.temp_1 << ", pressure1: " << frame.pres_1 << std::endl;
-#else
-    std::cout << "time: " << frame.time << ", int0: " << frame.test_int_0 << ", int1: " << frame.test_int_1 
-         << ", float0: " << frame.test_float_0 << ", float1 " << frame.test_float_1 << std::endl;
-#endif // LIVE_DATA
+    std::cout << "time: " << frame.time << ", temperature1: " << frame.temp_1
+              << ", pressure1: " << frame.pres_1 ", int0: " << frame.test_int_0 
+              << ", int1: " << frame.test_int_1 << std::endl;
 }
 #endif // PRINT_DATA_FRAME
 
@@ -105,8 +103,10 @@ kill_driver() {
 
 
 int hardware_controller::
-get_frame(struct sensor_data_frame & input) const {
-    memcpy(&input, &frame, frame_size);
+get_frame(sensor_data_frame & input) const {
+    hdw_mutex.lock();
+    input = frame;
+    hdw_mutex.unlock();
     return 1;
 }
 
@@ -123,19 +123,15 @@ get_time() const {
 // build new sensor frame 
 int hardware_controller::
 update_frame() {
+    hdw_mutex.lock();
 
     frame.time = get_time() - epoch;
-
-#ifdef LIVE_DATA
     frame.pres_1 = hardware_library::MPL3115A2_pres(fd_list.MPL3115A2);
     frame.temp_1 = hardware_library::MPL3115A2_temp(fd_list.MPL3115A2);
-#else
-    frame.test_int_0 = hardware_library::random_int();
-    frame.test_int_1 = hardware_library::random_int();
-    frame.test_float_0 = hardware_library::random_float();
-    frame.test_float_1 = hardware_library::random_float();
-#endif // LIVE_DATA
+    frame.random_int = hardware_library::random_int();
+    frame.random_float = hardware_library::random_float();
 
+    hdw_mutex.unlock();
     return 1;
 }
 
@@ -148,7 +144,6 @@ light_on() const {
 
 int hardware_controller::
 light_off() const {
-    pinMode(LIGHT_GPIO, OUTPUT);
     digitalWrite(LIGHT_GPIO, LOW);
     return 1;
 }
