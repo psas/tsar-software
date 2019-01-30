@@ -29,8 +29,8 @@ class sequencer {
         int sequence();
 
         // --------- data -----------
-        link_logger * link;
-        hardware_controller * hdw_ctrl;
+        std::shared_ptr<link_logger> link;
+        std::shared_ptr<hardware_controller> hdw_ctrl;
 
         struct sensor_data_frame last_frame;
         struct sequence_status status;

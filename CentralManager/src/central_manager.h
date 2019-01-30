@@ -25,16 +25,15 @@ class central_manager {
         void start_system();
     private:
         void start_threads();
-        void kill_all_threads();
         int check_sudo();
 
         // ---------- data -------------
-        std::shared_ptr<std::thread> hdw_thread;
-        std::shared_ptr<std::thread> link_thread;
-        std::shared_ptr<std::thread> seq_thread;
+        std::unique_ptr<std::thread> link_thread;
+        std::unique_ptr<std::thread> hdw_thread;
+        std::unique_ptr<std::thread> seq_thread;
 
-        link_logger link;
-        hardware_controller hdw;
+        std::shared_ptr<link_logger> link;
+        std::shared_ptr<hardware_controller> hdw;
         sequencer seq;
 };
 

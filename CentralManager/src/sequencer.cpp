@@ -16,15 +16,6 @@ sequencer(link_logger * link_input, hardware_controller * hdw_ctrl_input)
 }
 
 
-// deconstructor
-sequencer::
-~sequencer() {
-    // governor will delete these
-    link = nullptr; 
-    hdw_ctrl = nullptr;
-}
-
-
 // the high prio sequencer thread driver loop to get data from hardware and check for emergency 
 void sequencer::
 driver_loop_high() {

@@ -1,21 +1,29 @@
 #include "central_manager.h"
 
+central_manager::central_manager() : link(), hdw(link), seq(link, hdw),
+        link_thread(nullptr), hdw_thread(nullptr), seq_thread(nullptr) {}
 
 central_manager::
 ~central_manager() {
-    kill_all_threads(); // make sure all thread are stoped
+    link.kill_driver();
+    hdw.kill_driver();
+    seq.kill_driver();
 
-    if(link_thread != NULL){
+    link_thread->join();
+    hdw_thread->join();
+    seq_thread->join();
+
+    if(link_thread != nullptr){
         delete link_thread;
-        link_thread = NULL;
+        link_thread = nullptr;
     }
-    if(hdw_thread != NULL){
+    if(hdw_thread != nullptr){
         delete hdw_thread;
-        hdw_thread = NULL;
+        hdw_thread = nullptr;
     }
-    if(seq_thread != NULL){
+    if(seq_thread != nullptr){
         delete seq_thread;
-        seq_thread = NULL;
+        seq_thread = nullptr;
     }
 }
 
@@ -30,11 +38,11 @@ start_system() {
 void central_manager::
 start_threads() {
     std::cout << "Hardware Controller thread started" << endl;
-    hdw_thread = new std::thread(&hardware_controller::driver_loop, &hdw);
+    hdw_thread = new std::thread(&hardware_controller::driver_loop, hdw);
     //pthread_setschedparam(hdw_thread.native_handle(), SCHED_RR, HDW_PRIO);
 
     std::cout << "Link Logger thread started" << endl;
-    link_thread = new std::thread(&link_logger::driver_loop, &link);
+    link_thread = new std::thread(&link_logger::driver_loop, link);
     //pthread_setschedparam(link_thread.native_handle(), SCHED_RR, LINK_PRIO);
 
     std::cout << "Sequencer thread started" << endl;
@@ -42,18 +50,7 @@ start_threads() {
    // pthread_setschedparam(seq_thread.native_handle(), SCHED_RR, SEQ_MAIN_PRIO);
 }
 
-void central_manager::
-kill_all_threads() {
-    link.kill_driver();
-    hdw.kill_driver();
-    seq.kill_driver();
-
-    link_thread->join();
-    hdw_thread->join();
-    seq_thread->join();
-}
-
-// check for root, thread priority can't used without root
+// check for root, thread priority can't be used without root
 int central_manager::
 check_sudo() {
     if (getuid()) {
