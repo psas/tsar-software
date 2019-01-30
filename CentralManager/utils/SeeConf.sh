@@ -1,2 +1,2 @@
 #!/bin/bash
-grep "#define " *.h | cut -d ' ' -f 2-3 | grep -v ^\_
+grep "#define " ../src/*.h | cut -d ' ' -f 2-3 | grep -v ^\_
