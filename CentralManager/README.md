@@ -5,7 +5,7 @@ Software Controller for TSAR in C++. Designed for a Raspberry Pi3 with RT Preemp
 ## Description
 Sequencer 2 threads
 + High thread checks if CM needs to go into an emergency state, highest priority thread.
-+ The main thread contains the control theory and process commands from clients,  medium priority thread.
++ The main thread contains the control theory and process commands from clients, medium priority thread.
 
 Hardware Controller thread
 + Reads sensor values.
@@ -13,10 +13,10 @@ Hardware Controller thread
 + Second highest priority thread.
 
 LinkLogger thread
++ Starts server thread.
 + Uses [RAPIDJSON](https://github.com/Tencent/rapidjson).
 + Converts all sensor data into JSON strings for saving and for the server to send.
 + Converts receive JSON strings from the server into a struct for the sequencer to process.
-+ Only thread that can talk to the server.
 + Second lowest priority thread.
 
 Server thread
@@ -40,19 +40,19 @@ Server thread
     - [x] I2C
     - [x] GPIO pins
     - [ ] UART 
-  - [x] LinkLogger
+  - [ ] LinkLogger
     - [x] Make Server Thread
-    - [x] Send data buffer (Queue)
-    - [x] Send data to JSON
+    - [ ] Send/Recv Queue
+    - [ ] Send data to JSON
     - [x] JSON to commands
   - [x] Server
     - [x] General TCP Server
-    - [x] Send/Recv string buffers (Queues)
+    - [x] Send/Recv Queues
 
 
 ## Testing
 - [ ] Skeletal Protoype
   - [ ] Sequencer
-  - [x] Hardware Controller
-  - [x] LinkLogger
+  - [ ] Hardware Controller
+  - [ ] LinkLogger
   - [x] Server
