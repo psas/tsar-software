@@ -4,6 +4,7 @@
 #include <ctime>
 #include <iostream>
 #include <cstdint>
+#include <mutex>
 
 #include "sensor_data_frame.h"
 #include "hardware_controller.h"
@@ -40,6 +41,6 @@ class sequencer {
         struct timespec main_driver_delay;
         uint32_t main_driver_running;
         uint32_t high_driver_running;
-        //std::mutex seq_mutex; TODO mutex?
+        std::mutex seq_mutex;
 };
 #endif

@@ -23,8 +23,10 @@ driver_loop_high() {
 
     high_driver_running = 1;
     while(high_driver_running == 1) {
+        seq_mutex.lock();
         hdw_ctrl->get_frame(last_frame); //update internal frame
         emergency_state();
+        seq_mutex.unlock();
         nanosleep(&high_driver_delay, nullptr);
     }
     
@@ -43,10 +45,12 @@ driver_loop_main() {
 
     main_driver_running = 1;
     while(main_driver_running == 1) {
+        seq_mutex.lock();
         //if(link->recv(new_command) == 1)
         //    std::cout << "new command\n"; // replace with command stuff later
         sequence(); // control
         link->send(status); // update clients on progress
+        seq_mutex.unlock();
         nanosleep(&main_driver_delay, nullptr);
     }
     
