@@ -19,7 +19,7 @@ PRINT_DATA ?= 0
 
 
 CC=g++
-CPP_FLAGS=-std=c++17 -Wall
+CPP_FLAGS=-std=c++1z -Wall
 
 PROGS=CentralManager
 

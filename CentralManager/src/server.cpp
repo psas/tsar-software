@@ -2,8 +2,8 @@
 
 // defualt constuctor
 server::
-server() : send_q(SEND_Q_LENGTH, std::vector<char>(SEND_VECTOR_INIT_SIZE)),  
-        recv_q(RECV_Q_LENGTH, std::vector<char>(RECV_VECTOR_BUFF_SIZE)), 
+server() : send_q(SEND_Q_LENGTH, std::string(SEND_INIT_SIZE, '\0')),  
+        recv_q(RECV_Q_LENGTH, std::string(RECV_BUFF_SIZE,'\0')), 
         driver_running(0) {
 
     // clear the fds_master_list and temp sets
@@ -51,7 +51,7 @@ server() : send_q(SEND_Q_LENGTH, std::vector<char>(SEND_VECTOR_INIT_SIZE)),
  */
 void server::
 driver_loop() {
-    std::vector<char> message(SEND_VECTOR_INIT_SIZE);
+    std::string message;
 
     std::cout << "server connection opened\n";
 
@@ -80,7 +80,7 @@ driver_loop() {
 int server::
 check_new_and_read() {
     fd_set fds_read_list = fds_master_list; // copy it
-    std::vector<char> buffer(RECV_VECTOR_BUFF_SIZE);
+    std::string buffer(RECV_BUFF_SIZE,'\0');
     struct sockaddr_in clientaddr; // address for new client
     int new_fd;
 
@@ -112,7 +112,7 @@ check_new_and_read() {
                     // TODO fd_zero, all fd_data is assume to be bad
             }
             else { // handle data from a client
-                if(recv(i, &buffer[0], RECV_VECTOR_BUFF_SIZE, 0) <= 0) {
+                if(recv(i, &buffer[0], RECV_BUFF_SIZE, 0) <= 0) {
                     // got error (1) or connection closed by client (0)
                     std::cout << "Socket " << i << " disconnected/errored\n";
                     close(i);
@@ -120,7 +120,7 @@ check_new_and_read() {
                 }
                 else{ // got data from a client, add it to queue
                     std::cout << "Command Accepted\n";
-                    buffer[RECV_VECTOR_BUFF_SIZE-1] = '\0'; // just incase
+                    buffer[RECV_BUFF_SIZE-1] = '\0'; // just incase
                     recv_q.enqueue(buffer);
                 }
             }
@@ -132,7 +132,7 @@ check_new_and_read() {
 
 // sends input string to all clients
 int server::
-send_to_all(const std::vector<char> & message) {
+send_to_all(const std::string & message) {
     for(int i=0; i <= fd_count; i++) { // send to each client
         if(FD_ISSET(i, &fds_master_list) && (i != listener)) {// don't send to listener and itself (the server)
             if(send(i, &message[0], strlen(&message[0])+1, 0) <= 0) { 
@@ -158,7 +158,7 @@ kill_driver() {
 
 // enqueue message to be send
 int server::
-send_string(const std::vector<char> & message) {
+send_string(const std::string & message) {
     int ri = 0;
     serv_mutex.lock();
     ri = send_q.enqueue(message); 
@@ -169,7 +169,7 @@ send_string(const std::vector<char> & message) {
 
 // dequeue oldest recieve message
 int server::
-recv_string(std::vector<char> & message) {
+recv_string(std::string & message) {
     int ri = 0;
     serv_mutex.lock();
     ri = recv_q.dequeue(message);
