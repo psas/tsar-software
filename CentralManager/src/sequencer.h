@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cstdint>
 #include <mutex>
+#include <memory>
 
 #include "sensor_data_frame.h"
 #include "hardware_controller.h"
@@ -19,7 +20,7 @@
  */
 class sequencer {
     public:
-        sequencer(link_logger * link, hardware_controller * hdw_ctrl);
+        sequencer(std::shared_ptr<link_logger> & link_input, std::shared_ptr<hardware_controller> & hdw_ctrl_input);
         ~sequencer();
 
         void driver_loop_high();
@@ -35,7 +36,6 @@ class sequencer {
 
         struct sensor_data_frame last_frame;
         struct sequence_status status;
-        uint32_t status_size;
 
         struct timespec high_driver_delay;
         struct timespec main_driver_delay;
@@ -43,4 +43,5 @@ class sequencer {
         uint32_t high_driver_running;
         std::mutex seq_mutex;
 };
+
 #endif

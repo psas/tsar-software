@@ -18,21 +18,18 @@ hardware_controller() : driver_running(0) {
 
 #ifndef LINK_OFF
 hardware_controller::
-hardware_controller(link_logger * input) : ll(input), driver_running(0) {
+hardware_controller(std::shared_ptr<link_logger> & input) : ll(input), driver_running(0) {
     epoch = get_time();
 
     driver_delay.tv_sec = 0;
     driver_delay.tv_nsec = HDW_DRIVER_DELAY*1000;
-    frame_size = sizeof(struct sensor_data_frame);
 
     wiringPiSetup();
     //add more as needed
     //pinMode(TEST_PIN, OUTPUT);
 }
-#endif // LINK_OFF
 
 
-#ifndef LINK_OFF
 hardware_controller::
 ~hardware_controller() {
     ll = NULL; // central manager class will hand link logger deconstruction
@@ -94,6 +91,7 @@ kill_driver() {
 }
 
 
+// give a copy of data frame
 int hardware_controller::
 get_frame(sensor_data_frame & input) {
     hdw_mutex.lock();
@@ -124,6 +122,8 @@ update_frame() {
     return 1;
 }
 
+
+// make gpio pin voltage high
 int hardware_controller::
 light_on() {
     hdw_mutex.lock();
@@ -135,6 +135,8 @@ light_on() {
     return 1;
 }
 
+
+// make gpio pin voltage low
 int hardware_controller::
 light_off() {
     hdw_mutex.lock();

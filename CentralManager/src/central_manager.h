@@ -16,6 +16,7 @@
 
 /* Central Manager:
  * Its main job is to setup the hardware, sequencer, and link logger classes and threads.
+ * It will then run sequncer high driver loop until the Central Manager as a whole is no longer needed.
  */
 class central_manager {
     public:
@@ -28,9 +29,9 @@ class central_manager {
         int check_sudo();
 
         // ---------- data -------------
-        std::unique_ptr<std::thread> link_thread;
-        std::unique_ptr<std::thread> hdw_thread;
-        std::unique_ptr<std::thread> seq_thread;
+        std::thread link_thread;
+        std::thread hdw_thread;
+        std::thread seq_thread;
 
         std::shared_ptr<link_logger> link;
         std::shared_ptr<hardware_controller> hdw;

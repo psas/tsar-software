@@ -32,8 +32,7 @@ class ServerException {
 };
 
 
-/* server:
- */
+// Asynchronous TCP server.
 class server {
     public:
         server();
@@ -46,7 +45,7 @@ class server {
         int check_new_and_read();
         int send_to_all(const std::string & message);
 
-        // -------- data ---------
+        // buffers
         fixed_queue<std::string> send_q;
         fixed_queue<std::string> recv_q;
 

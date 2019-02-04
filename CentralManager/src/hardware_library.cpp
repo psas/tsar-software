@@ -26,11 +26,12 @@ MPL3115A2_pres(const uint32_t fd) {
     csb = wiringPiI2CReadReg8(fd,0x02);
     lsb = wiringPiI2CReadReg8(fd,0x03);
 
-    if(msb == -1 || csb == -1 || lsb == -1) {
+    if(msb == -1 || csb == -1 || lsb == -1) { // i2c read fail 
         std::cout << "MPL3115A2 Pressure Fail" << std::endl;
         return -1;
     }
 
+    // math on bits as defined in mpl3115a2 datasheet for pressure value
     pres = (float)(((msb * 65536) + (csb * 256) + (lsb & 0xF0)) / 16);
     pres = pres / 4.0 / 1000.0;
 
@@ -53,15 +54,9 @@ MPL3115A2_temp(const uint32_t fd) {
         return -1;
     }
 
+    // math on bits as defined in mpl3115a2 datasheet for temperature value
     temp = (float)((msb * 256) + (lsb & 0xF0)) / 256.0;
 
     return temp;
 }
-
-int32_t hardware_library::
-random_int() { return rand() % 100; }
-
-
-float hardware_library::
-random_float() { return (float)(rand() % 100); }
 

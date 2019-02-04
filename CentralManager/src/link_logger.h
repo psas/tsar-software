@@ -6,16 +6,32 @@
 #include <cstring>                          // string
 #include <thread>                           // threading
 #include <mutex>                            // mutex
+#include <string>                           // strings
 
 #include "server.h"
-#include "send_data.h"
 #include "fixed_queue.h"
 #include "client_command.h"
+#include "sensor_data_frame.h"
+#include "sequence_status.h"
 
-#define FILENAME "saved_output/CM_data.txt" // output filename
+#define FILENAME "saved_output/CM_data.txt" // output filename TODO: change this to add a time/date to name
 #define LINK_LOGGER_DELAY 3                 // ms  
-#define SEND_DATA_Q_LENG 250
+#define SEND_DATA_Q_LEN 250
 #define CLIENT_COM_Q_LEN 250
+#define STATUS 1                            // for flag in send_data
+#define FRAME 0                             // for flag in send_data
+
+
+/* POD for send queue. To reduce new and delete calls, this was used over a 
+ * send_data base class with sensor_data_frame and sequence_status as derived classes being upcasted.
+ * TODO: research into last statement
+ */
+struct send_data {
+    sensor_data_frame sensor_frame;
+    sequence_status seq_status;
+    bool flag; // 0 for sensor, 1 for sequence
+};
+
 
 /* link_logger:
  * Acts as a wrapper class for the server class. The main of this class is to convert data 
@@ -35,26 +51,20 @@ class link_logger {
         void kill_driver();
         void driver_loop();
     private:
-        int save(const char *) const;
-        int make_send_string(const send_data &, char *);
-        int make_send_string(const sequence_status &, char *);
-        int make_send_string(const sensor_data_frame &, char *);
-        int make_command_data(const char *, client_command &) const;
+        void make_send_string(send_data & in, std::string & out);
+        int save(std::string &) const;
         int data_changed(send_data) const;
         void start_server();
 
-        std::thread * serv_thread;
+        std::thread serv_thread;
         server serv;
         fixed_queue<send_data> send_q;
         fixed_queue<client_command> recv_q;
-
         struct timespec driver_delay;
-        struct send_data last_frame; // last input data
-        int sensor_frame_size; // sensor data frame struct size
-        int send_data_size; // send data frame struct size
-        int seq_status_size; // sequencer status struct size
+        struct send_data last_out_data;    // last frame sent to server
+        struct send_data last_in_data;     // last frame created, used in send() to reduce contructor/decontructor calls
         bool driver_running;
-        send_data new_data;
         std::mutex ll_mutex;
 };
+
 #endif

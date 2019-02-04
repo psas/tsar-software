@@ -1,9 +1,9 @@
 #include "link_logger.h"
 
 
-// default constructor
+// constructor
 link_logger::
-link_logger() : serv_thread(NULL), send_q(SEND_DATA_Q_LEN), recv_q(CLIENT_COM_Q_LEN), driver_running(0) {
+link_logger() : send_q(SEND_DATA_Q_LEN), recv_q(CLIENT_COM_Q_LEN), driver_running(0) {
     driver_delay.tv_sec = 0;
     driver_delay.tv_nsec = LINK_LOGGER_DELAY * 1000000;  
 }
@@ -13,11 +13,6 @@ link_logger() : serv_thread(NULL), send_q(SEND_DATA_Q_LEN), recv_q(CLIENT_COM_Q_
 link_logger::
 ~link_logger() {
     serv.kill_driver();
-    if(serv_thread != NULL) {
-        serv_thread->join();
-        delete serv_thread;
-        serv_thread = NULL;
-    }
 }
 
 
@@ -26,7 +21,7 @@ void link_logger::
 driver_loop() {
     start_server();
 
-    std::string output_string(SEND_STRING_MAX_LEN, '\0');
+    std::string temp_string;
     send_data temp_send_data;
 
     std::cout << "Link Logger Started\n";
@@ -35,10 +30,9 @@ driver_loop() {
     while(driver_running) {
         while(send_q.dequeue(temp_send_data) && data_changed(temp_send_data)) {
                 // if there is temp data and it's differenet than last 
-                make_send_string(temp_send_data, output_string);
-                serv.send_string(output_string);
-                save(output_string);
-            }
+                make_send_string(temp_send_data, temp_string);
+                serv.send_string(temp_string);
+                save(temp_string);
         }
         nanosleep(&driver_delay, NULL);
     }
@@ -49,7 +43,7 @@ driver_loop() {
 
 void link_logger::
 start_server() {
-    serv_thread = new std::thread(&server::driver_loop, &serv);
+    serv_thread(&server::driver_loop, &serv);
 }
 
 
@@ -62,24 +56,26 @@ kill_driver() {
     ll_mutex.unlock();
 }
 
-
+// compaires data is see if it is the same
 int link_logger::
 data_changed(send_data input) const {
     if(input.flag == FRAME)
-        return (input.sensor_frame == last_frame.semsor_frame);
-    return (input.seq_status == last_frame.seq_satus);
+        return (input.sensor_frame == last_out_data.sensor_frame);
+    return (input.seq_status == last_out_data.seq_status);
 }
 
 
 int link_logger::
 send(const sequence_status & input) {
     ll_mutex.lock();
+
     // update new send data
-    new_data.seq_status = input;
-    new_data.flag = STATUS; 
+    last_in_data.seq_status = input;
+    last_in_data.flag = STATUS; 
 
     // send data
-    send_q.enqueue(new_data); 
+    send_q.enqueue(last_in_data); 
+
     ll_mutex.unlock();
     return 1;
 }
@@ -88,12 +84,14 @@ send(const sequence_status & input) {
 int link_logger::
 send(const sensor_data_frame & input) {
     ll_mutex.lock();
+
     // make data to add to queue
-    new_data.sensor_frame = input;
-    new_data.flag = FRAME; 
+    last_in_data.sensor_frame = input;
+    last_in_data.flag = FRAME; 
 
     // send data
-    send_q.enqueue(new_data); 
+    send_q.enqueue(last_in_data); 
+
     ll_mutex.unlock();
     return 1;
 }
@@ -118,24 +116,16 @@ recv(client_command & output) {
     if(serv.recv_string(temp_string) == 0) // no new string
         return 0;
 
-    ouput.make_command_data(temp_string);
+    output.make_command_data(temp_string);
     return 1;
 }
 
 
-/* Wrapper function for converting sensor_data_frame and sequence_status structs
- * to a string using RAPIDJSON. Only adds data that has changed to reduce data
- * sent to clients
- */
-int link_logger::
-make_send_string(const send_data & input_data, std::string & output_string) {
-    int ri;
-
-    if(input_data.flag == STATUS)
-        ri = input_data.seq_status.make_JSON(output_string);
-    else // == FRAME
-        ri = make_send_string(input_data.sensor_frame, output_string);
-
-    return ri;
+void link_logger::
+make_send_string(send_data & in, std::string & out) {
+    if(in.flag == FRAME)
+        in.sensor_frame.make_JSON_diff(out, last_out_data.sensor_frame);
+    in.seq_status.make_JSON_diff(out, last_out_data.seq_status);
+    return;
 }
 

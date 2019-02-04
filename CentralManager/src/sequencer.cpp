@@ -3,8 +3,8 @@
 
 // main constructor
 sequencer::
-sequencer(link_logger * link_input, hardware_controller * hdw_ctrl_input)
-        : link(link_input), hdw_ctrl(hdw_ctrl_input), main_driver_running(0), 
+sequencer(std::shared_ptr<link_logger> & link_input, std::shared_ptr<hardware_controller> & hdw_ctrl_input) :
+        link(link_input), hdw_ctrl(hdw_ctrl_input), main_driver_running(0), 
         high_driver_running(0) {
 
     status.current_state = 0;
@@ -12,7 +12,6 @@ sequencer(link_logger * link_input, hardware_controller * hdw_ctrl_input)
     high_driver_delay.tv_nsec = (long)SEQ_HIGH_DRIVER_DELAY * 1000000;
     main_driver_delay.tv_sec = 0;
     main_driver_delay.tv_nsec = (long)SEQ_MAIN_DRIVER_DELAY * 1000000;
-    status_size = sizeof(struct sequence_status);
 }
 
 
@@ -59,31 +58,16 @@ driver_loop_main() {
     return;
 }
 
-#ifdef LIVE_DATA
-int sequencer::
-sequence() { 
-    cout << "sequence\n";
-    // add switch statment here
-}
-#else // for testing/debug
 int sequencer::
 sequence() { 
     switch(status.current_state) {
         case 1 :
             hdw_ctrl->light_on();
-            if(last_frame.test_int_0 > 80)
-                status.current_state = 2;
-            else
-                break;
         default :
             hdw_ctrl->light_off();
-            if(last_frame.test_int_1 < 80)
-                status.current_state = 1;
-            break;
     }
     return 1; 
 }
-#endif
 
 
 void sequencer::
@@ -95,11 +79,5 @@ kill_driver() {
 
 int sequencer::
 emergency_state() {
-    if(last_frame.test_int_1%20 == 1) { // placeholder for later logic
-        //std::cout << "EMERGENCY HALT\n";
-        status.current_state = -1;
-        link->send(status);
-        return 1;
-    }
-    return 0;
+    return 1;
 }
