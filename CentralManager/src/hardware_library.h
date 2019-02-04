@@ -2,7 +2,7 @@
 #define _HARDWARE_LIBRARY_H_
 
 #include <iostream>         // cout
-#include <stdint>           // uint_t
+#include <cstdint>           // uint_t
 #include <wiringPiI2C.h>    // raspberry pi I2C
 #include <cstdlib>          // rand
 

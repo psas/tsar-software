@@ -59,7 +59,7 @@ MPL3115A2_temp(const uint32_t fd) {
 }
 
 int32_t hardware_library::
-random_int32_t() { return rand() % 100; }
+random_int() { return rand() % 100; }
 
 
 float hardware_library::

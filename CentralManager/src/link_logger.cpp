@@ -3,11 +3,7 @@
 
 // default constructor
 link_logger::
-link_logger() : serv_thread(NULL), send_data(SEND_DATA_Q_LEN), driver_running(0) {
-    send_data_size = sizeof(struct send_data);
-    sensor_frame_size = sizeof(struct sensor_data_frame);
-    seq_status_size = sizeof(struct sequence_status);
-
+link_logger() : serv_thread(NULL), send_q(SEND_DATA_Q_LEN), recv_q(CLIENT_COM_Q_LEN), driver_running(0) {
     driver_delay.tv_sec = 0;
     driver_delay.tv_nsec = LINK_LOGGER_DELAY * 1000000;  
 }
@@ -29,17 +25,16 @@ link_logger::
 void link_logger::
 driver_loop() {
     start_server();
-    char output_string[SEND_STRING_MAX_LEN];
+
+    std::string output_string(SEND_STRING_MAX_LEN, '\0');
     send_data temp_send_data;
 
     std::cout << "Link Logger Started\n";
 
     driver_running = 1;
     while(driver_running) {
-        while(send_q.dequeue(temp_send_data) == 1) { 
-            // TODO check if possible to combine with if statement and the compiler kept correct the order
-            if(data_changed(temp_send_data) != 0) { // making sure dequeue happens 1st
-                // if the temp data is differenet than last 
+        while(send_q.dequeue(temp_send_data) && data_changed(temp_send_data)) {
+                // if there is temp data and it's differenet than last 
                 make_send_string(temp_send_data, output_string);
                 serv.send_string(output_string);
                 save(output_string);
@@ -71,8 +66,8 @@ kill_driver() {
 int link_logger::
 data_changed(send_data input) const {
     if(input.flag == FRAME)
-        return memcmp(&input.sensor_frame, &last_frame.sensor_frame, sensor_frame_size);
-    return memcmp(&input.seq_status, &last_frame.seq_status, seq_status_size);
+        return (input.sensor_frame == last_frame.semsor_frame);
+    return (input.seq_status == last_frame.seq_satus);
 }
 
 
@@ -106,7 +101,7 @@ send(const sensor_data_frame & input) {
 
 // save string
 int link_logger::
-save(const char * input_string) const {
+save(std::string & input_string) const {
     std::ofstream file; // file for saving data on rasp pi
     file.open(FILENAME, std::fstream::app); //append to file
     file << input_string;
@@ -118,11 +113,12 @@ save(const char * input_string) const {
 // Receive wrapper, to convert string from server to a command struct for processing 
 int link_logger::
 recv(client_command & output) {
-    char output_string[RECV_STRING_MAX_LEN];
+    std::string temp_string;
 
-    if(serv.recv_string(output_string) == 0) // no new string
+    if(serv.recv_string(temp_string) == 0) // no new string
         return 0;
-    make_command_data(output_string, output);
+
+    ouput.make_command_data(temp_string);
     return 1;
 }
 
@@ -132,12 +128,14 @@ recv(client_command & output) {
  * sent to clients
  */
 int link_logger::
-make_send_string(const send_data & input_data, char * output_string) {
+make_send_string(const send_data & input_data, std::string & output_string) {
     int ri;
+
     if(input_data.flag == STATUS)
-        ri = make_send_string(input_data.seq_status, output_string);
+        ri = input_data.seq_status.make_JSON(output_string);
     else // == FRAME
         ri = make_send_string(input_data.sensor_frame, output_string);
+
     return ri;
 }
 

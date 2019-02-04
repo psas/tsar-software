@@ -7,7 +7,7 @@
 //#include <sys/resource.h>
 //#include <unistd.h>
 #include <mutex>                // muxtex
-#include <stdlib.h>
+#include <cstdlib>
 #include <wiringPi.h>           // raspberry pi UART/GPIO
 #include <wiringSerial.h>       // raspberry pi UART
 #include <iostream>             // cout, cerr
@@ -38,7 +38,7 @@ struct sensor_fds_list {
 class hardware_controller {
     public:
         hardware_controller();
-        hardware_library(const hardware_controller &) = delete;
+        hardware_controller(const hardware_controller &) = delete;
 #ifndef LINK_OFF
         hardware_controller(link_logger * input);
         ~hardware_controller();
@@ -46,17 +46,14 @@ class hardware_controller {
         
         void driver_loop();
         int kill_driver();
-        int get_frame(struct sensor_data_frame & input) const;
-        int light_on() const;
-        int light_off() const;
+        int get_frame(sensor_data_frame & input);
+        int light_on();
+        int light_off();
     private:
         int i2c_setup();
         int gpio_setup();
         int update_frame();
         int get_time() const;
-#ifdef PRINT_DATA_FRAME
-        void print_current_frame() const;
-#endif // PRINT_DATA_FRAME
 
 #ifndef LINK_OFF
         link_logger * ll;

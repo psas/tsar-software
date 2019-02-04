@@ -1,3 +1,4 @@
+#include "hardware_controller.h"
 
 #ifdef LINK_OFF
 //default constructor, only use for test/debuging
@@ -41,11 +42,6 @@ hardware_controller::
 
 void hardware_controller::
 driver_loop() {
-    if(wiringPiSetup() == -1){
-        std::cout << "wiringPiSettup failed\n";
-        return;
-    }
-
     i2c_setup();
     gpio_setup();
 
@@ -53,14 +49,18 @@ driver_loop() {
 
     driver_running = 1;
     while(driver_running == 1) {
+        hdw_mutex.lock();
+
         update_frame();
-#ifdef PRINT_DATA_FRAME
-        print_current_frame();
-#endif
+        // put any nessary hardware controls befro unlock (UART etc)
+    
+        hdw_mutex.unlock();
+
 #ifdef LINK_ON
         if(ll != NULL)
             ll->send(frame);
 #endif // LINK_ON
+
         nanosleep(&driver_delay, NULL);
     }
 
@@ -69,7 +69,7 @@ driver_loop() {
 }
 
 int hardware_controller::
-i2c_setup(){
+i2c_setup() {
     int ri =0;
 
     fd_list.MPL3115A2 = hardware_library::MPL3115A2_setup(MPL3115A2_ADDRESS);
@@ -79,20 +79,12 @@ i2c_setup(){
 }
 
 int hardware_controller::
-gpio_setup(){
+gpio_setup() {
+    pinMode(LIGHT_GPIO, OUTPUT);
     digitalWrite(LIGHT_GPIO, LOW);
+    frame.light_status = 0;
+    return 1;
 }
-
-
-
-#ifdef PRINT_DATA_FRAME
-void hardware_controller::
-print_current_frame() const {
-    std::cout << "time: " << frame.time << ", temperature1: " << frame.temp_1
-              << ", pressure1: " << frame.pres_1 ", int0: " << frame.test_int_0 
-              << ", int1: " << frame.test_int_1 << std::endl;
-}
-#endif // PRINT_DATA_FRAME
 
 
 int hardware_controller::
@@ -103,7 +95,7 @@ kill_driver() {
 
 
 int hardware_controller::
-get_frame(sensor_data_frame & input) const {
+get_frame(sensor_data_frame & input) {
     hdw_mutex.lock();
     input = frame;
     hdw_mutex.unlock();
@@ -123,27 +115,33 @@ get_time() const {
 // build new sensor frame 
 int hardware_controller::
 update_frame() {
-    hdw_mutex.lock();
-
     frame.time = get_time() - epoch;
     frame.pres_1 = hardware_library::MPL3115A2_pres(fd_list.MPL3115A2);
     frame.temp_1 = hardware_library::MPL3115A2_temp(fd_list.MPL3115A2);
     frame.random_int = hardware_library::random_int();
     frame.random_float = hardware_library::random_float();
 
+    return 1;
+}
+
+int hardware_controller::
+light_on() {
+    hdw_mutex.lock();
+    
+    digitalWrite(LIGHT_GPIO, HIGH);
+    frame.light_status = 1;
+    
     hdw_mutex.unlock();
     return 1;
 }
 
 int hardware_controller::
-light_on() const {
-    pinMode(LIGHT_GPIO, OUTPUT);
-    digitalWrite(LIGHT_GPIO, HIGH);
-    return 1;
-}
-
-int hardware_controller::
-light_off() const {
+light_off() {
+    hdw_mutex.lock();
+    
     digitalWrite(LIGHT_GPIO, LOW);
+    frame.light_status = 0;
+        
+    hdw_mutex.unlock();
     return 1;
 }

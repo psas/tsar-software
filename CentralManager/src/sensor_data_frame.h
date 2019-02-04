@@ -1,7 +1,7 @@
 #ifndef _SENSOR_DATA_FRAME_H_
 #define _SENSOR_DATA_FRAME_H_
 
-#include <vector>
+#include <string>
 
 #include "../thirdparty/rapidjson/document.h"       // rapidjson
 #include "../thirdparty/rapidjson/writer.h"         // rapidjson
@@ -9,14 +9,23 @@
 
 class sensor_data_frame {
     public:
-        int make_JSON(std::vector<char> & output);
-        int make_JSON_diff(const sensor_data_frame & other, std::vector<char> & output);
+        friend bool operator ==  (const sensor_data_frame &, const sensor_data_frame &);
+        friend bool operator !=  (const sensor_data_frame &, const sensor_data_frame &);
+
+        int make_JSON(std::string & output);
+        int make_JSON_diff(const sensor_data_frame & other, std::string & output);
 
         int time;
-        int temp_1;
-        int pres_1;
+
+        // i2c 
+        float temp_1;
+        float pres_1;
         int random_int;
         float random_float;
+
+        // gpio
+        int light_status;
+        // UADT ?
 };
 
 #endif // _SENSOR_DATA_FRAME_H_

@@ -1,15 +1,28 @@
-#include <iostream>
+#include <iostreamm>
 
 #if defined(SERVER_TEST)
 #include "server.h"
+#include <string>
+#include <ctime>
+#include <thread>
 int
 main() {
     try {
     server serv;
-    serv.driver_loop();
     } catch(ServerException& e){
         std::cout << e.what() << std::endl;
     }
+
+    std::thread * serv_thread;
+    serv_thread = new std::thread(&server::driver_loop, &serv);
+
+    std::string temp = {"THIS IS A TEST"};
+
+    while(1) {
+        serv.send_string(temp);
+        sleep(1);
+    }
+
     return 0;
 }
 #elif defined(HARDWARE_TEST)

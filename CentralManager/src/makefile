@@ -1,17 +1,17 @@
-#CentralManager makefile
+# CentralManager makefile
 
-
+# make run will ignore all settings
 # debug setttings
 # 1 on, 0 off
 
 # select which files to debug
-TEST_ALL ?= 0# this will turn in all others
+TEST_ALL ?= 0		# this will turn in all others
 TEST_HARDWARE ?= 0
-TEST_LINK ?= 0# this will turn on server too
+TEST_LINK ?= 0		# this will turn on server too
 TEST_SERVER ?= 1
 
 # optional debug settings, this are only avaible in debug mode
-PRINT_DATA ?= 0
+PRINT_DATA ?= 1
 
 
 ##############################################################################
@@ -19,7 +19,7 @@ PRINT_DATA ?= 0
 
 
 CC=g++
-CPP_FLAGS=-std=c++1z -Wall
+CPP_FLAGS=-std=c++14 -Wall
 
 PROGS=CentralManager
 
@@ -59,7 +59,7 @@ TEST_FLAGS += -DSERVER_TEST
 endif
 
 
-#optional setting(s)
+# optional setting(s)
 ifeq ($(PRINT_DATA), 1)			#print data
 TEST_FLAGS+= -DPRINT_DATA_FRAME
 endif

@@ -14,7 +14,8 @@
 
 #define FILENAME "saved_output/CM_data.txt" // output filename
 #define LINK_LOGGER_DELAY 3                 // ms  
-#define SEND_DATA_Q_LENGTH 250
+#define SEND_DATA_Q_LENG 250
+#define CLIENT_COM_Q_LEN 250
 
 /* link_logger:
  * Acts as a wrapper class for the server class. The main of this class is to convert data 
@@ -44,7 +45,8 @@ class link_logger {
 
         std::thread * serv_thread;
         server serv;
-        fixed_queue<struct send_data> send_q;
+        fixed_queue<send_data> send_q;
+        fixed_queue<client_command> recv_q;
 
         struct timespec driver_delay;
         struct send_data last_frame; // last input data
