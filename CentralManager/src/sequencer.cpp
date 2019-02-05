@@ -38,7 +38,7 @@ driver_loop_high() {
 // main thread that handles, main control theory
 void sequencer::
 driver_loop_main() {
-    struct client_command new_command;
+    client_command new_command;
 
     std::cout << "Sequencer Main running\n";
 

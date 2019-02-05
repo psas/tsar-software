@@ -1,17 +1,18 @@
 # CentralManager makefile
 
 # make run will ignore all settings
-# debug setttings
+# debug/test setttings
 # 1 on, 0 off
 
-# select which files to debug
-TEST_ALL ?= 0		# this will turn in all others
-TEST_HARDWARE ?= 0
+# select which files to debug/test
+TEST_SEQUENCER ?= 0		# this will turn in all others
+TEST_HARDWARE ?= 1
 TEST_LINK ?= 0		# this will turn on server too
-TEST_SERVER ?= 1
+TEST_SERVER ?= 0
 
-# optional debug settings, this are only avaible in debug mode
-PRINT_DATA ?= 1
+# optional debug/test settings, this are only avaible in debug/test mode
+PRINT_DATA ?= 0
+HDW_LIVE_DATA ?= 1
 
 
 ##############################################################################
@@ -19,7 +20,8 @@ PRINT_DATA ?= 1
 
 
 CC=g++
-CPP_FLAGS=-std=c++14 -Wall
+C_FLAGS=-std=c++14 -Wall
+D_FLAGS=-pthread -lwiringPi
 
 PROGS=CentralManager
 
@@ -27,47 +29,50 @@ HARDWAREFILES=hardware_controller.cpp hardware_library.cpp
 SERVERFILES=server.cpp
 LINKFILES=link_logger.cpp $(SERVERFILES)
 SEQUENCERFILES=sequencer.cpp
-CMFILES=central_manager.cpp
 MAIN=main.cpp
-ALLFILES= $(MAIN) $(CMFILES) $(SEQUENCERFILES) $(LINKFILES) $(HARDWAREFILES)
+ALLFILES= $(MAIN) $(SEQUENCERFILES) $(LINKFILES) $(HARDWAREFILES)
 
 
 # debug modes
-ifeq ($(TEST_ALL), 1)			#debug system
-TESTFILES= $(CMFILES) $(SEQUENCERFILES) $(LINKFILES) $(HARDWAREFILES)
-TEST_FLAGS += -DALL_TEST
+ifeq ($(TEST_SEQUENCER), 1)					#debug/test system
+TESTFILES= tests/sequencer_test_mains.cpp $(SEQUENCERFILES) $(LINKFILES) $(HARDWAREFILES)
+TEST_FLAGS += -DSYSTEM_TEST
 CPP_FLAGS += -pthread -lwiringPi
 
 else ifeq ($(TEST_HARDWARE), 1)
-ifeq ($(TEST_LINK), 1)			#debug hardware and link
-TESTFILES= $(HARDWAREFILES) $(LINKFILES)
+ifeq ($(TEST_LINK), 1)						#debug/test hardware and link
+TESTFILES= tests/hardware_test_mains.cpp $(HARDWAREFILES) $(LINKFILES)
 TEST_FLAGS += -DHARDWARE_LINK_TEST
 CPP_FLAGS += -pthread -lwiringPi
-else
-TESTFILES= $(HARDWAREFILES)		#debug only hardware
+else								#debug/test only hardware
+TESTFILES= tests/hardware_test_mains.cpp $(HARDWAREFILES)
 TEST_FLAGS += -DHARDWARE_TEST -DLINK_OFF
 CPP_FLAGS += -lwiringPi
 endif
 
-else ifeq ($(TEST_LINK), 1)		#debug only link
-TESTFILES= $(LINKFILES)
+else ifeq ($(TEST_LINK), 1)					#debug/test only link
+TESTFILES= tests/link_test_mains.cpp $(LINKFILES)
 TEST_FLAGS += -DLINK_TEST
 
-else ifeq ($(TEST_SERVER), 1)		#debug only server
-TESTFILES += $(SERVERFILES)
+else ifeq ($(TEST_SERVER), 1)					#debug/test only server
+TESTFILES += tests/link_test_mains.cpp $(SERVERFILES)
 TEST_FLAGS += -DSERVER_TEST
 endif
 
 
 # optional setting(s)
-ifeq ($(PRINT_DATA), 1)			#print data
+ifeq ($(PRINT_DATA), 1)						#print data
 TEST_FLAGS+= -DPRINT_DATA_FRAME
+endif
+
+ifeq ($(HDW_LIVE_DATA), 0)					#use live data or read from file
+TEST_FLAGS+= -DLIVE_DATA_OFF
 endif
 
 
 run:
-	$(CC) $(CPP_FLAGS) -o $(PROGS) $(ALLFILES) -DLINK_ON -pthread -lwiringPi
-test:
-	$(CC) $(CPP_FLAGS) -g -o $(PROGS) $(MAIN) $(TESTFILES) $(TEST_FLAGS)
+	$(CC) $(C_FLAGS) $(D_FLAGS) -o $(PROGS) $(ALLFILES)
+debug_test:
+	$(CC) $(C_FLAGS) $(TEST_FLAGS) -g -o $(PROGS) $(TESTFILES)
 clean:
 	rm -f *.o $(PROGS)

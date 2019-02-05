@@ -13,6 +13,7 @@ main() {
     std::cout << "Starting Hardware Test" << std::endl;
 
     hardware_controller hdw;
+
     hdw.driver_loop();
 
     return 0;
@@ -31,10 +32,10 @@ main() {
     link_logger link;
     hardware_controller hdw(&link);
 
-    std::thread * link_thread;
-    link_thread = new std::thread(&link_logger::driver_loop, &link);
+    std::thread link_thread(&link_logger::driver_loop, &link);
 
     hdw.driver_loop();
+
     return 0;
 }
 

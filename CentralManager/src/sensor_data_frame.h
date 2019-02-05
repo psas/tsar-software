@@ -23,6 +23,8 @@ struct sensor_data_frame {
         // i2c 
         float temp_1;
         float pres_1;
+        float temp_2;
+        float pres_2;
 
         // gpio
         int light_status;

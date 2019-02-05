@@ -7,10 +7,11 @@
 #include <mutex>
 #include <memory>
 
-#include "sensor_data_frame.h"
 #include "hardware_controller.h"
 #include "link_logger.h"
+#include "sensor_data_frame.h"
 #include "sequence_status.h"
+#include "client_command.h"
 
 #define SEQ_MAIN_DRIVER_DELAY 50 //milliseconds
 #define SEQ_HIGH_DRIVER_DELAY 10 //milliseconds
