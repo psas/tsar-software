@@ -1,6 +1,7 @@
 #include "sensor_data_frame.h"
 
-bool operator ==  (const sensor_data_frame & A, const sensor_data_frame & B){
+// this is overload to ignore the time field, since every object will have a different time value
+bool operator == (const sensor_data_frame & A, const sensor_data_frame & B) {
     if(A.temp_1 != B.temp_1)
         return 0;
     if(A.pres_1 != B.pres_1)
@@ -14,7 +15,9 @@ bool operator ==  (const sensor_data_frame & A, const sensor_data_frame & B){
     return 1;
 }
 
-bool operator !=  (const sensor_data_frame & A, const sensor_data_frame & B){
+
+// this is overload to ignore the time field, since every object will have a different time value
+bool operator != (const sensor_data_frame & A, const sensor_data_frame & B) {
     if(A.temp_1 == B.temp_1)
         return 0;
     if(A.pres_1 == B.pres_1)

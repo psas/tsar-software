@@ -4,6 +4,7 @@
 // constructor
 link_logger::
 link_logger() : serv(), send_q(SEND_DATA_Q_LEN), recv_q(CLIENT_COM_Q_LEN), driver_running(0) {
+    //TODO: add expection handling
     driver_delay.tv_sec = 0;
     driver_delay.tv_nsec = LINK_LOGGER_DELAY * 1000000;  
 }

@@ -1,3 +1,5 @@
 *.o
-*.swp
+.*.swp
 CentralManager
+build.ninja
+.ninja*

@@ -13,20 +13,18 @@
 
 int
 main() {
+    std::string temp = {"THIS IS A TEST"};
+    
     try {
-    server serv;
+        server serv;
+        std::thread serv_thread(&server::driver_loop, std::ref(serv));
+
+        while(1) {
+            serv.send_string(temp);
+            sleep(1);
+        }
     } catch(ServerException& e){
         std::cout << e.what() << std::endl;
-    }
-
-    std::thread * serv_thread;
-    serv_thread = new std::thread(&server::driver_loop, &serv);
-
-    std::string temp = {"THIS IS A TEST"};
-
-    while(1) {
-        serv.send_string(temp);
-        sleep(1);
     }
 
     return 0;
