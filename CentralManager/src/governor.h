@@ -1,14 +1,17 @@
-#include <iostream>         // cout
+#include <unistd.h>         // getuid
+#include <iostream>         // cout, cerr
 #include <thread>           // thread
 #include <chrono>           // sleep for
 #include <atomic>           // atomic
+#include <mutex>            // mutex
 
 #include "sequencer.h"
 #include "hardware_controller.h"
 #include "link_logger.h"
 #include "server.h"
 
-#define GOV_DRIVER_DELAY 500 // mircoseconds
+#define GOV_DRIVER_DELAY 500    // mircoseconds
+#define NICE_VALUE -20          // nice
 
 
 /* This class will handle the setup/end the entire Central Manager system and will 

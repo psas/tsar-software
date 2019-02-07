@@ -2,6 +2,16 @@
 
 
 int main() {
+    if(getuid() != 0) {
+        std::cout << "Run as root" << std::endl;
+        return 0;
+    }
+
+    if(nice(NICE_VALUE) != NICE_VALUE) {
+        std::cout << "Setting nice to NICE_VALUE failed." << std::endl;
+        // TODO: return or continue ?
+    }
+
     governor gov;
     gov.start_system();
     return 1;
@@ -15,15 +25,15 @@ governor() : serv(), link(serv), hdw_ctrl(link), seq(link, hdw_ctrl) {}
 // deconstructor
 governor::
 ~governor() {
-        // Stop all threads if they are still running
-        if(hdw_thread.joinable())
-            hdw_thread.join();
-        if(seq_thread.joinable())
-            seq_thread.join();
-        if(link_thread.joinable())
-            link_thread.join();
-        if(server_thread.joinable())
-            server_thread.join();
+    // Stop all threads if they are still running
+    if(hdw_thread.joinable())
+        hdw_thread.join();
+    if(seq_thread.joinable())
+        seq_thread.join();
+    if(link_thread.joinable())
+        link_thread.join();
+    if(server_thread.joinable())
+        server_thread.join();
 }
 
 
