@@ -68,6 +68,7 @@ start_system() {
 void governor::run_hdw() {
     hdw_thread_running = true;
     std::cout << "Hardware thread has started." << std::endl;
+    pthread_setname_np(pthread_self(), "Hardware");
     hdw_ctrl->driver_loop();
     std::cout << "Hardware thread has stoped." << std::endl;
     hdw_thread_running = false;
@@ -77,9 +78,10 @@ void governor::run_hdw() {
 // handles the sequencer thread
 void governor::run_seq() {
     seq_thread_running = true;
-    std::cout << "Hardware thread has started." << std::endl;
+    std::cout << "Sequencer thread has started." << std::endl;
+    pthread_setname_np(pthread_self(), "Sequencer");
     seq->driver_loop();
-    std::cout << "Hardware thread has stoped." << std::endl;
+    std::cout << "Sequencer thread has stoped." << std::endl;
     seq_thread_running = false;
 }
 
@@ -87,9 +89,10 @@ void governor::run_seq() {
 // handles the link thread
 void governor::run_link() {
     link_thread_running = true;
-    std::cout << "Hardware thread has started." << std::endl;
+    std::cout << "Link thread has started." << std::endl;
+    pthread_setname_np(pthread_self(), "Link");
     link->driver_loop();
-    std::cout << "Hardware thread has stoped." << std::endl;
+    std::cout << "Link thread has stoped." << std::endl;
     link_thread_running = false;
 }
 
@@ -97,8 +100,9 @@ void governor::run_link() {
 // handles the server thread
 void governor::run_server() {
     server_thread_running = true;
-    std::cout << "Hardware thread has started." << std::endl;
+    std::cout << "Server thread has started." << std::endl;
+    pthread_setname_np(pthread_self(), "Server");
     serv->driver_loop();
-    std::cout << "Hardware thread has stoped." << std::endl;
+    std::cout << "Server thread has stoped." << std::endl;
     server_thread_running = false;
 }
