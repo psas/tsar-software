@@ -2,11 +2,10 @@
 #define _LINK_LOGGER_H_
 
 #include <fstream>                          // file io
-#include <iostream>                         // cout
-#include <cstring>                          // string
-#include <thread>                           // threading
-#include <mutex>                            // mutex
 #include <string>                           // strings
+#include <chrono>                           // time
+#include <thread>                           // sleep_for
+#include <mutex>                            // mutex
 
 #include "server.h"
 #include "fixed_queue.h"
@@ -15,7 +14,7 @@
 #include "sequence_status.h"
 
 #define FILENAME "saved_output/CM_data.txt" // output filename TODO: change this to add a time/date to name
-#define LINK_LOGGER_DELAY 3                 // ms  
+#define LINK_LOGGER_DELAY 500               // mircoseconds  
 #define SEND_DATA_Q_LEN 250
 #define CLIENT_COM_Q_LEN 250
 #define STATUS 1                            // for flag in send_data
@@ -42,25 +41,21 @@ struct send_data {
  */
 class link_logger {
     public:
-        link_logger();
-        ~link_logger();
+        link_logger(std::shared_ptr<server> input_server);
 
         int send(const sequence_status &);
         int send(const sensor_data_frame &);
         int recv(client_command &);
-        void kill_driver();
+        void stop_driver();
         void driver_loop();
     private:
         void make_send_string(send_data & in, std::string & out);
         int save(std::string &) const;
         int data_changed(send_data) const;
-        void start_server();
 
-        std::thread serv_thread;
-        server serv;
+        std::shared_ptr<server> serv;
         fixed_queue<send_data> send_q;
         fixed_queue<client_command> recv_q;
-        struct timespec driver_delay;
         struct send_data last_out_data;    // last frame sent to server
         struct send_data last_in_data;     // last frame created, used in send() to reduce contructor/decontructor calls
         bool driver_running;

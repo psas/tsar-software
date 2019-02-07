@@ -4,7 +4,7 @@
 server::
 server() : send_q(SEND_Q_LENGTH, std::string(SEND_INIT_SIZE, '\0')),  
         recv_q(RECV_Q_LENGTH, std::string(RECV_BUFF_SIZE,'\0')), 
-        driver_running(0) {
+        driver_running(false) {
 
     // clear the fds_master_list and temp sets
     FD_ZERO(&fds_master_list);
@@ -36,13 +36,8 @@ server() : send_q(SEND_Q_LENGTH, std::string(SEND_INIT_SIZE, '\0')),
     FD_SET(listener, &fds_master_list); // add listener to master list
     fd_count = listener; // keep track of the largest descriptor
     
-    //delays
     pselect_timeout.tv_sec = 0;
     pselect_timeout.tv_nsec = PSELECT_TIMEOUT * 1000000;
-    driver_delay.tv_sec = 0;
-    driver_delay.tv_nsec = SERVER_DELAY * 1000000;    
-
-    driver_running = 0;
 }
 
 
@@ -52,8 +47,6 @@ server() : send_q(SEND_Q_LENGTH, std::string(SEND_INIT_SIZE, '\0')),
 void server::
 driver_loop() {
     std::string message;
-
-    std::cout << "server connection opened\n";
 
     driver_running = 1;
     while(driver_running == 1) { 
@@ -66,10 +59,8 @@ driver_loop() {
             std::cout << e.what() << std::endl;
             break; //TODO: change this
         }
-        nanosleep(&driver_delay, NULL);
+        std::this_thread::sleep_for(std::chrono::microseconds(SERVER_DELAY));
     }
-
-    std::cout << "server connection closed\n";
     return;
 }
 
@@ -149,9 +140,9 @@ send_to_all(const std::string & message) {
 
 //stops driver_loop, only use to end server
 void server::
-kill_driver() { 
+stop_driver() { 
     serv_mutex.lock();
-    driver_running = 0; 
+    driver_running = false; 
     serv_mutex.unlock();
 }
 

@@ -1,85 +1,49 @@
 #include "hardware_controller.h"
 
 
-#ifdef LINK_OFF
-//default constructor, only use for test/debuging
+// constructor, need pointer to link
 hardware_controller::
-hardware_controller() : driver_running(0) {
-    epoch = get_time();
+hardware_controller(std::shared_ptr<link_logger> & input) : ll(input), driver_running(false) {
     wiringPiSetup();
-    //add more as needed
-    //pinMode(TEST_PIN, OUTPUT);
+
+    // setup i2c sensors
+    fd_list.MPL3115A2_1 = hardware_library::MPL3115A2_setup(MPL3115A2_1_ADD);
+    fd_list.MPL3115A2_2 = hardware_library::MPL3115A2_setup(MPL3115A2_2_ADD);
+
+    // setup gpio pins
+    pinMode(LIGHT_GPIO, OUTPUT);
+    digitalWrite(LIGHT_GPIO, LOW);
+    frame.light_status = false;
 }
-#endif // LINK_OFF
-
-
-#ifndef LINK_OFF
-hardware_controller::
-hardware_controller(std::shared_ptr<link_logger> & input) : ll(input), driver_running(0) {
-    epoch = get_time();
-    wiringPiSetup();
-    //add more as needed
-    //pinMode(TEST_PIN, OUTPUT);
-}
-
-
-hardware_controller::
-~hardware_controller() {
-    ll = NULL; // central manager class will hand link logger deconstruction
-}
-#endif // LINK_OFF
 
 
 void hardware_controller::
 driver_loop() {
-    i2c_setup();
-    gpio_setup();
-
-    driver_running = 1;
-    while(driver_running == 1) {
+    driver_running = true;
+    while(driver_running) {
         hdw_mutex.lock();
 
         update_frame();
 
         // put any nessary hardware controls befro unlock (UART etc)
     
-        hdw_mutex.unlock();
 
-#ifdef LINK_ON
         if(ll != NULL)
             ll->send(frame);
-#endif // LINK_ON
+
+        hdw_mutex.unlock();
 
         std::this_thread::sleep_for(std::chrono::microseconds(HDW_DRIVER_DELAY));
     }
-
     return;
 }
 
 
-int hardware_controller::
-i2c_setup() {
-    int ri =0;
-
-    fd_list.MPL3115A2_1 = hardware_library::MPL3115A2_setup(MPL3115A2_1_ADD);
-    fd_list.MPL3115A2_2 = hardware_library::MPL3115A2_setup(MPL3115A2_2_ADD);
-
-    return ri;
-}
-
-int hardware_controller::
-gpio_setup() {
-    pinMode(LIGHT_GPIO, OUTPUT);
-    digitalWrite(LIGHT_GPIO, LOW);
-    frame.light_status = 0;
-    return 1;
-}
-
-
-int hardware_controller::
-kill_driver() { 
-    driver_running = 0; 
-    return 1;
+void hardware_controller::
+stop_driver() { 
+    hdw_mutex.lock();
+    driver_running = false;
+    hdw_mutex.unlock();
 }
 
 
@@ -93,20 +57,11 @@ get_frame(sensor_data_frame & input) {
 }
 
 
-// gets monotonic time from hardware (in milliseconds)
-int hardware_controller::
-get_time() const {
-    struct timespec current_time;
-    clock_gettime(CLOCK_MONOTONIC, &current_time);
-    return (int)(current_time.tv_sec*1000 + current_time.tv_nsec/1000000);
-}
-
-
 // gets monotonic time from hardware (in microseconds) as a string
 void hardware_controller::
 get_time_us(std::string & time) const {
     auto now = std::chrono::steady_clock::now();
-    auto now_ms = std::chrono::time_point_cast<std::chrono::microseconds>(now);
+    auto now_us = std::chrono::time_point_cast<std::chrono::microseconds>(now);
     auto epoch = now_ms.time_since_epoch();
     auto value = std::chrono::duration_cast<std::chrono::microseconds>(epoch);
     long long duration = value.count();
@@ -114,7 +69,7 @@ get_time_us(std::string & time) const {
 }
 
 
-#ifndef LIVE_DATA_OFF
+#ifndef SENSOR_DATA_OFF
 // build new sensor frame from live sensors 
 int hardware_controller::
 update_frame() {
@@ -154,7 +109,7 @@ update_frame() {
 
     return 1;
 }
-#endif // LIVE_DATA_OFF
+#endif // SENSOR_DATA_OFF
 
 
 // make gpio pin voltage high
@@ -163,7 +118,7 @@ light_on() {
     hdw_mutex.lock();
     
     digitalWrite(LIGHT_GPIO, HIGH);
-    frame.light_status = 1;
+    frame.light_status = true;
     
     hdw_mutex.unlock();
     return 1;
@@ -176,7 +131,7 @@ light_off() {
     hdw_mutex.lock();
     
     digitalWrite(LIGHT_GPIO, LOW);
-    frame.light_status = 0;
+    frame.light_status = false;
         
     hdw_mutex.unlock();
     return 1;

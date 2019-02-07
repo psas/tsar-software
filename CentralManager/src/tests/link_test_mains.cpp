@@ -13,6 +13,7 @@
 
 int
 main() {
+    std::cout << "Starting Server Test" << std::endl;
     std::string temp = {"THIS IS A TEST"};
     
     try {
@@ -33,10 +34,12 @@ main() {
 #elif defined(LINK_TEST)
 
 #include "../link_logger.h"
+//TODO: implement this
 
 int
 main() {
-    link_logger link;
+    std::cout << "Starting Link Logger Test" << std::endl;
+    link_logger link(nullptr);
     link.driver_loop();
     return 0;
 }

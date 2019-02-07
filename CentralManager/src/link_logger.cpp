@@ -3,58 +3,37 @@
 
 // constructor
 link_logger::
-link_logger() : serv(), send_q(SEND_DATA_Q_LEN), recv_q(CLIENT_COM_Q_LEN), driver_running(0) {
-    //TODO: add expection handling
-    driver_delay.tv_sec = 0;
-    driver_delay.tv_nsec = LINK_LOGGER_DELAY * 1000000;  
-}
-
-
-// deconstructor
-link_logger::
-~link_logger() {
-    serv.kill_driver();
-}
+link_logger(std::shared_ptr<server> input_server) : serv(input_server), 
+        send_q(SEND_DATA_Q_LEN), recv_q(CLIENT_COM_Q_LEN), driver_running(false) {}
 
 
 // server wrapper for link thread
 void link_logger::
 driver_loop() {
-    start_server();
-
     std::string temp_string;
     send_data temp_send_data;
 
-    std::cout << "Link Logger Started\n";
-
-    driver_running = 1;
+    driver_running = true;
     while(driver_running) {
         while(send_q.dequeue(temp_send_data) && data_changed(temp_send_data)) {
                 // if there is temp data and it's differenet than last 
                 make_send_string(temp_send_data, temp_string);
-                serv.send_string(temp_string);
+                serv->send_string(temp_string);
                 save(temp_string);
         }
-        nanosleep(&driver_delay, NULL);
+        std::this_thread::sleep_for(std::chrono::microseconds(LINK_LOGGER_DELAY));
     }
-
-    std::cout << "Link Logger Stopped\n";
-}
-
-
-void link_logger::
-start_server() {
-    serv_thread = std::thread(&server::driver_loop, &serv);
+    return;
 }
 
 
 // kill server driver wrapper
 void link_logger::
-kill_driver() { 
+stop_driver() { 
     ll_mutex.lock();
-    driver_running = 0;
-    serv.kill_driver();
+    driver_running = false;
     ll_mutex.unlock();
+    return;
 }
 
 // compaires data is see if it is the same
@@ -114,7 +93,7 @@ int link_logger::
 recv(client_command & output) {
     std::string temp_string;
 
-    if(serv.recv_string(temp_string) == 0) // no new string
+    if(serv->recv_string(temp_string) == 0) // no new string
         return 0;
 
     output.make_command_data(temp_string);

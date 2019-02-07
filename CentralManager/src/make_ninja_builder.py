@@ -19,7 +19,7 @@ to uses this:
     args: is a LIST of special flags for testing, it will ignore all other input.
         "no_link"            for hardware without the link_logger running.
         "print_hdw_data"     prints sensor data on terminal.
-        "hdw_live_data_off"  make hardware constantly read from a file instead of sensor (to test sequencer).
+        "sensor_data_off"  make hardware constantly read from a file instead of sensor (to test sequencer).
 
     examples:
         ./make_ninja_builder.py test server
@@ -29,11 +29,20 @@ to uses this:
 '''
 
 
-# the list of classes
+# the list of sub-class need by selectec class
 server = ['server']
-link = ['link_logger', 'sequence_status', 'client_command', 'sensor_data_frame'] # needs link
-sequencer = ['sequencer'] # needs link and server
-hardware = ['hardware_controller', 'hardware_library', 'sensor_data_frame'] # may need link if no test_flags
+
+link = ['link_logger', 'sequence_status', 'sensor_data_frame','client_command']
+link.extend(server)
+
+hardware = ['hardware_contoller','hardware_library']
+hardware.extend(link)
+
+sequencer = ['sequencer']
+sequencer.extend(hardware)
+
+governor = ['governor']
+governor.extend(sequencer)
 
 
 def main():
@@ -46,13 +55,12 @@ def main():
         print("test_flags:")
         print("  no_link            -- for hardware without the link_logger running")
         print("  print_hdw_data     -- prints sensor data on terminal")
-        print("  hdw_live_data_off  -- make hardware constantly read from a file instead of sensor (test sequence)")
+        print("  sensor_data_off  -- make hardware constantly read from a file instead of sensor (test sequence)")
         return
 
     if(sys.argv[1] == 'run'):
-        main_file = 'main.cpp'
-        file_list = make_file_list('sequencer') # sequencer includes all file in central manager
-        make_ninja_file(file_list, main_file)
+        file_list = make_file_list('governor') # sequencer includes all file in central manager
+        make_ninja_file(file_list)
     elif(sys.argv[1] == 'test' and len(sys.argv) >= 3):
         target = sys.argv[2]
         flag_list = sys.argv[2:]
@@ -103,7 +111,7 @@ def get_flags(target, flags=[]):
     elif(target == 'server'):
         test_flags += '-DSERVER_TEST'
     else:
-        print('Error: arg2 is not sequencer, hardware, or link')
+        print('Error: arg2 is not sequencer, hardware, link, or server')
         exit()
 
     # add test flags
@@ -122,30 +130,25 @@ def get_flags(target, flags=[]):
 def make_file_list(target, flags=[]):
     file_list = []
 
-    if(target == 'sequencer'):
+    if(target == 'governor'):
+        file_list = governor
+    elif(target == 'sequencer'):
         file_list = sequencer
-        file_list.extend(hardware)
-        file_list.extend(link)
-        file_list.extend(server)
     elif(target == 'hardware'):
         file_list = hardware
-        if('no_link' not in flags):
-            file_list.extend(link)
-            file_list.extend(server)
-        file_list.extend(server)
     elif(target == 'link'):
         file_list = link
-        file_list.extend(server)
     elif(target == 'server'):
         file_list = server
     else:
-        print("not a value input")
+        print('Error: arg2 is not sequencer, hardware, link, or server')
+        exit()
 
     return file_list
 
 
 # creates the build.ninja file
-def make_ninja_file(file_list, main_file, test_flags=''):
+def make_ninja_file(file_list, main_file='', test_flags=''):
     f = open("build.ninja","w")
 
     # write header
