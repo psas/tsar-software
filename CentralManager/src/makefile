@@ -18,12 +18,11 @@ PI_PLAG=-lwiringPi
 
 PROGS=CentralManager
 
-HARDWAREFILES=hardware_controller.cpp hardware_library.cpp
 SERVERFILES=server.cpp
-LINKFILES=link_logger.cpp $(SERVERFILES)
-SEQUENCERFILES=sequencer.cpp
-PODFILES=sensor_data_frame.cpp client_command.cpp sequence_status.cpp
-ALLFILES= $(SEQUENCERFILES) $(LINKFILES) $(HARDWAREFILES) $(PODFILES)
+LINKFILES=link_logger.cpp $(SERVERFILES) sensor_data_frame.cpp client_command.cpp sequence_status.cpp
+HARDWAREFILES=hardware_controller.cpp hardware_library.cpp $(LINKFILES)
+SEQUENCERFILES=sequencer.cpp $(HARDWAREFILES)
+ALLFILES= governor.cpp $(SEQUENCERFILES)
 
 # optional setting(s)
 ifeq ($(PRINT_DATA), 1)			#print data
@@ -31,19 +30,19 @@ TEST_FLAGS+= -DPRINT_DATA_FRAME
 endif
 
 ifeq ($(HDW_LIVE_DATA), 0)		#live data
-TEST_FLAGS+= -DLIVE_DATA_OFF
+TEST_FLAGS+= -DSENSOR_DATA_OFF
 endif
 
 run:
-	$(CC) $(C_FLAGS) $(PI_FLAGS) -o $(PROGS) main.cpp $(ALLFILES)
+	$(CC) $(C_FLAGS) $(PI_FLAGS) -o $(PROGS) $(ALLFILES)
 sequencer_test_debug:
-	$(CC) $(C_FLAGS) $(PI_FLAGS) -g -o $(PROGS) tests/sequencer_test_mains.cpp $(ALLFILES) $(TEST_FLAGS) -DSEQUENCER_TEST
+	$(CC) $(C_FLAGS) $(PI_FLAGS) -g -o $(PROGS) tests/sequencer_test_mains.cpp $(SEQUENCERFILES) $(TEST_FLAGS) -DSEQUENCER_TEST
 hardware_test_debug:
-	$(CC) $(C_FLAGS) $(PI_FLAGS) -g -o $(PROGS) tests/hardware_test_mains.cpp $(HARDWAREFILES) sensor_data_frame.cpp $(TEST_FLAGS) -DHARDWARE_TEST
+	$(CC) $(C_FLAGS) $(PI_FLAGS) -g -o $(PROGS) tests/hardware_test_mains.cpp $(HARDWAREFILES) $(TEST_FLAGS) -DHARDWARE_TEST
 hardware_link_test_debug:
-	$(CC) $(C_FLAGS) $(PI_FLAGS) -g -o $(PROGS) tests/hardware_test_mains.cpp $(HARDWAREFILES) $(LINKFILES) $(PODFILES) $(TEST_FLAGS) -DHARDWARE_LINK_TEST
+	$(CC) $(C_FLAGS) $(PI_FLAGS) -g -o $(PROGS) tests/hardware_test_mains.cpp $(HARDWAREFILES) $(TEST_FLAGS) -DHARDWARE_LINK_TEST
 link_test_debug:
-	$(CC) $(C_FLAGS) -g -o $(PROGS) tests/link_test_mains.cpp $(LINKFILES) $(PODFILES) $(TEST_FLAGS) -DLINK_TEST
+	$(CC) $(C_FLAGS) -g -o $(PROGS) tests/link_test_mains.cpp $(LINKFILES) $(TEST_FLAGS) -DLINK_TEST
 server_test_debug:
 	$(CC) $(C_FLAGS) -g -o $(PROGS) tests/link_test_mains.cpp $(SERVERFILES) $(TEST_FLAGS) -DSERVER_TEST
 clean:
