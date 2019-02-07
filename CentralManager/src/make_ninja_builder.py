@@ -160,7 +160,7 @@ def make_ninja_file(file_list, main_file, test_flags=''):
     f.write("rule link\n")
     f.write("    command = $cc $cflags $in -o $output %s\n\n" % test_flags)
     f.write("rule clean_all\n")
-    f.write("    command = rm -rf *.o\n\n")
+    f.write("    command = rm -rf *.o $output\n\n")
 
     # write object file builders
     for x in file_list:
