@@ -66,7 +66,7 @@ def main():
         flag_list = sys.argv[2:]
 
         main_file = get_main_path(target)
-        test_flags = get_flags(target, flag_list)
+        test_flags = get_test_flags(target, flag_list)
         file_list = make_file_list(target, flag_list)
         make_ninja_file(file_list, main_file, test_flags)
     else:
@@ -98,7 +98,7 @@ def get_main_path(target):
 
 
 # figures what test flags are needed
-def get_flags(target, flags=[]):
+def get_test_flags(target, flags=[]):
     test_flags = ''
 
     # set test main and add main test flag
@@ -149,12 +149,15 @@ def make_file_list(target, flags=[]):
 
 # creates the build.ninja file
 def make_ninja_file(file_list, main_file='', test_flags=''):
+    pi_flag = ''
+    if(main_file != 'tests/link_test_mains.cpp'):
+        pi_flag = '-lwiringPi' # needed for hardware
+
     f = open("build.ninja","w")
 
     # write header
     f.write("cc = g++\n")
-    f.write("cflags = -std=c++14 -pthread -Wall\n")
-    f.write("piflags = -lwiringPi\n\n")
+    f.write("cflags = -std=c++14 -pthread -Wall %s\n" % pi_flag)
     f.write("output = CentralManager\n\n")
 
     # write rules
