@@ -15,12 +15,12 @@ MPL3115A2_setup(const uint32_t reg) {
 
 
 // returns pressure (in kPa) from mpl3115a2
-float hardware_library::
+double hardware_library::
 MPL3115A2_pres(const uint32_t fd) {
     int32_t msb;                    // pressure most significant bits
     int32_t csb;                    // pressure central significant bits
     int32_t lsb;                    // pressure least significant bits
-    float pres;                     // return value 
+    double pres;                     // return value 
 
     msb = wiringPiI2CReadReg8(fd,0x01);
     csb = wiringPiI2CReadReg8(fd,0x02);
@@ -32,7 +32,7 @@ MPL3115A2_pres(const uint32_t fd) {
     }
 
     // math on bits as defined in mpl3115a2 datasheet for pressure value
-    pres = (float)(((msb * 65536) + (csb * 256) + (lsb & 0xF0)) / 16);
+    pres = (double)(((msb * 65536) + (csb * 256) + (lsb & 0xF0)) / 16);
     pres = pres / 4.0 / 1000.0;
 
     return pres;
@@ -40,11 +40,11 @@ MPL3115A2_pres(const uint32_t fd) {
 
 
 // returns temperature (in C) from mpl3115a2
-float hardware_library::
+double hardware_library::
 MPL3115A2_temp(const uint32_t fd) {
     int32_t msb;                    // temperature most significant bits
     int32_t lsb;                    // temperature least significant bits
-    float temp;                     // return value
+    double temp;                     // return value
 
     msb = wiringPiI2CReadReg8(fd,0x04);
     lsb = wiringPiI2CReadReg8(fd,0x05);
@@ -55,7 +55,7 @@ MPL3115A2_temp(const uint32_t fd) {
     }
 
     // math on bits as defined in mpl3115a2 datasheet for temperature value
-    temp = (float)((msb * 256) + (lsb & 0xF0)) / 256.0;
+    temp = (double)((msb * 256) + (lsb & 0xF0)) / 256.0;
 
     return temp;
 }

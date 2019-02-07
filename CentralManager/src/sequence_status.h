@@ -3,7 +3,6 @@
 
 #include <string>
 
-#include "../thirdparty/rapidjson/document.h"       // rapidjson
 #include "../thirdparty/rapidjson/writer.h"         // rapidjson
 #include "../thirdparty/rapidjson/stringbuffer.h"   // rapidjson
 
@@ -17,7 +16,8 @@ struct sequence_status {
         void make_JSON(std::string & output);
         void make_JSON_diff(std::string & output, const sequence_status & input);
 
-        int current_state;
+        std::string time;
+        unsigned int current_state;
 };
 
 #endif

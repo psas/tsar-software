@@ -16,8 +16,8 @@ namespace hardware_library {
      * TSAR hardware is ready for testing
      */
     int32_t MPL3115A2_setup(const uint32_t reg);
-    float MPL3115A2_pres(const uint32_t fd);
-    float MPL3115A2_temp(const uint32_t fd);
+    double MPL3115A2_pres(const uint32_t fd);
+    double MPL3115A2_temp(const uint32_t fd);
 }
 
 #endif // _HARDWARE_LIBRARY_H_

@@ -10,6 +10,8 @@
 #include <thread>                       // sleep_for
 #include <wiringPi.h>                   // raspberry pi UART/GPIO
 #include <wiringSerial.h>               // raspberry pi UART
+#include <fstream>                      // read file, only for test update()
+#include <string>                       // string
 
 #include "hardware_library.h"
 #include "sensor_data_frame.h"
@@ -64,6 +66,7 @@ class hardware_controller {
         int gpio_setup();
         int update_frame();
         int get_time() const;
+        void get_time_us(std::string & time) const;
 
 #ifndef LINK_OFF
         // allows fo debugin without link logger

@@ -1,5 +1,6 @@
 #include "hardware_controller.h"
 
+
 #ifdef LINK_OFF
 //default constructor, only use for test/debuging
 hardware_controller::
@@ -95,20 +96,29 @@ get_frame(sensor_data_frame & input) {
 // gets monotonic time from hardware (in milliseconds)
 int hardware_controller::
 get_time() const {
-    auto time = std::chrono::steady_clock::now();
-    auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(time);
-    auto value = now_ms.time_since_epoch();
-    long duration = value.count();
-    return 1;
+    struct timespec current_time;
+    clock_gettime(CLOCK_MONOTONIC, &current_time);
+    return (int)(current_time.tv_sec*1000 + current_time.tv_nsec/1000000);
 }
 
+
+// gets monotonic time from hardware (in microseconds) as a string
+void hardware_controller::
+get_time_us(std::string & time) const {
+    auto now = std::chrono::steady_clock::now();
+    auto now_ms = std::chrono::time_point_cast<std::chrono::microseconds>(now);
+    auto epoch = now_ms.time_since_epoch();
+    auto value = std::chrono::duration_cast<std::chrono::microseconds>(epoch);
+    long long duration = value.count();
+    time = std::to_string(duration);
+}
 
 
 #ifndef LIVE_DATA_OFF
 // build new sensor frame from live sensors 
 int hardware_controller::
 update_frame() {
-    frame.time = get_time() - epoch;
+    get_time_us(frame.time);
     frame.pres_1 = hardware_library::MPL3115A2_pres(fd_list.MPL3115A2_1);
     frame.temp_1 = hardware_library::MPL3115A2_temp(fd_list.MPL3115A2_1);
     frame.pres_2 = hardware_library::MPL3115A2_pres(fd_list.MPL3115A2_2);
@@ -122,11 +132,26 @@ update_frame() {
 int hardware_controller::
 update_frame() {
     // read for file for automated test
-    // TODO: replace with file in later
-    frame.time = get_time() - epoch;
-    frame.pres_1 = 1.0;
-    frame.temp_1 = 1.0;
+    float f_list[4];
+    int d, i = 0;
+    std::string s;
     
+    ifstream file(TEST_SENSOR_PATH);
+    if(file.is_open()) {
+        while(getline(file, s) && i < 4) {
+            d = s.find("=")+1;
+            f_list[i] = std::stof(s.substr(d));
+            ++i;
+        }
+        file.close();
+    }
+
+    get_time_us(frame.time);
+    frame.temp_1 = f_list[0];
+    frame.pres_1 = f_list[1];
+    frame.temp_2 = f_list[2];
+    frame.pres_2 = f_list[3];
+
     return 1;
 }
 #endif // LIVE_DATA_OFF

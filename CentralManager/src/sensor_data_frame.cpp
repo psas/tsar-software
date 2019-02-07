@@ -35,32 +35,32 @@ bool operator != (const sensor_data_frame & A, const sensor_data_frame & B) {
 // Uses RapidJSON to converts sensor_data_frame struct to a vector. 
 void sensor_data_frame::
 make_JSON(std::string & output) {
-    using namespace rapidjson;
+    rapidjson::StringBuffer s;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+    //writer.SetMaxDecimalPlaces(6);
 
-    Document new_json;
-
-    // makes json object not a string
-    new_json.SetObject();
-
-    // make allocator
-    Document::AllocatorType& allocator = new_json.GetAllocator();
+    writer.StartObject();
 
     // time
-    new_json.AddMember("time_ms", time, allocator);
+    writer.Key("time");
+    writer.String(time.c_str());
 
-    // sensor values, only change these by adding or removing members
-    new_json.AddMember("temp_1", temp_1, allocator);
-    new_json.AddMember("pres_1", pres_1, allocator);
-    new_json.AddMember("temp_2", temp_2, allocator);
-    new_json.AddMember("pres_2", pres_2, allocator);
-    new_json.AddMember("light_status", light_status, allocator);
+    // i2c 
+    writer.Key("temp_1");
+    writer.Double(temp_1);
+    writer.Key("pres_1");   
+    writer.Double(pres_1);
+    writer.Key("temp_2");       
+    writer.Double(temp_2);
+    writer.Key("pres_2");       
+    writer.Double(pres_2);
 
-    // converts json document to string
-    StringBuffer str_buff;
-    Writer<StringBuffer> writer(str_buff);
-    new_json.Accept(writer);
+    // gpio
+    writer.Key("light_status"); 
+    writer.Bool(light_status);
 
-    output = str_buff.GetString();
+    writer.EndObject();
+    output = s.GetString();
     return;
 }
 
@@ -70,36 +70,41 @@ make_JSON(std::string & output) {
  */
 void sensor_data_frame::
 make_JSON_diff(std::string & output, const sensor_data_frame & other) {
-    using namespace rapidjson;
+    rapidjson::StringBuffer s;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+    //writer.SetMaxDecimalPlaces(6);
 
-    Document new_json;
-
-    // makes json object not a string
-    new_json.SetObject();
-
-    // make allocator
-    Document::AllocatorType& allocator = new_json.GetAllocator();
+    writer.StartObject();
 
     // time
-    new_json.AddMember("time_ms", time, allocator);
+    writer.Key("time");
+    writer.String(time.c_str());
 
-    // sensor values, only change these by adding or removing members
-    if(temp_1 != other.temp_1)
-        new_json.AddMember("temp_1", temp_1, allocator);
-    if(pres_1 != other.pres_1)
-        new_json.AddMember("pres_1", pres_1, allocator);
-    if(temp_2 != other.temp_2)
-        new_json.AddMember("temp_2", temp_2, allocator);
-    if(pres_2 != other.pres_2)
-        new_json.AddMember("pres_2", pres_2, allocator);
-    if(light_status != other.light_status)
-        new_json.AddMember("light_status", light_status, allocator);
+    // i2c 
+    if(temp_1 != other.temp_1) {
+        writer.Key("temp_1");
+        writer.Double(temp_1);
+    }
+    if(pres_1 != other.pres_1) {
+        writer.Key("pres_1");
+        writer.Double(pres_1);
+    }
+    if(temp_2 != other.temp_2) {
+        writer.Key("temp_2");       
+        writer.Double(temp_2);
+    }
+    if(pres_2 != other.pres_2) {
+        writer.Key("pres_2");       
+        writer.Double(pres_2);
+    }
 
-    // converts json document to string
-    StringBuffer str_buff;
-    Writer<StringBuffer> writer(str_buff);
-    new_json.Accept(writer);
+    // gpio
+    if(light_status != other.light_status){
+        writer.Key("light_status"); 
+        writer.Bool(light_status);
+    }
 
-    output = str_buff.GetString();
+    writer.EndObject();
+    output = s.GetString();
     return;
 }
