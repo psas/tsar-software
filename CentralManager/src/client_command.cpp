@@ -2,11 +2,10 @@
 
 int client_command::
 make_command_data(std::string & input) {
-
     using namespace rapidjson;
 
-    Document document;
-    document.Parse(input);
+    rapidjson::Document document;
+    document.Parse(input.c_str());
 
     // get int
     if(document["number"].IsNumber())

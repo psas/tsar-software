@@ -4,8 +4,6 @@
 #include <cstdint>                                  // uint_t
 
 #include "../thirdparty/rapidjson/document.h"       // rapidjson
-#include "../thirdparty/rapidjson/writer.h"         // rapidjson
-#include "../thirdparty/rapidjson/stringbuffer.h"   // rapidjson
 
 /* This a POD (Plain Old Data) for commands given by the client.
  * It tehcically is not a POD, but the function only converts a 
