@@ -119,9 +119,9 @@ def get_flags(target, flags=[]):
         if ('no_link' in flags):
             test_flags += '-DNO_LINK '
         if('print_hdw_data' in flags):
-            test_flags += '-DNO_LINK '
+            test_flags += '-DPRINT_DATA '
         if('hdw_live_data_off' in flags):
-            test_flags += '-DLIVE_DATA_OFF '
+            test_flags += '-DSENSOR_DATA_OFF '
 
     return test_flags
 
