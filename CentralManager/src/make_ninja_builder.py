@@ -17,9 +17,9 @@ to uses this:
     arg2: is the selected class to test. 
         "sequencer", "hardware", "link", or "server"
     args: is a LIST of special flags for testing, it will ignore all other input.
-        "no_link"            for hardware without the link_logger running.
-        "print_hdw_data"     prints sensor data on terminal.
-        "sensor_data_off"  make hardware constantly read from a file instead of sensor (to test sequencer).
+        "no_link"           for hardware without the link_logger running.
+        "print_hdw_data"    prints sensor data on terminal.
+        "sensor_data_off"   make hardware constantly read from a file instead of sensor (to test sequencer).
 
     examples:
         ./make_ninja_builder.py test server
@@ -55,7 +55,7 @@ def main():
         print("test_flags:")
         print("  no_link            -- for hardware without the link_logger running")
         print("  print_hdw_data     -- prints sensor data on terminal")
-        print("  sensor_data_off  -- make hardware constantly read from a file instead of sensor (test sequence)")
+        print("  sensor_data_off    -- make hardware constantly read from a file instead of sensor (test sequence)")
         return
 
     if(sys.argv[1] == 'run'):
@@ -120,7 +120,7 @@ def get_test_flags(target, flags=[]):
             test_flags += '-DNO_LINK '
         if('print_hdw_data' in flags):
             test_flags += '-DPRINT_DATA '
-        if('hdw_live_data_off' in flags):
+        if('sensor_data_off' in flags):
             test_flags += '-DSENSOR_DATA_OFF '
 
     return test_flags
