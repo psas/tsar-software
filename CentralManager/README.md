@@ -2,56 +2,20 @@
 Software Controller for TSAR in C++14. Designed for a Raspberry Pi3 with RT Preempt patch.
 
 
-## Description
-Governor
-+ Starts system
-+ Creates and controlls all threads
+## High Level Description
+The Central Manager can be broken into 3 parts: the Sequencer, the Hardware Controller, & the Link Logger.
 
 Sequencer
-+ Contains the control theory.
-+ Checks if the system needs to go into an emergency state.
-+ Process commands from clients.
++ Sequences through a list of step for a liquid engine test fire.
++ Processes commands from clients (start, emergency stop, halt, continue, etc).
 
 Hardware Controller
-+ Reads sensor values.
-+ Controls hardware.
++ Hardware interface for Central Manager
++ Reads data sensor.
++ Sends commands to Actuator Controller system.
 
 Link Logger
-+ Uses [RAPIDJSON](https://github.com/Tencent/rapidjson).
-+ Converts all recieved data into JSON strings for saving and for the server to send.
-+ Converts receive JSON strings from the server into a struct for the sequencer to process.
++ TCP server (clients are monitoring laptops).
++ Send system status updates and hardware data to clients.
++ Gives any recieved commands from clients to Sequencer for processing.
 
-Server
-+ Asynchronous TCP server.
-+ Sends any strings given by LinkLogger to clients.
-+ Receives any strings from clients to give to the LinkLogger.
-
-
-## Progress
-- [ ] Skeletal Protoype
-  - [x] Governor
-    - [x] Makes all threads needed
-    - [x] Handles threads stopping early
-  - [ ] Sequencer
-    - [ ] Working test sequence
-    - [ ] Emergency state check
-  - [ ] Hardware Controller
-    - [x] I2C
-    - [x] GPIO pins
-    - [ ] UART 
-  - [x] LinkLogger
-    - [x] Send/Recv Queue
-    - [x] Send data to JSON
-    - [x] Sequencer status to JSON
-    - [x] JSON to commands
-  - [x] Server
-    - [x] General TCP Server
-    - [x] Send/Recv Queues
-
-
-## Testing
-- [ ] Skeletal Protoype
-  - [ ] Sequencer
-  - [ ] Hardware Controller
-  - [ ] LinkLogger
-  - [ ] Server
