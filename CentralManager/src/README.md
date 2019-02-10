@@ -1,6 +1,6 @@
-## Class and Struct Descriptions
+# Class and Struct Descriptions
 
-# Main Class Descriptions
+## Main Class Descriptions
 These are the main class for Central Manager.
 All of the main classes have their own thread.
 
@@ -28,7 +28,7 @@ Server
 + Sends any strings given by Link Logger to clients.
 + Receives any strings from clients to give to the Link Logger.
 
-# POD (plain old data) Structs Descriptions
+## POD (plain old data) Structs Descriptions
 These structs are mostly just a POD struct, but they all have functions to convert to or from strings.
 All POD Classes use [RAPIDJSON](https://github.com/Tencent/rapidjson) for struct to string conversions.
 These struct are uses by the main classes to send data to one another.
@@ -44,14 +44,14 @@ Sensor Data Frame
 Client Command
 + A command for the sequncer to do (start, emergency stop, halt, continue, etc).
 
-# Data Structures Class(es) Decriptions
+## Data Structures Class(es) Decriptions
 Fixed Queue (a c++ template class)
 + This is queue that has a fixed size to greaty reduce dynamic memory allocation and destruction.
 + If the queue becomes full, any new data will override oldest queued data.
 + Both Link Logger and Server have a Fixed Queue for data needing to be sent.
 
 
-## Progress
+# Progress
 - [ ] Skeletal Protoype
   - [x] Governor
     - [x] Makes all threads needed
@@ -71,11 +71,3 @@ Fixed Queue (a c++ template class)
   - [x] Server
     - [x] General TCP Server
     - [x] Send/Recv Queues
-
-
-## Testing
-- [ ] Skeletal Protoype
-  - [ ] Sequencer
-  - [ ] Hardware Controller
-  - [ ] LinkLogger
-  - [ ] Server
