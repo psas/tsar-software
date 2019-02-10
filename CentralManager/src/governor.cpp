@@ -19,7 +19,9 @@ int main() {
 
 // constructor
 governor::
-governor() : serv(), link(serv), hdw_ctrl(link), seq(link, hdw_ctrl) {}
+governor() : serv(), link(serv), hdw_ctrl(link), seq(link, hdw_ctrl), 
+            seq_thread_running(false), hdw_thread_running(false), 
+            link_thread_running(false), seq_thread_running(false) {}
 
 
 // deconstructor

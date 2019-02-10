@@ -36,19 +36,19 @@ class governor {
         void run_link();
         void run_server();
 
-        // threads
+        // sub threads
         std::thread hdw_thread;
         std::thread seq_thread;
         std::thread link_thread;
         std::thread server_thread;
 
-        // use to know the status of sub threads
+        // used to know the status of sub threads
         std::atomic<bool> seq_thread_running;
         std::atomic<bool> hdw_thread_running;
         std::atomic<bool> link_thread_running;
         std::atomic<bool> server_thread_running;
 
-        // pointer to all sub-classes
+        // pointers to all sub-classes
         std::unique_ptr<sequencer> seq;
         std::shared_ptr<hardware_controller> hdw_ctrl;
         std::shared_ptr<link_logger> link;
