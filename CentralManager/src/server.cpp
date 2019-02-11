@@ -35,9 +35,6 @@ server() : send_q(SEND_Q_LENGTH, std::string(SEND_INIT_SIZE, '\0')),
 
     FD_SET(listener, &fds_master_list); // add listener to master list
     fd_count = listener; // keep track of the largest descriptor
-    
-    pselect_timeout.tv_sec = 0;
-    pselect_timeout.tv_nsec = PSELECT_TIMEOUT * 1000000;
 }
 
 
