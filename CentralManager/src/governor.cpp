@@ -21,7 +21,7 @@ int main() {
 governor::
 governor() : serv(), link(serv), hdw_ctrl(link), seq(link, hdw_ctrl), 
             seq_thread_running(false), hdw_thread_running(false), 
-            link_thread_running(false), seq_thread_running(false) {}
+            link_thread_running(false), server_thread_running(false) {}
 
 
 // deconstructor
