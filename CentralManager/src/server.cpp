@@ -35,6 +35,9 @@ server() : send_q(SEND_Q_LENGTH, std::string(SEND_INIT_SIZE, '\0')),
 
     FD_SET(listener, &fds_master_list); // add listener to master list
     fd_count = listener; // keep track of the largest descriptor
+
+    pselect_timeout.tv_sec = 0;
+    pselect_timeout.tv_nsec = PSELECT_TIMEOUT * 1000000;
 }
 
 
@@ -45,8 +48,9 @@ void server::
 driver_loop() {
     std::string message;
 
-    driver_running = 1;
-    while(driver_running == 1) { 
+    driver_running = true;
+    while(driver_running == true) { 
+        serv_mutex.lock();
         try {
         check_new_and_read(); //this will also handle enqueuing into recv_q
         while(send_q.dequeue(message) == 1) // has data to send
@@ -56,7 +60,8 @@ driver_loop() {
             std::cout << e.what() << std::endl;
             break; //TODO: change this
         }
-        std::this_thread::sleep_for(std::chrono::microseconds(SERVER_DELAY));
+        serv_mutex.unlock();
+        std::this_thread::sleep_for(std::chrono::milliseconds(SERVER_DELAY));
     }
     return;
 

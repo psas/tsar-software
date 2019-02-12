@@ -8,7 +8,7 @@ int main() {
     }
 
     if(nice(NICE_VALUE) != NICE_VALUE) {
-        std::cout << "Setting nice to NICE_VALUE failed." << std::endl;
+        std::cout << "Setting nice to " << NICE_VALUE << " failed." << std::endl;
         // TODO: return or continue ?
     }
 
@@ -81,6 +81,13 @@ void governor::run_hdw() {
     hdw_thread_running = true;
     std::cout << "Hardware thread has started." << std::endl;
     pthread_setname_np(pthread_self(), "Hardware");
+    /*
+    TODO: thread prio
+    sched_param param;
+    int policy;
+    int r = pthread_getschedparam(pthread_self(), &policy, &param);
+    int r2 = pthread_setschedparam(pthread_self(), policy, &param);
+    */
     hdw_ctrl->driver_loop();
     std::cout << "Hardware thread has stoped." << std::endl;
     hdw_thread_running = false;

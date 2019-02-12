@@ -12,7 +12,7 @@ hardware_controller(std::shared_ptr<link_logger> & input) : ll(input), driver_ru
 
     // setup gpio pins
     pinMode(LIGHT_GPIO, OUTPUT);
-    digitalWrite(LIGHT_GPIO, LOW);
+    digitalWrite(LIGHT_GPIO, LOW); // default value
     frame.light_status = false;
 }
 
@@ -25,8 +25,7 @@ driver_loop() {
 
         update_frame();
 
-        // put any nessary hardware controls befro unlock (UART etc)
-    
+        // TODO UART heartbeat here
 
         if(ll != NULL)
             ll->send(frame);
@@ -62,7 +61,7 @@ void hardware_controller::
 get_time_us(std::string & time) const {
     auto now = std::chrono::steady_clock::now();
     auto now_us = std::chrono::time_point_cast<std::chrono::microseconds>(now);
-    auto epoch = now_ms.time_since_epoch();
+    auto epoch = now_us.time_since_epoch();
     auto value = std::chrono::duration_cast<std::chrono::microseconds>(epoch);
     long long duration = value.count();
     time = std::to_string(duration);
@@ -116,10 +115,10 @@ update_frame() {
 int hardware_controller::
 light_on() {
     hdw_mutex.lock();
-    
+
     digitalWrite(LIGHT_GPIO, HIGH);
     frame.light_status = true;
-    
+
     hdw_mutex.unlock();
     return 1;
 }
@@ -129,10 +128,10 @@ light_on() {
 int hardware_controller::
 light_off() {
     hdw_mutex.lock();
-    
+
     digitalWrite(LIGHT_GPIO, LOW);
     frame.light_status = false;
-        
+
     hdw_mutex.unlock();
     return 1;
 }

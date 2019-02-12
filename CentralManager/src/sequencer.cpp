@@ -15,12 +15,20 @@ driver_loop() {
     driver_running = true;
     while(driver_running) {
         seq_mutex.lock();
+
         if(emergency_state())               // check for emergency and deal with them
             continue;                       // restart loop if emergency was found
-        hdw_ctrl->get_frame(last_frame);    // update internal frame
-        link->recv(new_command);            // get new command from client(s) (if one exist)
+
+        hdw_ctrl->get_frame(last_frame);    // update internal sensor data frame
+
+        if(link != nullptr)
+            link->recv(new_command);        // get new command from client(s) (if one exist)
+
         sequence();                         // do system control
-        link->send(status);                 // update clients on progress
+
+        if(link != nullptr)
+            link->send(status);             // update clients on progress
+
         seq_mutex.unlock();
         std::this_thread::sleep_for(std::chrono::microseconds(SEQ_DRIVER_DELAY)); // sleep
     }

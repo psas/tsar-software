@@ -15,12 +15,15 @@ driver_loop() {
 
     driver_running = true;
     while(driver_running) {
+        ll_mutex.lock();
         while(send_q.dequeue(temp_send_data) && data_changed(temp_send_data)) {
                 // if there is temp data and it's differenet than last 
                 make_send_string(temp_send_data, temp_string);
-                serv->send_string(temp_string);
+                if(serv != nullptr)
+                    serv->send_string(temp_string);
                 save(temp_string);
         }
+        ll_mutex.unlock();
         std::this_thread::sleep_for(std::chrono::microseconds(LINK_LOGGER_DELAY));
     }
     return;
