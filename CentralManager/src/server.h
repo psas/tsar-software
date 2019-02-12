@@ -20,7 +20,7 @@
 
 #define PORT 8080
 #define PSELECT_TIMEOUT 5           // milliseconds
-#define SERVER_DELAY 500            // microseconds
+#define SERVER_DELAY 50             // milliseconds
 #define RECV_BUFF_SIZE 100
 #define SEND_INIT_SIZE 200
 #define SEND_Q_LENGTH 100

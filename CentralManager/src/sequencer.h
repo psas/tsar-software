@@ -1,10 +1,11 @@
 #ifndef _SEQUENCER_H_
 #define _SEQUENCER_H_
 
-#include <mutex>
-#include <memory>
-#include <atomic>
-#include <chrono>
+#include <mutex>                // mutex
+#include <memory>               // sharred_ptr
+#include <atomic>               // atomic
+#include <chrono>               // delays
+#include <thread>               // sleep_for
 
 #include "sequence_status.h"
 #include "hardware_controller.h"
@@ -12,7 +13,7 @@
 #include "link_logger.h"
 #include "client_command.h"
 
-#define SEQ_DRIVER_DELAY 500 //microseconds
+#define SEQ_DRIVER_DELAY 500    //microseconds
 
 /* Sequencer:
  * Control theory.
