@@ -13,18 +13,21 @@
 #include <fstream>                      // read file, only for test update()
 #include <string>                       // string
 #include <atomic>                       // atomic
+#include <string>                       // string (uart)
 
-#include "hardware_library.h"
+#include "i2c_library.h"
 #include "sensor_data_frame.h"
 #include "link_logger.h"
 
 #define HDW_DRIVER_DELAY 500            // mircoseconds
-#define BUAD_RATE 115200                // UART buad rate
-#define UART_PATH "/dev/ttyAMA0"        // UART path
 #define TEST_SENSOR_PATH "tests/test_sensor_values.txt" // path to test sensor value
 
+// uart
+#define BUAD_RATE 115200                // UART buad rate
+#define UART_PATH "/dev/ttyAMA0"        // UART path
+
 // raspberry pi gpio pins
-#define LIGHT_GPIO 0                    //gpio 17 or pin 11 on pi
+#define LIGHT_GPIO 0                    // gpio 17 or pin 11 on pi
 
 // raspberry pi i2c senors
 #define MPL3115A2_1_ADD 0x60            // example MPL3115A2
@@ -46,6 +49,7 @@ class hardware_controller {
     public:
         // normal contructor for when not debugging
         hardware_controller(std::shared_ptr<link_logger> & input);
+        ~hardware_controller();
 
         void driver_loop();
         void stop_driver();
@@ -62,10 +66,13 @@ class hardware_controller {
         // gets current time in microseconds as a string
         void get_time_us(std::string & time) const;
 
+        // UART send string data 
+        int uart_send(std::string & message);
+
         std::shared_ptr<link_logger> ll;
         sensor_data_frame frame;
         sensor_fds_list fd_list;
-        int frame_size;
+        int uart_fd;
         std::atomic<bool> driver_running;
         std::mutex hdw_mutex;
 };

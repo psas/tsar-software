@@ -11,7 +11,7 @@
 #include "fixed_queue.h"
 #include "client_command.h"
 #include "sensor_data_frame.h"
-#include "sequence_status.h"
+#include "sequencer_status.h"
 
 #define FILENAME "CM_data.txt"              // output filename TODO: change this to add a time/date to name
 #define LINK_LOGGER_DELAY 500               // mircoseconds  
@@ -22,12 +22,12 @@
 
 
 /* POD for send queue. To reduce new and delete calls, this was used over a 
- * send_data base class with sensor_data_frame and sequence_status as derived classes being upcasted.
+ * send_data base class with sensor_data_frame and sequencer_status as derived classes being upcasted.
  * TODO: research into last statement
  */
 struct send_data {
     sensor_data_frame sensor_frame;
-    sequence_status seq_status;
+    sequencer_status seq_status;
     bool flag; // 0 for sensor, 1 for sequence
 };
 
@@ -43,7 +43,7 @@ class link_logger {
     public:
         link_logger(std::shared_ptr<server> input_server);
 
-        int send(const sequence_status &);
+        int send(const sequencer_status &);
         int send(const sensor_data_frame &);
         int recv(client_command &);
         void stop_driver();

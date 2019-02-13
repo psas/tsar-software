@@ -7,6 +7,7 @@ sequencer(std::shared_ptr<link_logger> & link_input, std::shared_ptr<hardware_co
     status.current_state = 1;
 }
 
+
 // main thread that handles, main control theory
 void sequencer::
 driver_loop() {
@@ -36,6 +37,7 @@ driver_loop() {
 }
 
 
+// TODO need state diagram
 // Where main control theory goes.
 // Currently an example of turning a light on and off every second is used.
 int sequencer::
@@ -43,6 +45,8 @@ sequence() {
     std::chrono::system_clock::time_point current_time;
 
     // TODO: add processing of client commands
+
+    unsigned int next_state = status.current_state;
 
     switch(status.current_state) {
         case 1 : {
@@ -55,8 +59,7 @@ sequence() {
             current_time = std::chrono::system_clock::now();
             if(current_time >= wait_until_time)
                 next_state = 3;
-            else
-                break;
+            break;
         }
         case 3 : {
             hdw_ctrl->light_off();
@@ -66,17 +69,16 @@ sequence() {
         }
         case 4 : {
             current_time = std::chrono::system_clock::now();
-            if(current_time >= wait_until_time) {
+            if(current_time >= wait_until_time)
                 next_state = 1;
-                break;
-            }
-            else
-                break;
-        }
-        default :
-            std::cout << "unknown state " << status.current_state << std::endl;
-            driver_running = false;
             break;
+        }
+        default : {
+            // TODO go to emergeny state
+            std::cout << "unknown state " << status.current_state << std::endl;
+            next_state = 0;
+            break;
+        }
     }
 
     status.current_state = next_state;
@@ -85,17 +87,23 @@ sequence() {
 }
 
 
-// TODO: implement this
+// TODO: implement this, need state diagram
 // check for emergency condistions and will handle them
 bool sequencer::
 emergency_state() {
-    if(status.current_state == 0)
+    if(status.current_state == 0) {
+        std::cout << "emergency_state" << std::endl;
+        driver_running = false;
         return true;
+    }
     return false;
 }
+
 
 // tells governor to keep thread running or not
 bool sequencer::
 is_running() {
+    seq_mutex.lock();
     return driver_running;
+    seq_mutex.unlock();
 }

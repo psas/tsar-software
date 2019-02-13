@@ -8,7 +8,7 @@
 #include <thread>               // sleep_for
 #include <iostream>
 
-#include "sequence_status.h"
+#include "sequencer_status.h"
 #include "hardware_controller.h"
 #include "sensor_data_frame.h"
 #include "link_logger.h"
@@ -33,9 +33,8 @@ class sequencer {
         std::shared_ptr<hardware_controller> hdw_ctrl;
 
         sensor_data_frame last_frame;
-        sequence_status status;
+        sequencer_status status;
 
-        unsigned int next_state;
         std::chrono::system_clock::time_point wait_until_time;
 
         std::atomic<bool> driver_running;

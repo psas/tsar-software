@@ -32,10 +32,10 @@ to uses this:
 # the list of sub-class need by selectec class
 server = ['server']
 
-link = ['link_logger', 'sequence_status', 'sensor_data_frame','client_command']
+link = ['link_logger', 'sequencer_status', 'sensor_data_frame','client_command']
 link.extend(server)
 
-hardware = ['hardware_contoller','hardware_library']
+hardware = ['hardware_contoller','i2c_library']
 hardware.extend(link)
 
 sequencer = ['sequencer']

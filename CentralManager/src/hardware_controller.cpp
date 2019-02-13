@@ -6,17 +6,24 @@ hardware_controller::
 hardware_controller(std::shared_ptr<link_logger> & input) : ll(input), driver_running(false) {
     wiringPiSetup();
 
+    // setup uart
+    uart_fd = serialOpen(UART_PATH, BUAD_RATE);
+
     // setup i2c sensors
     fd_list.MPL3115A2_1 = hardware_library::MPL3115A2_setup(MPL3115A2_1_ADD);
     fd_list.MPL3115A2_2 = hardware_library::MPL3115A2_setup(MPL3115A2_2_ADD);
-
-    std::cout << fd_list.MPL3115A2_1 << " " << fd_list.MPL3115A2_2 << std::endl;
 
     // setup gpio pins
     pinMode(LIGHT_GPIO, OUTPUT);
     digitalWrite(LIGHT_GPIO, LOW); // default value
     frame.light_status = false;
 }
+
+hardware_controller::
+~hardware_controller() {
+    serialClose(uart_fd);
+}
+
 
 
 void hardware_controller::
@@ -31,9 +38,8 @@ driver_loop() {
 
         if(ll != NULL)
             ll->send(frame);
-        
-        hdw_mutex.unlock();
 
+        hdw_mutex.unlock();
         std::this_thread::sleep_for(std::chrono::microseconds(HDW_DRIVER_DELAY));
     }
     return;
@@ -137,5 +143,12 @@ light_off() {
     frame.light_status = false;
 
     hdw_mutex.unlock();
+    return 1;
+}
+
+
+int hardware_controller::
+uart_send(std::string & message) {
+    serialPuts(uart_fd, &message[0]);
     return 1;
 }

@@ -10,11 +10,11 @@
  * It tehcically is not a POD, but the function only converts the internal data into a 
  * JSON string, so for the most part it is.
  */
-struct sequence_status {
-        friend bool operator ==  (const sequence_status &, const sequence_status &);
-        friend bool operator !=  (const sequence_status &, const sequence_status &);
+struct sequencer_status {
+        friend bool operator ==  (const sequencer_status &, const sequencer_status &);
+        friend bool operator !=  (const sequencer_status &, const sequencer_status &);
         void make_JSON(std::string & output);
-        void make_JSON_diff(std::string & output, const sequence_status & input);
+        void make_JSON_diff(std::string & output, const sequencer_status & input);
 
         std::string time;
         unsigned int current_state;

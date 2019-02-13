@@ -1,14 +1,14 @@
-#include "sequence_status.h"
+#include "sequencer_status.h"
 
 
-bool operator ==  (const sequence_status & A, const sequence_status & B) {
+bool operator ==  (const sequencer_status & A, const sequencer_status & B) {
     if(A.current_state != B.current_state)
         return 0;
     return 1;
 }
 
 
-bool operator !=  (const sequence_status & A, const sequence_status & B) {
+bool operator !=  (const sequencer_status & A, const sequencer_status & B) {
     if(A.current_state == B.current_state)
         return 0;
     return 1;
@@ -16,8 +16,8 @@ bool operator !=  (const sequence_status & A, const sequence_status & B) {
 
 
 
-// Uses RapidJSON to converts sequence_status struct to a vector. 
-void sequence_status::
+// Uses RapidJSON to converts sequencer_status struct to a vector. 
+void sequencer_status::
 make_JSON(std::string & output) {
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
@@ -39,11 +39,11 @@ make_JSON(std::string & output) {
 }
 
 
-/* Uses RapidJSON to converts sequence_status struct to a vector. 
+/* Uses RapidJSON to converts sequencer_status struct to a vector. 
  * Only adds data that has changed to reduce data sent to clients
  */
-void sequence_status::
-make_JSON_diff(std::string & output, const sequence_status & other) {
+void sequencer_status::
+make_JSON_diff(std::string & output, const sequencer_status & other) {
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
     //writer.SetMaxDecimalPlaces(6);

@@ -46,6 +46,8 @@ stop_driver() {
     return;
 }
 
+
+// TODO return value is wrong
 // compaires data is see if it is the same
 int link_logger::
 data_changed(send_data input) const {
@@ -56,7 +58,7 @@ data_changed(send_data input) const {
 
 
 int link_logger::
-send(const sequence_status & input) {
+send(const sequencer_status & input) {
     ll_mutex.lock();
 
     // update new send data
@@ -113,13 +115,10 @@ recv(client_command & output) {
 
 void link_logger::
 make_send_string(send_data & in, std::string & out) {
-    //if(in.flag == FRAME)
-    //    in.sensor_frame.make_JSON_diff(out, last_out_data.sensor_frame);
-    //in.seq_status.make_JSON_diff(out, last_out_data.seq_status);
     if(in.flag == FRAME)
-        in.sensor_frame.make_JSON(out);
+        in.sensor_frame.make_JSON_diff(out, last_out_data.sensor_frame);
     else
-        in.seq_status.make_JSON(out);
+        in.seq_status.make_JSON_diff(out, last_out_data.seq_status);
     return;
 }
 
