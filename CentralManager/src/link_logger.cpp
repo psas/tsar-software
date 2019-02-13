@@ -16,13 +16,20 @@ driver_loop() {
     driver_running = true;
     while(driver_running) {
         ll_mutex.lock();
-        while(send_q.dequeue(temp_send_data) && data_changed(temp_send_data)) {
-                // if there is temp data and it's differenet than last 
-                make_send_string(temp_send_data, temp_string);
-                if(serv != nullptr)
-                    serv->send_string(temp_string);
-                save(temp_string);
+        
+        while(send_q.status() > 0) {
+            send_q.dequeue(temp_send_data);
+
+            // TODO get commands from server recv queue 
+            // TODO don't see data that hasnt change
+
+            make_send_string(temp_send_data, temp_string);
+
+            if(serv != nullptr)
+                serv->send_string(temp_string);
+            save(temp_string);
         }
+        
         ll_mutex.unlock();
         std::this_thread::sleep_for(std::chrono::microseconds(LINK_LOGGER_DELAY));
     }
@@ -106,9 +113,13 @@ recv(client_command & output) {
 
 void link_logger::
 make_send_string(send_data & in, std::string & out) {
+    //if(in.flag == FRAME)
+    //    in.sensor_frame.make_JSON_diff(out, last_out_data.sensor_frame);
+    //in.seq_status.make_JSON_diff(out, last_out_data.seq_status);
     if(in.flag == FRAME)
-        in.sensor_frame.make_JSON_diff(out, last_out_data.sensor_frame);
-    in.seq_status.make_JSON_diff(out, last_out_data.seq_status);
+        in.sensor_frame.make_JSON(out);
+    else
+        in.seq_status.make_JSON(out);
     return;
 }
 

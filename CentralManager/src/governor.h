@@ -53,7 +53,7 @@ class governor {
         std::atomic<bool> server_thread_running;
 
         // pointers to all sub-classes
-        std::unique_ptr<sequencer> seq;
+        std::shared_ptr<sequencer> seq;
         std::shared_ptr<hardware_controller> hdw_ctrl;
         std::shared_ptr<link_logger> link;
         std::shared_ptr<server> serv;

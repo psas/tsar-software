@@ -3,3 +3,4 @@
 CentralManager
 build.ninja
 .ninja*
+*.txt

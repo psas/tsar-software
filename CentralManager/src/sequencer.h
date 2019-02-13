@@ -6,6 +6,7 @@
 #include <atomic>               // atomic
 #include <chrono>               // delays
 #include <thread>               // sleep_for
+#include <iostream>
 
 #include "sequence_status.h"
 #include "hardware_controller.h"

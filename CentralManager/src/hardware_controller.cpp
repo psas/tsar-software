@@ -10,6 +10,8 @@ hardware_controller(std::shared_ptr<link_logger> & input) : ll(input), driver_ru
     fd_list.MPL3115A2_1 = hardware_library::MPL3115A2_setup(MPL3115A2_1_ADD);
     fd_list.MPL3115A2_2 = hardware_library::MPL3115A2_setup(MPL3115A2_2_ADD);
 
+    std::cout << fd_list.MPL3115A2_1 << " " << fd_list.MPL3115A2_2 << std::endl;
+
     // setup gpio pins
     pinMode(LIGHT_GPIO, OUTPUT);
     digitalWrite(LIGHT_GPIO, LOW); // default value
@@ -29,7 +31,7 @@ driver_loop() {
 
         if(ll != NULL)
             ll->send(frame);
-
+        
         hdw_mutex.unlock();
 
         std::this_thread::sleep_for(std::chrono::microseconds(HDW_DRIVER_DELAY));
@@ -73,6 +75,8 @@ get_time_us(std::string & time) const {
 int hardware_controller::
 update_frame() {
     get_time_us(frame.time);
+
+    // TODO deal with sensor deconnecting
     frame.pres_1 = hardware_library::MPL3115A2_pres(fd_list.MPL3115A2_1);
     frame.temp_1 = hardware_library::MPL3115A2_temp(fd_list.MPL3115A2_1);
     frame.pres_2 = hardware_library::MPL3115A2_pres(fd_list.MPL3115A2_2);

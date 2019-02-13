@@ -13,7 +13,7 @@
 #include "sensor_data_frame.h"
 #include "sequence_status.h"
 
-#define FILENAME "saved_output/CM_data.txt" // output filename TODO: change this to add a time/date to name
+#define FILENAME "CM_data.txt"              // output filename TODO: change this to add a time/date to name
 #define LINK_LOGGER_DELAY 500               // mircoseconds  
 #define SEND_DATA_Q_LEN 250
 #define CLIENT_COM_Q_LEN 250

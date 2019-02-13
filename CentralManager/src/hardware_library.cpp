@@ -27,7 +27,7 @@ MPL3115A2_pres(const uint32_t fd) {
     lsb = wiringPiI2CReadReg8(fd,0x03);
 
     if(msb == -1 || csb == -1 || lsb == -1) { // i2c read fail 
-        std::cout << "MPL3115A2 Pressure Fail" << std::endl;
+        //std::cout << "MPL3115A2 Pressure Fail" << std::endl;
         return -1;
     }
 
@@ -50,7 +50,7 @@ MPL3115A2_temp(const uint32_t fd) {
     lsb = wiringPiI2CReadReg8(fd,0x05);
 
     if(msb == -1 || lsb == -1) {
-        std::cout << "MPL3115A2 Temperature Fail" << std::endl;
+        //std::cout << "MPL3115A2 Temperature Fail" << std::endl;
         return -1;
     }
 

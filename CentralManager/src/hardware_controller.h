@@ -1,6 +1,7 @@
 #ifndef _HARDWARE_CONTROLLER_H_
 #define _HARDWARE_CONTROLLER_H_
 
+#include <iostream>                     // cerr
 #include <cstdint>                      // uint_t
 #include <mutex>                        // muxtex
 #include <cstdlib>

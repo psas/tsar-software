@@ -14,7 +14,7 @@ PRINT_DATA ?= 0
 
 CC=g++
 C_FLAGS=-std=c++14 -Wall -pthread
-PI_PLAG=-lwiringPi
+PI_FLAGS=-lwiringPi
 
 PROGS=CentralManager
 

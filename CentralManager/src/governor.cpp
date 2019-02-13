@@ -19,9 +19,12 @@ int main() {
 
 // constructor
 governor::
-governor() : serv(), link(serv), hdw_ctrl(link), seq(link, hdw_ctrl), 
-            seq_thread_running(false), hdw_thread_running(false), 
-            link_thread_running(false), server_thread_running(false) {}
+governor() : seq_thread_running(false), hdw_thread_running(false), link_thread_running(false), server_thread_running(false) {
+    serv = std::shared_ptr<server>(new server);
+    link = std::shared_ptr<link_logger>(new link_logger(serv));
+    hdw_ctrl = std::shared_ptr<hardware_controller>(new hardware_controller(link));
+    seq = std::shared_ptr<sequencer>(new sequencer(link, hdw_ctrl));
+}
 
 
 // deconstructor
@@ -64,14 +67,14 @@ start_system() {
         gov_mutex.unlock();
         
         std::this_thread::sleep_for(std::chrono::microseconds(GOV_DRIVER_DELAY));
-    } while(seq.is_running()); // ask the sequencer if it needs the system running
+    } while(seq->is_running()); // ask the sequencer if it needs the system running
 
     std::cout << "System is shuting down." << std::endl;
 
     // tell main classes to stop their driver 
-    hdw_ctrl.stop_driver();
-    link.stop_driver();
-    serv.stop_driver();
+    hdw_ctrl->stop_driver();
+    link->stop_driver();
+    serv->stop_driver();
     return;
 }
 

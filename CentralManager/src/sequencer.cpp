@@ -21,8 +21,8 @@ driver_loop() {
 
         hdw_ctrl->get_frame(last_frame);    // update internal sensor data frame
 
-        if(link != nullptr)
-            link->recv(new_command);        // get new command from client(s) (if one exist)
+        //if(link != nullptr)
+        //    link->recv(new_command);        // get new command from client(s) (if one exist)
 
         sequence();                         // do system control
 
@@ -48,6 +48,8 @@ sequence() {
         case 1 : {
             hdw_ctrl->light_on();
             wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(1);
+            next_state = 2;
+            break;
         }
         case 2 : {
             current_time = std::chrono::system_clock::now();
@@ -59,15 +61,20 @@ sequence() {
         case 3 : {
             hdw_ctrl->light_off();
             wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(1);
+            next_state = 4;
+            break;
         }
         case 4 : {
             current_time = std::chrono::system_clock::now();
-            if(current_time >= wait_until_time)
+            if(current_time >= wait_until_time) {
                 next_state = 1;
+                break;
+            }
             else
                 break;
         }
         default :
+            std::cout << "unknown state " << status.current_state << std::endl;
             driver_running = false;
             break;
     }

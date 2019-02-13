@@ -51,14 +51,9 @@ driver_loop() {
     driver_running = true;
     while(driver_running == true) { 
         serv_mutex.lock();
-        try {
         check_new_and_read(); //this will also handle enqueuing into recv_q
-        while(send_q.dequeue(message) == 1) // has data to send
+        while(send_q.dequeue(message) == 1) { // has data to send
             send_to_all(message);
-        }
-        catch (ServerException & e){
-            std::cout << e.what() << std::endl;
-            break; //TODO: change this
         }
         serv_mutex.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(SERVER_DELAY));
@@ -86,7 +81,8 @@ check_new_and_read() {
     if(is_data == 0) // pselect_timeout, no data
         return 0;
     else if(is_data == -1)
-        throw  ServerException("Pselect Error");
+        return -1;
+        //throw  ServerException("Pselect Error");
 
     // checking all existing connections looking for data to be received
     // also will handle any new client
@@ -104,7 +100,8 @@ check_new_and_read() {
                               << new_fd << std::endl;
                 }
                 else
-                    throw ServerException("Accept Error");
+                    return -1;
+                    //throw ServerException("Accept Error");
                     // TODO fd_zero, all fd_data is assume to be bad
             }
             else { // handle data from a client

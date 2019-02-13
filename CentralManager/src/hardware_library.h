@@ -5,6 +5,7 @@
 #include <cstdint>           // uint_t
 #include <wiringPiI2C.h>    // raspberry pi I2C
 #include <cstdlib>          // rand
+#include <iostream>         // cerr
 
 /*
  * This contain all hardware files for I2C testing
