@@ -31,7 +31,7 @@ driver_loop() {
         }
         
         ll_mutex.unlock();
-        std::this_thread::sleep_for(std::chrono::microseconds(LINK_LOGGER_DELAY));
+        std::this_thread::sleep_for(std::chrono::milliseconds(LINK_LOGGER_DELAY));
     }
     return;
 }

@@ -93,7 +93,7 @@ bool sequencer::
 emergency_state() {
     if(status.current_state == 0) {
         std::cout << "emergency_state" << std::endl;
-        driver_running = false;
+        //driver_running = false;
         return true;
     }
     return false;
@@ -104,6 +104,7 @@ emergency_state() {
 bool sequencer::
 is_running() {
     seq_mutex.lock();
-    return driver_running;
+    bool r = driver_running;
     seq_mutex.unlock();
+    return r;
 }

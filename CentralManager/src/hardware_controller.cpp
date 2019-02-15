@@ -10,8 +10,8 @@ hardware_controller(std::shared_ptr<link_logger> & input) : ll(input), driver_ru
     uart_fd = serialOpen(UART_PATH, BUAD_RATE);
 
     // setup i2c sensors
-    fd_list.MPL3115A2_1 = hardware_library::MPL3115A2_setup(MPL3115A2_1_ADD);
-    fd_list.MPL3115A2_2 = hardware_library::MPL3115A2_setup(MPL3115A2_2_ADD);
+    fd_list.MPL3115A2_1 = i2c_library::MPL3115A2_setup(MPL3115A2_1_ADD);
+    fd_list.MPL3115A2_2 = i2c_library::MPL3115A2_setup(MPL3115A2_2_ADD);
 
     // setup gpio pins
     pinMode(LIGHT_GPIO, OUTPUT);
@@ -83,10 +83,10 @@ update_frame() {
     get_time_us(frame.time);
 
     // TODO deal with sensor deconnecting
-    frame.pres_1 = hardware_library::MPL3115A2_pres(fd_list.MPL3115A2_1);
-    frame.temp_1 = hardware_library::MPL3115A2_temp(fd_list.MPL3115A2_1);
-    frame.pres_2 = hardware_library::MPL3115A2_pres(fd_list.MPL3115A2_2);
-    frame.temp_2 = hardware_library::MPL3115A2_temp(fd_list.MPL3115A2_2);
+    frame.pres_1 = i2c_library::MPL3115A2_pres(fd_list.MPL3115A2_1);
+    frame.temp_1 = i2c_library::MPL3115A2_temp(fd_list.MPL3115A2_1);
+    frame.pres_2 = i2c_library::MPL3115A2_pres(fd_list.MPL3115A2_2);
+    frame.temp_2 = i2c_library::MPL3115A2_temp(fd_list.MPL3115A2_2);
 
     return 1;
 }

@@ -14,9 +14,9 @@
 #include "sequencer_status.h"
 
 #define FILENAME "CM_data.txt"              // output filename TODO: change this to add a time/date to name
-#define LINK_LOGGER_DELAY 500               // mircoseconds  
-#define SEND_DATA_Q_LEN 250
-#define CLIENT_COM_Q_LEN 250
+#define LINK_LOGGER_DELAY 50               // milliseconds  
+#define SEND_DATA_Q_LEN 500
+#define CLIENT_COM_Q_LEN 100
 #define STATUS 1                            // for flag in send_data
 #define FRAME 0                             // for flag in send_data
 
