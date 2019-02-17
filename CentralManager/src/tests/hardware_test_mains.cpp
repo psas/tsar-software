@@ -7,20 +7,24 @@
 #include <thread>
 #include <memory>
 #include <iostream>
-#include "../hardware_controller.h"
 
+#include "../hardware_controller.h"
+#include "../link_logger.h"
+
+using namespace std;
 
 int
 main() {
-    std::cout << "Starting Hardware with Link Test" << std::endl;
+    cout << "Starting Hardware with Link Test" << endl;
 
-    std::shared_ptr<link_logger> link;
+    shared_ptr<link_logger> link;
 
-#ifdef HARDWARE_LINK_TEST
-    //TODO start threads as needed
-    std::shared_ptr<server> serv;
-    link = link_logger(serv)
-#endif // HARDWARE_LINK_TEST
+#ifdef LL_OFF
+    shared_ptr<server> serv = server();
+    link = link_logger(serv);
+    std::thread serv_thread(&server::driver_loop, ref(serv));
+    std::thread ll_thread(&link_logger::driver_loop, ref(link));
+#endif // LL_OFF
 
     hardware_controller hdw(link);
 

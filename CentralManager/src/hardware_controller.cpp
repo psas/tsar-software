@@ -3,8 +3,8 @@
 
 // constructor, need pointer to link
 hardware_controller::
-hardware_controller(std::shared_ptr<link_logger> & input) : ll(input), driver_running(false) {
-    wiringPiSetup();
+hardware_controller(std::shared_ptr<link_logger> & input) : ll(input), driver_running(false) noexcept {
+    wiringPiSetup()
 
     // setup uart
     uart_fd = serialOpen(UART_PATH, BUAD_RATE);
@@ -15,8 +15,8 @@ hardware_controller(std::shared_ptr<link_logger> & input) : ll(input), driver_ru
 
     // setup gpio pins
     pinMode(LIGHT_GPIO, OUTPUT);
-    digitalWrite(LIGHT_GPIO, LOW); // default value
-    frame.light_status = false;
+    digitalWrite(LIGHT_GPIO, LOW);  // init value (LOW/HIGH)
+    frame.light_status = false;     // init state
 }
 
 hardware_controller::

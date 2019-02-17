@@ -15,6 +15,7 @@
 #include <atomic>                       // atomic
 #include <string>                       // string (uart)
 
+#include "main_class.h"
 #include "i2c_library.h"
 #include "sensor_data_frame.h"
 #include "link_logger.h"

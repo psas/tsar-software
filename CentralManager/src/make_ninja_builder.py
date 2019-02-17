@@ -17,7 +17,7 @@ to uses this:
     arg2: is the selected class to test. 
         "sequencer", "hardware", "link", or "server"
     args: is a LIST of special flags for testing, it will ignore all other input.
-        "no_link"           for hardware without the link_logger running.
+        "no_ll"           for hardware without the link_logger running.
         "print_hdw_data"    prints sensor data on terminal.
         "sensor_data_off"   make hardware constantly read from a file instead of sensor (to test sequencer).
 
@@ -53,7 +53,7 @@ def main():
         print("object:")
         print("  sequencer, hardware, link, server")
         print("test_flags:")
-        print("  no_link            -- for hardware without the link_logger running")
+        print("  no_ll              -- for hardware without the link_logger running")
         print("  print_hdw_data     -- prints sensor data on terminal")
         print("  sensor_data_off    -- make hardware constantly read from a file instead of sensor (test sequence)")
         return
@@ -102,22 +102,18 @@ def get_test_flags(target, flags=[]):
     test_flags = ''
 
     # set test main and add main test flag
-    if(target == 'sequencer'):
-        test_flags += '-DSEQUENCER_TEST'
-    elif(target == 'hardware'):
-        test_flags +='-DHARDWARE_TEST'
-    elif(target == 'link'):
+    if(target == 'link'):
         test_flags += '-DLINK_TEST'
     elif(target == 'server'):
         test_flags += '-DSERVER_TEST'
     else:
-        print('Error: arg2 is not sequencer, hardware, link, or server')
+        print('Error: arg2 is not link or server')
         exit()
 
     # add test flags
     if (len(flags) != 0):
-        if ('no_link' in flags):
-            test_flags += '-DNO_LINK '
+        if ('no_ll' in flags):
+            test_flags += '-DLL_OFF '
         if('print_hdw_data' in flags):
             test_flags += '-DPRINT_DATA '
         if('sensor_data_off' in flags):

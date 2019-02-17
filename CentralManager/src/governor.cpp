@@ -1,7 +1,8 @@
 #include "governor.h"
 
 
-int main() {
+int 
+main() {
     if(getuid() != 0) {
         std::cout << "Run as root" << std::endl;
         return 0;
@@ -20,10 +21,17 @@ int main() {
 // constructor
 governor::
 governor() : seq_thread_running(false), hdw_thread_running(false), link_thread_running(false), server_thread_running(false) {
-    serv = std::shared_ptr<server>(new server);
-    link = std::shared_ptr<link_logger>(new link_logger(serv));
-    hdw_ctrl = std::shared_ptr<hardware_controller>(new hardware_controller(link));
-    seq = std::shared_ptr<sequencer>(new sequencer(link, hdw_ctrl));
+    try {
+        serv = std::shared_ptr<server>(new server);
+        link = std::shared_ptr<link_logger>(new link_logger(serv));
+        hdw_ctrl = std::shared_ptr<hardware_controller>(new hardware_controller(link));
+        seq = std::shared_ptr<sequencer>(new sequencer(link, hdw_ctrl));
+    }
+    catch (...) {
+        std::cout <<  "Exception throw" << std::endl;
+        std::cout <<  "Governor constructor failed" << std::endl;
+        exit(-1);
+    }
 }
 
 
@@ -80,7 +88,8 @@ start_system() {
 
 
 // handles the hardware thread
-void governor::run_hdw() {
+void governor::
+run_hdw() {
     hdw_thread_running = true;
     std::cout << "Hardware thread has started." << std::endl;
     pthread_setname_np(pthread_self(), "Hardware");
@@ -98,7 +107,8 @@ void governor::run_hdw() {
 
 
 // handles the sequencer thread
-void governor::run_seq() {
+void governor::
+run_seq() {
     seq_thread_running = true;
     std::cout << "Sequencer thread has started." << std::endl;
     pthread_setname_np(pthread_self(), "Sequencer");
@@ -109,7 +119,8 @@ void governor::run_seq() {
 
 
 // handles the link thread
-void governor::run_link() {
+void governor::
+run_link() {
     link_thread_running = true;
     std::cout << "Link thread has started." << std::endl;
     pthread_setname_np(pthread_self(), "Link");
@@ -120,7 +131,8 @@ void governor::run_link() {
 
 
 // handles the server thread
-void governor::run_server() {
+void governor::
+run_server() {
     server_thread_running = true;
     std::cout << "Server thread has started." << std::endl;
     pthread_setname_np(pthread_self(), "Server");
