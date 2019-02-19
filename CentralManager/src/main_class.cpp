@@ -1,7 +1,13 @@
 #include "main_class.h"
 
 
-// gets monotonic time from hardware (in microseconds) as a string
+main_class::main_class() : _driver_running(false) {}
+
+
+/*
+ * gets monotonic time from hardware (in microseconds) as a string
+ * used for logging and data frames sent to clients
+ */
 void main_class::
 get_time_us(std::string & time) const {
     auto now = std::chrono::steady_clock::now();
@@ -10,4 +16,12 @@ get_time_us(std::string & time) const {
     auto value = std::chrono::duration_cast<std::chrono::microseconds>(epoch);
     long long duration = value.count();
     time = std::to_string(duration);
+}
+
+
+void main_class::
+stop_driver() {
+    _mutex.lock();
+    _driver_running = false;
+    _mutex.unlock();
 }

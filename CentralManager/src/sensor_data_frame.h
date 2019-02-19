@@ -7,12 +7,26 @@
 #include "../thirdparty/rapidjson/writer.h"         // rapidjson
 #include "../thirdparty/rapidjson/stringbuffer.h"   // rapidjson
 
+
+struct AC_data_frame {
+    uint8_t AC_next_failure_mode;
+    uint8_t AC_failure_mode;
+    uint8_t AC_failure_cause;
+    uint8_t AC_consecutive_checksum_errors;
+    uint8_t AC_lifetime_checksum_errors;
+    uint8_t AC_sensor1;
+    uint8_t AC_sensor2;
+    uint8_t AC_sensor3;
+    uint8_t AC_sensor4;
+    uint16_t AC_sensor5;
+};
+
+
 /* This a POD (Plain Old Data) struct used for to hold a snap shot of the sensor data 
  * and hardware controller status infomation. It tehcically is not a POD, but the function only 
  * converts the internal data into a JSON string, so for the most part it is.
  */
-class sensor_data_frame {
-    public:
+struct sensor_data_frame {
         // these are overload to ignore the time field, since every object will have a different time value
         friend bool operator == (const sensor_data_frame & A, const sensor_data_frame & B);
         friend bool operator != (const sensor_data_frame & A, const sensor_data_frame & B);
@@ -32,17 +46,8 @@ class sensor_data_frame {
         bool light_status;
 
         // Actuator Controller Valuse
-        bool AC_connected;
-        uint8_t AC_next_failure_mode;
-        uint8_t AC_failure_mode;
-        uint8_t AC_failure_cause;
-        uint8_t AC_consecutive_checksum_errors;
-        uint8_t AC_lifetime_checksum_errors;
-        uint8_t AC_sensor1;
-        uint8_t AC_sensor2;
-        uint8_t AC_sensor3;
-        uint8_t AC_sensor4;
-        uint16_t AC_sensor5;
+        bool _AC_connected;
+        AC_data_frame _AC_frame;
 };
 
 #endif // _SENSOR_DATA_FRAME_H_

@@ -1,7 +1,7 @@
 #ifndef _MAIN_CLASS_
 #define _MAIN_CLASS_
 
-#include <iostream>     // cout
+#include <iostream>     // cout, cerr
 #include <string>       // string
 #include <chrono>       // time
 #include <atomic>       // atomic
@@ -20,12 +20,18 @@ class CM_Exception {
 
 class main_class {
     public:
+        main_class();
+        virtual ~main_class() = 0;
+        main_class(const main_class &) = delete;
+        main_class(main_class &&) = delete;
+        main_class& operator=(const main_class &) = delete;
         virtual void driver_loop() = 0;
-    private:
+        void stop_driver();
+    protected:
         // gets current time in microseconds as a string
         void get_time_us(std::string & time) const;
 
-        std::atomic<bool> driver_running;
-        std::mutex hdw_mutex;
+        std::atomic<bool> _driver_running;
+        std::mutex _mutex;
 };
 #endif

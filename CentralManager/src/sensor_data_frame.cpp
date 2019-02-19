@@ -108,3 +108,5 @@ make_JSON_diff(std::string & output, const sensor_data_frame & other) {
     output = s.GetString();
     return;
 }
+
+
