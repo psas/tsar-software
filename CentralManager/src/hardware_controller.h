@@ -14,6 +14,7 @@
 #include <string>                       // string
 #include <atomic>                       // atomic
 #include <string>                       // string (uart)
+#include <cstring>                      // memcpy
 
 #include "main_class.h"
 #include "i2c_library.h"
@@ -26,6 +27,12 @@
 // uart
 #define BUAD_RATE 115200                // UART buad rate
 #define UART_PATH "/dev/ttyAMA0"        // UART path
+#define AC_TO_CM_LEN 16                 // message length in Bytes
+#define CM_TO_AC_LEN 7                  // message length in Bytes
+#define AC_CMD_DO_NOTHING 0
+#define AC_CMD_PANIC 1
+#define AC_FM_NO_FAILURE 0
+#define AC_FM_OTHER_FAILURE 255
 
 // raspberry pi gpio pins
 #define LIGHT_GPIO 0                    // gpio 17 or pin 11 on pi
@@ -67,13 +74,20 @@ class hardware_controller {
         // gets current time in microseconds as a string
         void get_time_us(std::string & time) const;
 
-        // UART send string data 
-        int uart_send(std::string & message);
+        // UART send data 
+        int make_uart_message(std::array<uint8_t, CM_TO_AC_LEN> & message);
+        void generate_checksum(std::array<uint8_t, CM_TO_AC_LEN> & message);
+
+        // UART read recv data
+        int read_uart_message(std::array<uint8_t, AC_TO_CM_LEN> & message);
+        int process_uart_message(const std::array<uint8_t, AC_TO_CM_LEN> & message);
+        bool check_checksum(const std::array<uint8_t, AC_TO_CM_LEN> & message);
 
         std::shared_ptr<link_logger> ll;
         sensor_data_frame frame;
         sensor_fds_list fd_list;
         int uart_fd;
+        std::chrono::system_clock::time_point next_heartbeat_time;
         std::atomic<bool> driver_running;
         std::mutex hdw_mutex;
 };

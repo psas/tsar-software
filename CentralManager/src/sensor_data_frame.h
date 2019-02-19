@@ -2,6 +2,7 @@
 #define _SENSOR_DATA_FRAME_H_
 
 #include <string>   // string
+#include <cstdint>  // uintx_t
 
 #include "../thirdparty/rapidjson/writer.h"         // rapidjson
 #include "../thirdparty/rapidjson/stringbuffer.h"   // rapidjson
@@ -30,7 +31,18 @@ class sensor_data_frame {
         // gpio
         bool light_status;
 
-        // UART ?
+        // Actuator Controller Valuse
+        bool AC_connected;
+        uint8_t AC_next_failure_mode;
+        uint8_t AC_failure_mode;
+        uint8_t AC_failure_cause;
+        uint8_t AC_consecutive_checksum_errors;
+        uint8_t AC_lifetime_checksum_errors;
+        uint8_t AC_sensor1;
+        uint8_t AC_sensor2;
+        uint8_t AC_sensor3;
+        uint8_t AC_sensor4;
+        uint16_t AC_sensor5;
 };
 
 #endif // _SENSOR_DATA_FRAME_H_
