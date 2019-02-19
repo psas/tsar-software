@@ -1,24 +1,4 @@
-#ifndef _HARDWARE_LIBRARY_H_
-#define _HARDWARE_LIBRARY_H_
-
-#include <iostream>                 // cout, cerr
-#include <cstdint>                  // uint_t
-#include <wiringPiI2C.h>            // raspberry pi I2C
-#include <iostream>                 // cerr
-#include <cstring>                  // memcpy
-#include <array>                    // array
-
-#include "sensor_data_frame.h"      // AC_data_frame
-
-// UART params
-#define AC_TO_CM_LEN 16                 // message length in Bytes
-#define CM_TO_AC_LEN 7                  // message length in Bytes
-
-#define AC_CMD_DO_NOTHING 0
-#define AC_CMD_PANIC 1
-
-#define AC_FM_NO_FAILURE 0
-#define AC_FM_OTHER_FAILURE 255
+#include "hardware_library.h"
 
 
 /*
@@ -220,4 +200,3 @@ namespace hardware_library {
     }
 }
 
-#endif // _HARDWARE_LIBRARY_H_

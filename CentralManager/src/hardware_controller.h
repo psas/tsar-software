@@ -12,7 +12,7 @@
 
 
 #include "main_class.h"
-#include "hardware_library.hpp"
+#include "hardware_library.h"
 #include "sensor_data_frame.h"
 #include "link_logger.h"
 
