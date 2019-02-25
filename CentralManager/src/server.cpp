@@ -140,20 +140,12 @@ send_to_all(const std::string & message) {
 // enqueue message to be send
 int server::
 send_string(const std::string & message) {
-    int ri = 0;
-    _mutex.lock();
-    ri = send_q.enqueue(message); 
-    _mutex.unlock();
-    return ri;
+    return send_q.enqueue(message); 
 }
 
 
 // dequeue oldest recieve message
 int server::
 recv_string(std::string & message) {
-    int ri = 0;
-    _mutex.lock();
-    ri = recv_q.dequeue(message);
-    _mutex.unlock();
-    return ri;
+    return recv_q.dequeue(message);
 }

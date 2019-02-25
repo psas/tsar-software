@@ -63,33 +63,27 @@ data_changed(send_data input) const {
 
 int link_logger::
 send(const sequencer_status & input) {
-    _mutex.lock();
+    send_data temp;
 
     // update new send data
-    last_in_data.seq_status = input;
-    last_in_data.flag = SEQ; 
+    temp.seq_status = input;
+    temp.flag = SEQ; 
 
     // send data
-    send_q.enqueue(last_in_data); 
-
-    _mutex.unlock();
-    return 1;
+    return send_q.enqueue(temp); 
 }
 
 
 int link_logger::
 send(const hardware_data_frame & input) {
-    _mutex.lock();
+    send_data temp;
 
     // make data to add to queue
-    last_in_data.hardware_data = input;
-    last_in_data.flag = HDW; 
+    temp.hardware_data = input;
+    temp.flag = HDW; 
 
     // send data
-    send_q.enqueue(last_in_data); 
-
-    _mutex.unlock();
-    return 1;
+    return send_q.enqueue(temp); 
 }
 
 

@@ -5,7 +5,6 @@
 #include <string>                           // strings
 #include <chrono>                           // time
 #include <thread>                           // sleep_for
-#include <mutex>                            // mutex
 
 #include "main_class.h"
 #include "server.h"
@@ -59,7 +58,6 @@ class link_logger : public main_class {
         fixed_queue<send_data> send_q;
         fixed_queue<client_command> recv_q;
         struct send_data last_out_data;     // last frame sent to server
-        struct send_data last_in_data;      // last frame created, used in send() to reduce contructor/decontructor calls
 };
 
 #endif
