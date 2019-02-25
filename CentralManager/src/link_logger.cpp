@@ -18,12 +18,8 @@ driver_loop() {
     while(_driver_running) {
         _mutex.lock();
         
-        while(send_q.status() > 0) {
+        while(send_q.size() > 0) {
             send_q.dequeue(temp_send_data);
-            if(data_changed(temp_send_data)) {
-                ++i;
-                continue;
-            }
 
             // TODO get commands from server recv queue 
 
@@ -41,6 +37,7 @@ driver_loop() {
                 serv->send_string(temp_string);
             save(temp_string);
 
+            // update last out for next json conversion
             last_out_data = temp_send_data;
         }
         
@@ -51,21 +48,15 @@ driver_loop() {
 }
 
 
-// TODO return value is wrong
-// compaires data is see if it is the same
-int link_logger::
-data_changed(send_data input) const {
-    if(input.flag == HDW)
-        return (input.hardware_data == last_out_data.hardware_data);
-    return (input.seq_status == last_out_data.seq_status);
-}
-
-
+// only enqueues if new data is different from last enqueue
 int link_logger::
 send(const sequencer_status & input) {
-    send_data temp;
+    if(input == last_enqueued_seq_status)
+        return 1;
+    last_enqueued_seq_status = input; // update for next enqueue
 
     // update new send data
+    send_data temp;
     temp.seq_status = input;
     temp.flag = SEQ; 
 
@@ -74,11 +65,15 @@ send(const sequencer_status & input) {
 }
 
 
+// only enqueues if new data is different from last enqueue
 int link_logger::
 send(const hardware_data_frame & input) {
-    send_data temp;
+    if(input == last_enqueued_hdw_data)
+        return 1;
+    last_enqueued_hdw_data = input; // update for next enqueue
 
     // make data to add to queue
+    send_data temp;
     temp.hardware_data = input;
     temp.flag = HDW; 
 

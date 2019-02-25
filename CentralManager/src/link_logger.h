@@ -23,8 +23,8 @@
 
 
 /* POD for send queue. To reduce new and delete calls, this was used over a 
- * send_data base class with hardware_data_frame and sequencer_status as derived classes being upcasted.
- * TODO: research into last statement
+ * send_data base class with hardware_data_frame and sequencer_status as derived 
+ * classes being upcasted.
  */
 struct send_data {
     hardware_data_frame hardware_data;
@@ -57,7 +57,12 @@ class link_logger : public main_class {
         std::shared_ptr<server> serv;
         fixed_queue<send_data> send_q;
         fixed_queue<client_command> recv_q;
-        struct send_data last_out_data;     // last frame sent to server
+
+        send_data last_out_data; // last frame sent to server
+
+        // used to remove data that has not changed from being enqueued
+        hardware_data_frame last_enqueued_hdw_data;
+        sequencer_status last_enqueued_seq_status;
 };
 
 #endif
