@@ -20,9 +20,12 @@ driver_loop() {
         
         while(send_q.status() > 0) {
             send_q.dequeue(temp_send_data);
+            if(data_changed(temp_send_data)) {
+                ++i;
+                continue;
+            }
 
             // TODO get commands from server recv queue 
-            // TODO don't see data that hasnt change
 
             // every x loop, send a message with all the data / status 
             if(i < FULL_SEND) {
@@ -37,6 +40,8 @@ driver_loop() {
             if(serv != nullptr)
                 serv->send_string(temp_string);
             save(temp_string);
+
+            last_out_data = temp_send_data;
         }
         
         _mutex.unlock();

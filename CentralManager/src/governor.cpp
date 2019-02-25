@@ -65,14 +65,14 @@ driver_loop() {
         _mutex.lock();
 
         // (re)start threads
+        if(server_thread_running == false)
+            server_thread = std::thread(&governor::run_server, this);
+        if(link_thread_running == false)
+            link_thread = std::thread(&governor::run_link, this);
         if(hdw_thread_running == false)
             hdw_thread = std::thread(&governor::run_hdw, this);
         if(seq_thread_running == false)
             seq_thread = std::thread(&governor::run_seq, this);;
-        if(link_thread_running == false)
-            link_thread = std::thread(&governor::run_link, this);
-        if(server_thread_running == false)
-            server_thread = std::thread(&governor::run_server, this);
 
         // TODO: deal with logging cerr
         

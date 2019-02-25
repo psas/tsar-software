@@ -42,10 +42,14 @@ make_JSON(std::string & output) {
     writer.String(time.c_str());
 
     // i2c 
+    writer.Key("sensor_1_connected");
+    writer.Bool(i2c_data.sensor_1_connected);
     writer.Key("temp_1");
     writer.Double(i2c_data.temp_1);
     writer.Key("pres_1");   
     writer.Double(i2c_data.pres_1);
+    writer.Key("sensor_2_connected");
+    writer.Bool(i2c_data.sensor_2_connected);
     writer.Key("temp_2");       
     writer.Double(i2c_data.temp_2);
     writer.Key("pres_2");       
@@ -99,6 +103,10 @@ make_JSON_diff(std::string & output, const hardware_data_frame & other) {
     writer.String(time.c_str());
 
     // i2c 
+    if(i2c_data.sensor_1_connected != other.i2c_data.sensor_1_connected) {
+        writer.Key("sensor_1_connected");
+        writer.Bool(i2c_data.sensor_1_connected);
+    }
     if(i2c_data.temp_1 != other.i2c_data.temp_1) {
         writer.Key("temp_1");
         writer.Double(i2c_data.temp_1);
@@ -106,6 +114,10 @@ make_JSON_diff(std::string & output, const hardware_data_frame & other) {
     if(i2c_data.pres_1 != other.i2c_data.pres_1) {
         writer.Key("pres_1");
         writer.Double(i2c_data.pres_1);
+    }
+    if(i2c_data.sensor_2_connected != other.i2c_data.sensor_2_connected) {
+        writer.Key("sensor_2_connected");
+        writer.Bool(i2c_data.sensor_2_connected);
     }
     if(i2c_data.temp_2 != other.i2c_data.temp_2) {
         writer.Key("temp_2");       

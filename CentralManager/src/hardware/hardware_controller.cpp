@@ -9,6 +9,8 @@ hardware_controller(std::shared_ptr<link_logger> & input) : _ll(input) {
     // setup i2c sensors
     _i2c_fds.MPL3115A2_1 = i2c_library::MPL3115A2_setup(MPL3115A2_1_ADD);
     _i2c_fds.MPL3115A2_2 = i2c_library::MPL3115A2_setup(MPL3115A2_2_ADD);
+    _i2c_data.sensor_1_connected = true; // TODO add constructor ?
+    _i2c_data.sensor_2_connected = true;
 
     // setup gpio pins
     pinMode(LIGHT_GPIO, OUTPUT);
@@ -84,10 +86,18 @@ make_frame(hardware_data_frame & input) {
 void hardware_controller::
 update_i2c_data() {
     // TODO deal with i2c sensor deconnecting
-    _i2c_data.pres_1 = i2c_library::MPL3115A2_pres(_i2c_fds.MPL3115A2_1);
-    _i2c_data.temp_1 = i2c_library::MPL3115A2_temp(_i2c_fds.MPL3115A2_1);
-    _i2c_data.pres_2 = i2c_library::MPL3115A2_pres(_i2c_fds.MPL3115A2_2);
-    _i2c_data.temp_2 = i2c_library::MPL3115A2_temp(_i2c_fds.MPL3115A2_2);
+    if(_i2c_data.sensor_1_connected) {
+        _i2c_data.pres_1 = i2c_library::MPL3115A2_pres(_i2c_fds.MPL3115A2_1);
+        _i2c_data.temp_1 = i2c_library::MPL3115A2_temp(_i2c_fds.MPL3115A2_1);
+        if(_i2c_data.pres_1 == -1 || _i2c_data.temp_1 == -1)
+            _i2c_data.sensor_1_connected = false;
+    }
+    if(_i2c_data.sensor_2_connected) {
+        _i2c_data.pres_2 = i2c_library::MPL3115A2_pres(_i2c_fds.MPL3115A2_2);
+        _i2c_data.temp_2 = i2c_library::MPL3115A2_temp(_i2c_fds.MPL3115A2_2);
+        if(_i2c_data.pres_2 == -1 || _i2c_data.temp_2 == -1)
+            _i2c_data.sensor_2_connected = false;
+    }
     return;
 }
 

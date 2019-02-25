@@ -11,7 +11,7 @@ sequencer(std::shared_ptr<link_logger> & link_input, std::shared_ptr<hardware_co
 // main thread that handles, main control theory
 void sequencer::
 driver_loop() {
-    client_command new_command;
+    //client_command new_command; TODO add this back
 
     driver_running = true;
     while(driver_running) {
@@ -27,8 +27,10 @@ driver_loop() {
 
         sequence();                         // do system control
 
-        if(link != nullptr)
+        if(link != nullptr) {
+            get_time_us(status.time);
             link->send(status);             // update clients on progress
+        }
 
         _mutex.unlock();
         std::this_thread::sleep_for(std::chrono::microseconds(SEQ_DRIVER_DELAY)); // sleep
