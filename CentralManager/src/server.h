@@ -16,7 +16,7 @@
 #include <atomic>                   // atomic
 #include <iostream>                 // cout, cerr
 
-#include "fixed_queue.h"
+#include "fixed_queue.hpp"
 
 #define PORT 8080
 #define PSELECT_TIMEOUT 5           // milliseconds

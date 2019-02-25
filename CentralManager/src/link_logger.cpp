@@ -12,6 +12,7 @@ void link_logger::
 driver_loop() {
     std::string temp_string;
     send_data temp_send_data;
+    unsigned int i = 0;
 
     driver_running = true;
     while(driver_running) {
@@ -22,8 +23,17 @@ driver_loop() {
 
             // TODO get commands from server recv queue 
             // TODO don't see data that hasnt change
+           
 
-            make_send_string(temp_send_data, temp_string);
+            // every x loop, send a message with all the data / status 
+            if(i < FULL_SEND) {
+                make_send_string(temp_send_data, temp_string);
+                ++i;
+            }
+            else { 
+                make_send_string_all(temp_send_data, temp_string);
+                i = 0;
+            }
 
             if(serv != nullptr)
                 serv->send_string(temp_string);
@@ -51,8 +61,8 @@ stop_driver() {
 // compaires data is see if it is the same
 int link_logger::
 data_changed(send_data input) const {
-    if(input.flag == FRAME)
-        return (input.sensor_frame == last_out_data.sensor_frame);
+    if(input.flag == HDW)
+        return (input.hardware_data == last_out_data.hardware_data);
     return (input.seq_status == last_out_data.seq_status);
 }
 
@@ -63,7 +73,7 @@ send(const sequencer_status & input) {
 
     // update new send data
     last_in_data.seq_status = input;
-    last_in_data.flag = STATUS; 
+    last_in_data.flag = SEQ; 
 
     // send data
     send_q.enqueue(last_in_data); 
@@ -74,12 +84,12 @@ send(const sequencer_status & input) {
 
 
 int link_logger::
-send(const sensor_data_frame & input) {
+send(const hardware_data_frame & input) {
     ll_mutex.lock();
 
     // make data to add to queue
-    last_in_data.sensor_frame = input;
-    last_in_data.flag = FRAME; 
+    last_in_data.hardware_data = input;
+    last_in_data.flag = HDW; 
 
     // send data
     send_q.enqueue(last_in_data); 
@@ -95,6 +105,7 @@ save(std::string & input_string) const {
     std::ofstream file; // file for saving data on rasp pi
     file.open(FILENAME, std::fstream::app); //append to file
     file << input_string;
+    file << '\n';
     file.close();
     return 1;
 }
@@ -113,12 +124,24 @@ recv(client_command & output) {
 }
 
 
+// makes a string with only data that has changed 
 void link_logger::
 make_send_string(send_data & in, std::string & out) {
-    if(in.flag == FRAME)
-        in.sensor_frame.make_JSON_diff(out, last_out_data.sensor_frame);
+    if(in.flag == HDW)
+        in.hardware_data.make_JSON_diff(out, last_out_data.hardware_data);
     else
         in.seq_status.make_JSON_diff(out, last_out_data.seq_status);
+    return;
+}
+
+
+// make a string with all data
+void link_logger::
+make_send_string_all(send_data & in, std::string & out) {
+    if(in.flag == HDW)
+        in.hardware_data.make_JSON(out);
+    else
+        in.seq_status.make_JSON(out);
     return;
 }
 

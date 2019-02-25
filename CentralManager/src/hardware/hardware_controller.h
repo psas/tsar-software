@@ -1,7 +1,6 @@
 #ifndef _HARDWARE_CONTROLLER_H_
 #define _HARDWARE_CONTROLLER_H_
 
-
 #include <iostream>                     // cerr
 #include <cstdint>                      // uint_t
 #include <cstdlib>
@@ -10,29 +9,30 @@
 #include <wiringPi.h>                   // raspberry pi UART/GPIO
 #include <wiringSerial.h>               // raspberry pi UART
 
+#include "../main_class.h"
+#include "../hardware_data_frame.h"
+#include "../link_logger.h"
+#include "i2c_library.h"
+#include "uart_library.h"
 
-#include "main_class.h"
-#include "hardware_library.h"
-#include "sensor_data_frame.h"
-#include "link_logger.h"
-
-
+// general
 #define HDW_DRIVER_DELAY 500            // mircoseconds
-
-// uart
-#define BUAD_RATE 9600                  // UART buad rate
-#define UART_PATH "/dev/ttyAMA0"        // UART path
-
-// raspberry pi gpio pins
-#define LIGHT_GPIO 0                    // gpio 17 or pin 11 on pi
 
 // raspberry pi i2c senors
 #define MPL3115A2_1_ADD 0x60            // example MPL3115A2
 #define MPL3115A2_2_ADD 0x63            // example non existing MPL3115A2
 
+// raspberry pi gpio pins
+#define LIGHT_GPIO 0                    // gpio 17 or pin 11 on pi
+
+// uart
+#define BUAD_RATE 9600                  // UART buad rate
+#define UART_PATH "/dev/ttyAMA0"        // UART path
+#define HB_TIME_MS 10                   // Time between sent heartbeats in milliseconds
+
 
 // fd list for referencing by hardware controller
-struct sensor_fds_list {
+struct i2c_fd_list {
     int MPL3115A2_1;
     int MPL3115A2_2;
 };
@@ -40,7 +40,7 @@ struct sensor_fds_list {
 
 /*
  * Controls the hardware, the hardware interface for the sequencer.
- * When testing/debuging this class can be compiled with and without link_logger.
+ * It also maintains a connection to the Actuator Contoller (AC) for issuing command to.
  */
 class hardware_controller : public main_class {
     public:
@@ -49,18 +49,30 @@ class hardware_controller : public main_class {
         ~hardware_controller();
 
         // return a copy of current data frame
-        int get_frame(sensor_data_frame & input);
+        void get_frame(hardware_data_frame & input);
 
         int light_on();
         int light_off();
+        void driver_loop() override;
     private:
         // reads sensor values, updates internal data frame
-        int update_frame();
+        void update_i2c_data();
+
+        // makes a hardware data frame
+        void make_frame(hardware_data_frame & input);
 
         std::shared_ptr<link_logger> _ll;
-        sensor_data_frame _frame;
-        sensor_fds_list _fd_list;
+
+        // all fd info
+        i2c_fd_list _i2c_fds;
         int _uart_fd;
+
+        // current data frames
+        i2c_data_frame _i2c_data;
+        bool _light_status;
+        bool _AC_connected;
+        AC_data_frame _AC_data;
+
         std::chrono::system_clock::time_point _next_heartbeat_time;
 };
 #endif

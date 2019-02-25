@@ -9,8 +9,8 @@
 #include <iostream>
 
 #include "sequencer_status.h"
-#include "hardware_controller.h"
-#include "sensor_data_frame.h"
+#include "hardware/hardware_controller.h"
+#include "hardware_data_frame.h"
 #include "link_logger.h"
 #include "client_command.h"
 
@@ -32,7 +32,7 @@ class sequencer {
         std::shared_ptr<link_logger> link;
         std::shared_ptr<hardware_controller> hdw_ctrl;
 
-        sensor_data_frame last_frame;
+        hardware_data_frame last_hdw_frame;
         sequencer_status status;
 
         std::chrono::system_clock::time_point wait_until_time;

@@ -6,7 +6,7 @@
 #include <mutex>            // mutex
 
 #include "sequencer.h"
-#include "hardware_controller.h"
+#include "hardware/hardware_controller.h"
 #include "link_logger.h"
 #include "server.h"
 

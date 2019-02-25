@@ -20,11 +20,9 @@ class CM_Exception {
 
 class main_class {
     public:
-        main_class();
-        virtual ~main_class() = 0;
-        main_class(const main_class &) = delete;
-        main_class(main_class &&) = delete;
-        main_class& operator=(const main_class &) = delete;
+        //main_class(const main_class &) = delete;
+        //main_class(main_class &&) = delete;
+        //main_class& operator=(const main_class &) = delete;
         virtual void driver_loop() = 0;
         void stop_driver();
     protected:

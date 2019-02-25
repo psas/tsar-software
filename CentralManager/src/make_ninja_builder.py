@@ -17,7 +17,7 @@ to uses this:
     arg2: is the selected class to test. 
         "sequencer", "hardware", "link", or "server"
     args: is a LIST of special flags for testing, it will ignore all other input.
-        "no_ll"           for hardware without the link_logger running.
+        "no_ll"             for hardware without the link_logger running.
         "print_hdw_data"    prints sensor data on terminal.
         "sensor_data_off"   make hardware constantly read from a file instead of sensor (to test sequencer).
 
@@ -32,10 +32,10 @@ to uses this:
 # the list of sub-class need by selectec class
 server = ['server']
 
-link = ['link_logger', 'sequencer_status', 'sensor_data_frame','client_command']
+link = ['link_logger', 'sequencer_status', 'hardware_data_frame','client_command']
 link.extend(server)
 
-hardware = ['hardware_contoller','i2c_library']
+hardware = ['main_class', 'hardware/hardware_controller', 'hardware/i2c_library', 'hardware/uart_library']
 hardware.extend(link)
 
 sequencer = ['sequencer']
@@ -51,7 +51,7 @@ def main():
         print("                 or")
         print("./make_ninja_builder.py test object test_flags\n")
         print("object:")
-        print("  sequencer, hardware, link, server")
+        print("  hardware, link, server")
         print("test_flags:")
         print("  no_ll              -- for hardware without the link_logger running")
         print("  print_hdw_data     -- prints sensor data on terminal")
@@ -106,9 +106,6 @@ def get_test_flags(target, flags=[]):
         test_flags += '-DLINK_TEST'
     elif(target == 'server'):
         test_flags += '-DSERVER_TEST'
-    else:
-        print('Error: arg2 is not link or server')
-        exit()
 
     # add test flags
     if (len(flags) != 0):
@@ -162,7 +159,7 @@ def make_ninja_file(file_list, main_file='', test_flags=''):
     f.write("rule link\n")
     f.write("    command = $cc $cflags $in -o $output %s\n\n" % test_flags)
     f.write("rule clean_all\n")
-    f.write("    command = rm -rf *.o $output\n\n")
+    f.write("    command = rm -rf *.o hardware/*.o $output\n\n")
 
     # write object file builders
     for x in file_list:

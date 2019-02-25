@@ -6,6 +6,7 @@
 
 # optional debug settings, this are only avaible in debug mode
 HDW_LIVE_DATA ?= 1
+HDW_NO_LL ?= 1
 PRINT_DATA ?= 0
 
 
@@ -20,17 +21,21 @@ PROGS=CentralManager
 
 SERVERFILES=server.cpp
 LINKFILES=link_logger.cpp $(SERVERFILES) sensor_data_frame.cpp client_command.cpp sequencer_status.cpp
-HARDWAREFILES=hardware_controller.cpp i2c_library.cpp $(LINKFILES)
+HARDWAREFILES=hardware_controller.cpp hardware_library.cpp main_class.cpp $(LINKFILES)
 SEQUENCERFILES=sequencer.cpp $(HARDWAREFILES)
 ALLFILES= governor.cpp $(SEQUENCERFILES)
 
 # optional setting(s)
 ifeq ($(PRINT_DATA), 1)			#print data
-TEST_FLAGS+= -DPRINT_DATA_FRAME
+TEST_FLAGS += -DPRINT_DATA_FRAME
 endif
 
 ifeq ($(HDW_LIVE_DATA), 0)		#live data
-TEST_FLAGS+= -DSENSOR_DATA_OFF
+TEST_FLAGS += -DSENSOR_DATA_OFF
+endif
+
+ifeq ($(HDW_NO_LL), 1)			#no link on hdw test
+TEST_FLAGS += -DLL_OFF
 endif
 
 run:
@@ -38,9 +43,7 @@ run:
 sequencer_test_debug:
 	$(CC) $(C_FLAGS) $(PI_FLAGS) -g -o $(PROGS) tests/sequencer_test_mains.cpp $(SEQUENCERFILES) $(TEST_FLAGS) -DSEQUENCER_TEST
 hardware_test_debug:
-	$(CC) $(C_FLAGS) $(PI_FLAGS) -g -o $(PROGS) tests/hardware_test_mains.cpp $(HARDWAREFILES) $(TEST_FLAGS) -DHARDWARE_TEST
-hardware_link_test_debug:
-	$(CC) $(C_FLAGS) $(PI_FLAGS) -g -o $(PROGS) tests/hardware_test_mains.cpp $(HARDWAREFILES) $(TEST_FLAGS) -DHARDWARE_LINK_TEST
+	$(CC) $(C_FLAGS) $(PI_FLAGS) -g -o $(PROGS) tests/hardware_test_mains.cpp $(HARDWAREFILES) $(TEST_FLAGS)
 link_test_debug:
 	$(CC) $(C_FLAGS) -g -o $(PROGS) tests/link_test_mains.cpp $(LINKFILES) $(TEST_FLAGS) -DLINK_TEST
 server_test_debug:
