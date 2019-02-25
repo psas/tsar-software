@@ -25,6 +25,9 @@ make_JSON(std::string & output) {
 
     writer.StartObject();
 
+    writer.Key("what");
+    writer.String("seq_full");
+
     // time
     writer.Key("time");
     writer.String(time.c_str());
@@ -49,6 +52,9 @@ make_JSON_diff(std::string & output, const sequencer_status & other) {
     //writer.SetMaxDecimalPlaces(6);
 
     writer.StartObject();
+
+    writer.Key("what");
+    writer.String("seq_change");
 
     // time
     writer.Key("time");

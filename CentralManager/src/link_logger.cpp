@@ -36,9 +36,6 @@ driver_loop() {
             if(serv != nullptr)
                 serv->send_string(temp_string);
             save(temp_string);
-
-            // update last out for next json conversion
-            last_out_data = temp_send_data;
         }
         
         _mutex.unlock();
@@ -51,9 +48,9 @@ driver_loop() {
 // only enqueues if new data is different from last enqueue
 int link_logger::
 send(const sequencer_status & input) {
-    if(input == last_enqueued_seq_status)
+    if(input == last_in_seq_status)
         return 1;
-    last_enqueued_seq_status = input; // update for next enqueue
+    last_in_seq_status = input; // update for next enqueue
 
     // update new send data
     send_data temp;
@@ -68,9 +65,9 @@ send(const sequencer_status & input) {
 // only enqueues if new data is different from last enqueue
 int link_logger::
 send(const hardware_data_frame & input) {
-    if(input == last_enqueued_hdw_data)
+    if(input == last_in_hdw_data)
         return 1;
-    last_enqueued_hdw_data = input; // update for next enqueue
+    last_in_hdw_data = input; // update for next enqueue
 
     // make data to add to queue
     send_data temp;
@@ -110,10 +107,14 @@ recv(client_command & output) {
 // makes a string with only data that has changed 
 void link_logger::
 make_send_string(send_data & in, std::string & out) {
-    if(in.flag == HDW)
-        in.hardware_data.make_JSON_diff(out, last_out_data.hardware_data);
-    else
-        in.seq_status.make_JSON_diff(out, last_out_data.seq_status);
+    if(in.flag == HDW) {
+        in.hardware_data.make_JSON_diff(out, last_out_hdw_data);
+        last_out_hdw_data = in.hardware_data; // update for next call
+    }
+    else {
+        in.seq_status.make_JSON_diff(out, last_out_seq_status);
+        last_out_seq_status = in.seq_status; // update for next call
+    }
     return;
 }
 

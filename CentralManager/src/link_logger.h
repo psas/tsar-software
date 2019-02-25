@@ -19,7 +19,7 @@
 #define CLIENT_COM_Q_LEN 100
 #define SEQ 1                               // for flag in send_data
 #define HDW 0                               // for flag in send_data
-#define FULL_SEND 100                       // every x loops, send all data in message
+#define FULL_SEND 50                        // every x loops, send all data in message
 
 
 /* POD for send queue. To reduce new and delete calls, this was used over a 
@@ -58,11 +58,13 @@ class link_logger : public main_class {
         fixed_queue<send_data> send_q;
         fixed_queue<client_command> recv_q;
 
-        send_data last_out_data; // last frame sent to server
+        // used to remove data that has not changed from being added to json string
+        hardware_data_frame last_out_hdw_data;
+        sequencer_status last_out_seq_status;
 
         // used to remove data that has not changed from being enqueued
-        hardware_data_frame last_enqueued_hdw_data;
-        sequencer_status last_enqueued_seq_status;
+        hardware_data_frame last_in_hdw_data;
+        sequencer_status last_in_seq_status;
 };
 
 #endif
