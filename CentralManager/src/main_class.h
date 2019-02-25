@@ -26,6 +26,7 @@ class main_class {
         virtual void driver_loop() = 0;
         void stop_driver();
     protected:
+        main_class();
         // gets current time in microseconds as a string
         void get_time_us(std::string & time) const;
 

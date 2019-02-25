@@ -5,6 +5,7 @@
 #include <atomic>           // atomic
 #include <mutex>            // mutex
 
+#include "main_class.h"
 #include "sequencer.h"
 #include "hardware/hardware_controller.h"
 #include "link_logger.h"
@@ -23,7 +24,7 @@
  * Once the Sequencer has declared it has finish sequencing, the Governor will end all 
  * threads and exit.
  */
-class governor {
+class governor : public main_class {
     public:
         governor();
         ~governor();
@@ -31,7 +32,7 @@ class governor {
         /* Calls all run function below to (re)start threads as needed, 
          * until sequencer is done sequencing.
          */
-        void start_system();
+        void driver_loop();
 
     private:
         // These functions start the system threads, if they return, the thread has ended
@@ -57,7 +58,5 @@ class governor {
         std::shared_ptr<hardware_controller> hdw_ctrl;
         std::shared_ptr<link_logger> link;
         std::shared_ptr<server> serv;
-
-        std::mutex gov_mutex;
 };
 

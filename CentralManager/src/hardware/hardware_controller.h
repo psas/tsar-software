@@ -53,7 +53,7 @@ class hardware_controller : public main_class {
 
         int light_on();
         int light_off();
-        void driver_loop() override;
+        void driver_loop();
     private:
         // reads sensor values, updates internal data frame
         void update_i2c_data();

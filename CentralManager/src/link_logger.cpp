@@ -4,7 +4,7 @@
 // constructor
 link_logger::
 link_logger(std::shared_ptr<server> input_server) : serv(input_server), 
-        send_q(SEND_DATA_Q_LEN), recv_q(CLIENT_COM_Q_LEN), driver_running(false) {}
+        send_q(SEND_DATA_Q_LEN), recv_q(CLIENT_COM_Q_LEN) {}
 
 
 // server wrapper for link thread
@@ -14,16 +14,15 @@ driver_loop() {
     send_data temp_send_data;
     unsigned int i = 0;
 
-    driver_running = true;
-    while(driver_running) {
-        ll_mutex.lock();
+    _driver_running = true;
+    while(_driver_running) {
+        _mutex.lock();
         
         while(send_q.status() > 0) {
             send_q.dequeue(temp_send_data);
 
             // TODO get commands from server recv queue 
             // TODO don't see data that hasnt change
-           
 
             // every x loop, send a message with all the data / status 
             if(i < FULL_SEND) {
@@ -40,19 +39,9 @@ driver_loop() {
             save(temp_string);
         }
         
-        ll_mutex.unlock();
+        _mutex.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(LINK_LOGGER_DELAY));
     }
-    return;
-}
-
-
-// kill server driver wrapper
-void link_logger::
-stop_driver() { 
-    ll_mutex.lock();
-    driver_running = false;
-    ll_mutex.unlock();
     return;
 }
 
@@ -69,7 +58,7 @@ data_changed(send_data input) const {
 
 int link_logger::
 send(const sequencer_status & input) {
-    ll_mutex.lock();
+    _mutex.lock();
 
     // update new send data
     last_in_data.seq_status = input;
@@ -78,14 +67,14 @@ send(const sequencer_status & input) {
     // send data
     send_q.enqueue(last_in_data); 
 
-    ll_mutex.unlock();
+    _mutex.unlock();
     return 1;
 }
 
 
 int link_logger::
 send(const hardware_data_frame & input) {
-    ll_mutex.lock();
+    _mutex.lock();
 
     // make data to add to queue
     last_in_data.hardware_data = input;
@@ -94,7 +83,7 @@ send(const hardware_data_frame & input) {
     // send data
     send_q.enqueue(last_in_data); 
 
-    ll_mutex.unlock();
+    _mutex.unlock();
     return 1;
 }
 

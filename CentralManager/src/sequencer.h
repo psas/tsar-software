@@ -8,6 +8,7 @@
 #include <thread>               // sleep_for
 #include <iostream>
 
+#include "main_class.h"
 #include "sequencer_status.h"
 #include "hardware/hardware_controller.h"
 #include "hardware_data_frame.h"
@@ -19,7 +20,7 @@
 /* Sequencer:
  * Control theory.
  */
-class sequencer {
+class sequencer : public main_class {
     public:
         sequencer(std::shared_ptr<link_logger> & link_input, std::shared_ptr<hardware_controller> & hdw_ctrl_input);
 
@@ -38,7 +39,6 @@ class sequencer {
         std::chrono::system_clock::time_point wait_until_time;
 
         std::atomic<bool> driver_running;
-        std::mutex seq_mutex;
 };
 
 #endif

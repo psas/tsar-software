@@ -15,7 +15,7 @@ driver_loop() {
 
     driver_running = true;
     while(driver_running) {
-        seq_mutex.lock();
+        _mutex.lock();
 
         if(emergency_state())               // check for emergency and deal with them
             continue;                       // restart loop if emergency was found
@@ -30,7 +30,7 @@ driver_loop() {
         if(link != nullptr)
             link->send(status);             // update clients on progress
 
-        seq_mutex.unlock();
+        _mutex.unlock();
         std::this_thread::sleep_for(std::chrono::microseconds(SEQ_DRIVER_DELAY)); // sleep
     }
     return;
@@ -103,8 +103,8 @@ emergency_state() {
 // tells governor to keep thread running or not
 bool sequencer::
 is_running() {
-    seq_mutex.lock();
+    _mutex.lock();
     bool r = driver_running;
-    seq_mutex.unlock();
+    _mutex.unlock();
     return r;
 }

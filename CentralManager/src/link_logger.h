@@ -7,6 +7,7 @@
 #include <thread>                           // sleep_for
 #include <mutex>                            // mutex
 
+#include "main_class.h"
 #include "server.h"
 #include "fixed_queue.hpp"
 #include "client_command.h"
@@ -40,14 +41,13 @@ struct send_data {
  * into a command class object for the sequencer to process. 
  * This will also save all strings made for later data/system analysis.
  */
-class link_logger {
+class link_logger : public main_class {
     public:
         link_logger(std::shared_ptr<server> input_server);
 
         int send(const sequencer_status &);
         int send(const hardware_data_frame &);
         int recv(client_command &);
-        void stop_driver();
         void driver_loop();
     private:
         void make_send_string(send_data & in, std::string & out);
@@ -60,8 +60,6 @@ class link_logger {
         fixed_queue<client_command> recv_q;
         struct send_data last_out_data;     // last frame sent to server
         struct send_data last_in_data;      // last frame created, used in send() to reduce contructor/decontructor calls
-        bool driver_running;
-        std::mutex ll_mutex;
 };
 
 #endif

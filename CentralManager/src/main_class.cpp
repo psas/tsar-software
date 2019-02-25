@@ -1,5 +1,7 @@
 #include "main_class.h"
 
+main_class::
+main_class() : _driver_running(false) {}
 
 /*
  * gets monotonic time from hardware (in microseconds) as a string

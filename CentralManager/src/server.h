@@ -16,6 +16,7 @@
 #include <atomic>                   // atomic
 #include <iostream>                 // cout, cerr
 
+#include "main_class.h"
 #include "fixed_queue.hpp"
 
 #define PORT 8080
@@ -26,25 +27,14 @@
 #define SEND_Q_LENGTH 100
 #define RECV_Q_LENGTH 50
 
-// for throwing exceptions in the constructor of server class
-class ServerException {
-    private:
-        std::string msg;
-    public: 
-        ServerException(std::string str) : msg(str) {}
-        std::string what() const {return msg;}
-};
-
-
 // Asynchronous TCP server.
-class server {
+class server : public main_class {
     public:
         server();
 
         void driver_loop();
         int send_string(const std::string & message);
         int recv_string(std::string & message);
-        void stop_driver();
     private:
         int check_new_and_read();
         int send_to_all(const std::string & message);
@@ -62,9 +52,6 @@ class server {
         struct timespec pselect_timeout;
 
         int address_len;
-
-        std::atomic<bool> driver_running;
-        std::mutex serv_mutex;
 };
 
 #endif

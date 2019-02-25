@@ -14,7 +14,7 @@ main() {
     }
 
     governor gov;
-    gov.start_system();
+    gov.driver_loop();
     return 1;
 }
 
@@ -27,8 +27,12 @@ governor() : seq_thread_running(false), hdw_thread_running(false), link_thread_r
         hdw_ctrl = std::shared_ptr<hardware_controller>(new hardware_controller(link));
         seq = std::shared_ptr<sequencer>(new sequencer(link, hdw_ctrl));
     }
+    catch (const CM_Exception& e) {
+        std::cout << e.what() << std:: endl;
+        exit(-1);
+    }
     catch (...) {
-        std::cout <<  "Exception throw" << std::endl;
+        std::cout <<  "Unknown Exception throw" << std::endl;
         std::cout <<  "Governor constructor failed" << std::endl;
         exit(-1);
     }
@@ -54,11 +58,11 @@ governor::
  * until sequencer is done sequencing.
  */
 void governor::
-start_system() {
+driver_loop() {
     std::cout << "System is starting up." << std::endl;
     
     do {
-        gov_mutex.lock();
+        _mutex.lock();
 
         // (re)start threads
         if(hdw_thread_running == false)
@@ -72,7 +76,7 @@ start_system() {
 
         // TODO: deal with logging cerr
         
-        gov_mutex.unlock();
+        _mutex.unlock();
         
         std::this_thread::sleep_for(std::chrono::microseconds(GOV_DRIVER_DELAY));
     } while(seq->is_running()); // ask the sequencer if it needs the system running

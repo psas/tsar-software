@@ -3,20 +3,19 @@
 // defualt constuctor
 server::
 server() : send_q(SEND_Q_LENGTH, std::string(SEND_INIT_SIZE, '\0')),  
-        recv_q(RECV_Q_LENGTH, std::string(RECV_BUFF_SIZE,'\0')), 
-        driver_running(false) {
+        recv_q(RECV_Q_LENGTH, std::string(RECV_BUFF_SIZE,'\0')) {
 
     // clear the fds_master_list and temp sets
     FD_ZERO(&fds_master_list);
 
     // listener
     if((listener = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-        throw ServerException("Socket Error");
+        throw CM_Exception("Server: Socket Error");
 
     // listener setsockopt
     int option_value = 1;
     if(setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(int)) == -1)
-        throw ServerException("SetSocketOpt Error");
+        throw CM_Exception("Server: SetSocketOpt Error");
 
     address_len = sizeof(struct sockaddr_in);
 
@@ -27,11 +26,11 @@ server() : send_q(SEND_Q_LENGTH, std::string(SEND_INIT_SIZE, '\0')),
     serveraddr.sin_port = htons(PORT);
     memset(&(serveraddr.sin_zero), '\0', 8); // to avoid undefined behavior in padding bytes
     if(bind(listener, (struct sockaddr *)&serveraddr, sizeof(struct sockaddr_in)) == -1)
-        throw ServerException("Bind Error");
+        throw CM_Exception("Server: Bind Error");
 
     // listen
     if(listen(listener, 10) == -1)
-        throw ServerException("Listen Error");
+        throw CM_Exception("Server: Listen Error");
 
     FD_SET(listener, &fds_master_list); // add listener to master list
     fd_count = listener; // keep track of the largest descriptor
@@ -48,14 +47,14 @@ void server::
 driver_loop() {
     std::string message;
 
-    driver_running = true;
-    while(driver_running == true) { 
-        serv_mutex.lock();
+    _driver_running = true;
+    while(_driver_running == true) { 
+        _mutex.lock();
         check_new_and_read(); //this will also handle enqueuing into recv_q
         while(send_q.dequeue(message) == 1) { // has data to send
             send_to_all(message);
         }
-        serv_mutex.unlock();
+        _mutex.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(SERVER_DELAY));
     }
     return;
@@ -81,8 +80,7 @@ check_new_and_read() {
     if(is_data == 0) // pselect_timeout, no data
         return 0;
     else if(is_data == -1)
-        return -1;
-        //throw  ServerException("Pselect Error");
+        return -1; // Pselect Error
 
     // checking all existing connections looking for data to be received
     // also will handle any new client
@@ -100,9 +98,8 @@ check_new_and_read() {
                               << new_fd << std::endl;
                 }
                 else
-                    return -1;
-                    //throw ServerException("Accept Error");
-                    // TODO fd_zero, all fd_data is assume to be bad
+                    return -1; //Accept Error
+                    // TODO fd_zero, all fd_data is assume to be bad?
             }
             else { // handle data from a client
                 if(recv(i, &buffer[0], RECV_BUFF_SIZE, 0) <= 0) {
@@ -140,22 +137,13 @@ send_to_all(const std::string & message) {
 }
 
 
-//stops driver_loop, only use to end server
-void server::
-stop_driver() { 
-    serv_mutex.lock();
-    driver_running = false; 
-    serv_mutex.unlock();
-}
-
-
 // enqueue message to be send
 int server::
 send_string(const std::string & message) {
     int ri = 0;
-    serv_mutex.lock();
+    _mutex.lock();
     ri = send_q.enqueue(message); 
-    serv_mutex.unlock();
+    _mutex.unlock();
     return ri;
 }
 
@@ -164,8 +152,8 @@ send_string(const std::string & message) {
 int server::
 recv_string(std::string & message) {
     int ri = 0;
-    serv_mutex.lock();
+    _mutex.lock();
     ri = recv_q.dequeue(message);
-    serv_mutex.unlock();
+    _mutex.unlock();
     return ri;
 }
