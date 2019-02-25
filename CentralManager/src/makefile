@@ -19,13 +19,13 @@ PI_FLAGS=-lwiringPi
 
 PROGS=CentralManager
 
-SERVERFILES=server.cpp
+SERVERFILES=server.cpp main_class.cpp
 LINKFILES=link_logger.cpp $(SERVERFILES) sensor_data_frame.cpp client_command.cpp sequencer_status.cpp
-HARDWAREFILES=hardware_controller.cpp hardware_library.cpp main_class.cpp $(LINKFILES)
+HARDWAREFILES=hardware_controller.cpp hardware_library.cpp $(LINKFILES)
 SEQUENCERFILES=sequencer.cpp $(HARDWAREFILES)
 ALLFILES= governor.cpp $(SEQUENCERFILES)
 
-# optional setting(s)
+########## optional setting(s) ####################
 ifeq ($(PRINT_DATA), 1)			#print data
 TEST_FLAGS += -DPRINT_DATA_FRAME
 endif
@@ -40,13 +40,9 @@ endif
 
 run:
 	$(CC) $(C_FLAGS) $(PI_FLAGS) -o $(PROGS) $(ALLFILES)
-sequencer_test_debug:
-	$(CC) $(C_FLAGS) $(PI_FLAGS) -g -o $(PROGS) tests/sequencer_test_mains.cpp $(SEQUENCERFILES) $(TEST_FLAGS) -DSEQUENCER_TEST
 hardware_test_debug:
-	$(CC) $(C_FLAGS) $(PI_FLAGS) -g -o $(PROGS) tests/hardware_test_mains.cpp $(HARDWAREFILES) $(TEST_FLAGS)
-link_test_debug:
-	$(CC) $(C_FLAGS) -g -o $(PROGS) tests/link_test_mains.cpp $(LINKFILES) $(TEST_FLAGS) -DLINK_TEST
+	$(CC) $(C_FLAGS) $(PI_FLAGS) -g -o $(PROGS) tests/hardware_test_main.cpp $(HARDWAREFILES) $(TEST_FLAGS)
 server_test_debug:
-	$(CC) $(C_FLAGS) -g -o $(PROGS) tests/link_test_mains.cpp $(SERVERFILES) $(TEST_FLAGS) -DSERVER_TEST
+	$(CC) $(C_FLAGS) -g -o $(PROGS) tests/server_test_main.cpp $(SERVERFILES) $(TEST_FLAGS)
 clean:
-	rm -f *.o $(PROGS)
+	rm -f *.o hardware/*.o $(PROGS)

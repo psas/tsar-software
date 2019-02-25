@@ -30,12 +30,12 @@ to uses this:
 
 
 # the list of sub-class need by selectec class
-server = ['server']
+server = ['server', 'main_class']
 
 link = ['link_logger', 'sequencer_status', 'hardware_data_frame','client_command']
 link.extend(server)
 
-hardware = ['main_class', 'hardware/hardware_controller', 'hardware/i2c_library', 'hardware/uart_library']
+hardware = ['hardware/hardware_controller', 'hardware/i2c_library', 'hardware/uart_library']
 hardware.extend(link)
 
 sequencer = ['sequencer']
@@ -51,7 +51,7 @@ def main():
         print("                 or")
         print("./make_ninja_builder.py test object test_flags\n")
         print("object:")
-        print("  hardware, link, server")
+        print("  hardware or server")
         print("test_flags:")
         print("  no_ll              -- for hardware without the link_logger running")
         print("  print_hdw_data     -- prints sensor data on terminal")
@@ -82,16 +82,12 @@ def main():
 def get_main_path(target):
     main = ''
 
-    if(target == 'sequencer'):
-        main = 'tests/sequencer_test_mains.cpp'
-    elif(target == 'hardware'):
-        main = 'tests/hardware_test_mains.cpp'
-    elif(target == 'link'):
-        main = 'tests/link_test_mains.cpp'
+    if(target == 'hardware'):
+        main = 'tests/hardware_test_main.cpp'
     elif(target == 'server'):
-        main = 'tests/link_test_mains.cpp'
+        main = 'tests/server_test_main.cpp'
     else:
-        print('Error: arg2 is not sequencer, hardware, or link')
+        print('Error: arg2 is not hardware or server')
         exit()
 
     return main
@@ -100,12 +96,6 @@ def get_main_path(target):
 # figures what test flags are needed
 def get_test_flags(target, flags=[]):
     test_flags = ''
-
-    # set test main and add main test flag
-    if(target == 'link'):
-        test_flags += '-DLINK_TEST'
-    elif(target == 'server'):
-        test_flags += '-DSERVER_TEST'
 
     # add test flags
     if (len(flags) != 0):
@@ -143,7 +133,7 @@ def make_file_list(target, flags=[]):
 # creates the build.ninja file
 def make_ninja_file(file_list, main_file='', test_flags=''):
     pi_flag = ''
-    if(main_file != 'tests/link_test_mains.cpp'):
+    if(main_file != 'tests/server_test_main.cpp'):
         pi_flag = '-lwiringPi' # needed for hardware
 
     f = open("build.ninja","w")
