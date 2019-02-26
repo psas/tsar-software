@@ -11,17 +11,18 @@ Governor
 Sequencer
 + Sequences through a list of step for a liquid engine test fire.
 + Checks if the system needs to go into an emergency state.
-+ Processes commands from clients (start, emergency stop, halt, continue, etc).
++ Processes commands from clients (start, emergency stop, halt, continue, end, etc).
 
 Hardware Controller
 + Hardware interface for Central Manager
 + Reads data form I2C sensor.
-+ Handles GPIO conections.
++ Controls GPIO conections.
++ Read hearbeats from Actuator Controller system using UART.
 + Sends commands and hearbeats to Actuator Controller system using UART.
 
 Link Logger
-+ Converts all Sequencer and Hardware data into JSON strings for saving and for the server to send.
-+ Converts receive JSON strings from the server into a struct for the Sequencer to process.
++ Converts all Sequencer and Hardware status/data into JSON strings for saving and for the server to send.
++ Converts receive JSON strings from the Server into a struct for the Sequencer to process.
 
 Server
 + Asynchronous TCP server.
@@ -36,13 +37,15 @@ These struct are uses by the main classes to send data to one another.
 Sequence Status
 + Hold a snap shot of the sequencer satuts to send to cleints
 
-Sensor Data Frame
-+ Hold a snap shot of hardware data
+Hardware Data Frame
++ Hold a snap shot of i2c status/data
++ Hold a snap shot of gpio status/data
++ Hold a snap shot of AC status/data
 + Sequencer uses this data for sequencing
 + A copy is sent to clients
 
 Client Command
-+ A command for the sequncer to do (start, emergency stop, halt, continue, etc).
++ A command for the sequncer to do (start, emergency stop, halt, continue, end, etc).
 
 ## Data Structures Class(es) Decriptions
 Fixed Queue (a c++ template class)
@@ -57,7 +60,7 @@ Fixed Queue (a c++ template class)
     - [x] Makes all threads needed
     - [x] Handles threads stopping early
   - [ ] Sequencer
-    - [ ] Working test sequence
+    - [x] Working test sequence
     - [ ] Emergency state check
   - [ ] Hardware Controller
     - [x] I2C
