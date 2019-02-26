@@ -14,6 +14,9 @@
 #include "../link_logger.h"
 #include "i2c_library.h"
 #include "uart_library.h"
+#include "i2c_data_frame.h"
+#include "uart_data_frame.h"
+#include "gpio_data_frame.h"
 
 // general
 #define HDW_DRIVER_DELAY 500            // mircoseconds
@@ -23,7 +26,8 @@
 #define MPL3115A2_2_ADD 0x63            // example non existing MPL3115A2
 
 // raspberry pi gpio pins
-#define LIGHT_GPIO 0                    // gpio 17 or pin 11 on pi
+#define LIGHT_1_GPIO 0                  // gpio17 or pin11 on pi
+#define LIGHT_2_GPIO 1                  // gpio18 or pin12 on pi (non exosting)
 
 // uart
 #define BUAD_RATE 9600                  // UART buad rate
@@ -58,6 +62,9 @@ class hardware_controller : public main_class {
         // reads sensor values, updates internal data frame
         void update_i2c_data();
 
+        // reads sensor values, updates internal data frame
+        void update_gpio_data();
+
         // makes a hardware data frame
         void make_frame(hardware_data_frame & input);
 
@@ -69,7 +76,7 @@ class hardware_controller : public main_class {
 
         // current data frames
         i2c_data_frame _i2c_data;
-        bool _light_status;
+        gpio_data_frame _gpio_data;
         bool _AC_connected;
         AC_data_frame _AC_data;
 

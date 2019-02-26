@@ -5,6 +5,7 @@
 #include <cstdint>  // uintx_t
 
 #include "hardware/i2c_data_frame.h"
+#include "hardware/gpio_data_frame.h"
 #include "hardware/AC_data_frame.h"
 #include "../thirdparty/rapidjson/writer.h"         // rapidjson
 #include "../thirdparty/rapidjson/stringbuffer.h"   // rapidjson
@@ -26,7 +27,7 @@ struct hardware_data_frame {
         i2c_data_frame i2c_data;
 
         // gpio
-        bool light_status;
+        gpio_data_frame gpio_data;
 
         // Actuator Controller Valuse
         bool AC_connected;

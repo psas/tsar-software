@@ -2,13 +2,13 @@
 
 // this is overload to ignore the time field, since every object will have a different time value
 bool operator == (const hardware_data_frame & A, const hardware_data_frame & B) {
-    //if(A.i2c_data != B.i2c_data)
     if(memcmp(&A.i2c_data, &B.i2c_data, sizeof(i2c_data_frame)) != 0)
+        return 0;
+    if(memcmp(&A.gpio_data, &B.gpio_data, sizeof(gpio_data_frame)) != 0)
         return 0;
     if(A.AC_connected != B.AC_connected)
         return 0;
     if(memcmp(&A.AC_data, &B.AC_data, sizeof(AC_data_frame)) != 0)
-    //if(A.AC_data != B.AC_data)
         return 0;
     return 1;
 }
@@ -16,12 +16,12 @@ bool operator == (const hardware_data_frame & A, const hardware_data_frame & B) 
 
 // this is overload to ignore the time field, since every object will have a different time value
 bool operator != (const hardware_data_frame & A, const hardware_data_frame & B) {
-    //if(A.i2c_data == B.i2c_data)
     if(memcmp(&A.i2c_data, &B.i2c_data, sizeof(i2c_data_frame)) == 0)
+        return 0;
+    if(memcmp(&A.gpio_data, &B.gpio_data, sizeof(gpio_data_frame)) == 0)
         return 0;
     if(A.AC_connected == B.AC_connected)
         return 0;
-    //if(A.AC_data == B.AC_data)
     if(memcmp(&A.AC_data, &B.AC_data, sizeof(AC_data_frame)) == 0)
         return 0;
     return 1;
@@ -59,8 +59,10 @@ make_JSON(std::string & output) {
     writer.Double(i2c_data.pres_2);
 
     // gpio
-    writer.Key("light_status"); 
-    writer.Bool(light_status);
+    writer.Key("light_1_status"); 
+    writer.Bool(gpio_data.light_1_status);
+    writer.Key("light_2_status"); 
+    writer.Bool(gpio_data.light_2_status);
 
     // uart
     writer.Key("AC_next_failure_mode"); 
@@ -135,9 +137,13 @@ make_JSON_diff(std::string & output, const hardware_data_frame & other) {
     }
 
     // gpio
-    if(light_status != other.light_status){
-        writer.Key("light_status"); 
-        writer.Bool(light_status);
+    if(gpio_data.light_1_status != other.gpio_data.light_1_status){
+        writer.Key("light_1_status"); 
+        writer.Bool(gpio_data.light_1_status);
+    }
+    if(gpio_data.light_2_status != other.gpio_data.light_2_status){
+        writer.Key("light_2_status"); 
+        writer.Bool(gpio_data.light_2_status);
     }
 
     // uart
