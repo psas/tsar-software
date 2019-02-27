@@ -32,5 +32,7 @@ class main_class {
 
         std::atomic<bool> _driver_running;
         std::mutex _mutex;
+    private:
+        long long _system_epoch;
 };
 #endif
