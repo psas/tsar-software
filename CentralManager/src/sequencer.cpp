@@ -18,20 +18,26 @@ driver_loop() {
     while(_driver_running) {
         _mutex.lock();
 
-        if(emergency_state())               // check for emergency and deal with them
-            continue;                       // restart loop if emergency was found
+        // check for emergency and deal with them if found
+        if(emergency_state()) {
+            _mutex.unlock();
+            continue;// restart loop if emergency was found
+        }
 
-        hdw_ctrl->get_frame(last_hdw_frame);// update internal sensor data frame
+        // update internal sensor data frame
+        hdw_ctrl->get_frame(last_hdw_frame);
 
+        // process any commands from clients
         if(link != nullptr)
-            if(link->recv(new_command) == 1)// get new command from client(s) (if one exist)
+            if(link->recv(new_command))
                 process_command(new_command);
 
-        sequence();                         // do system control
+        sequence();
 
+        // update clients
         if(link != nullptr) {
             get_time_us(status.time);
-            link->send(status);             // update clients on progress
+            link->send(status);
         }
 
         _mutex.unlock();
@@ -39,8 +45,6 @@ driver_loop() {
     }
     return;
 }
-
-
 
 
 bool sequencer::
@@ -116,9 +120,9 @@ sequence() {
             status.next_state = eUnknown;
             break;
     }
-
     return 1; 
 }
+
 
 /* Checks for emergency condistions and will handle them by calling hardware emergency functions
  *      false was not in emergency state
