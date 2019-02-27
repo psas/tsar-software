@@ -28,6 +28,7 @@ class sequencer : public main_class {
         bool is_running();
     private:
         bool emergency_state();
+        bool process_command(const client_command & data);
         int sequence();
 
         std::shared_ptr<link_logger> link;
@@ -35,10 +36,7 @@ class sequencer : public main_class {
 
         hardware_data_frame last_hdw_frame;
         sequencer_status status;
-
         std::chrono::system_clock::time_point wait_until_time;
-
-        std::atomic<bool> driver_running;
 };
 
 #endif

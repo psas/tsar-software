@@ -1,5 +1,6 @@
 #include "client_command.h"
 
+
 int client_command::
 make_command_data(std::string & input) {
     using namespace rapidjson;
@@ -8,8 +9,8 @@ make_command_data(std::string & input) {
     document.Parse(input.c_str());
 
     // get int
-    if(document["number"].IsNumber())
-        number = document["number"].GetInt();
+    if(document["seq_command"].IsString())
+        seq_command = document["seq_command"].GetString();
 
     return 1;
 }
