@@ -101,8 +101,8 @@ run_hdw() {
     TODO: thread prio
     sched_param param;
     int policy;
-    int r = pthread_getschedparam(pthread_self(), &policy, &param);
-    int r2 = pthread_setschedparam(pthread_self(), policy, &param);
+    int r1 = pthread_getschedparam(pthread_self(), &policy, &param);
+    int r2 = pthread_setschedparam(pthread_self(), SCHED_FIFO, &param); // SCHED_FIFO is an RT policy
     */
     hdw_ctrl->driver_loop();
     std::cout << "Hardware thread has stoped." << std::endl;
