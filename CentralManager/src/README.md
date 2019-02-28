@@ -23,6 +23,7 @@ Hardware Controller
 Link Logger
 + Converts all Sequencer and Hardware status/data into JSON strings for saving and for the server to send.
 + Converts receive JSON strings from the Server into a struct for the Sequencer to process.
++ Save all data sent
 
 Server
 + Asynchronous TCP server.
