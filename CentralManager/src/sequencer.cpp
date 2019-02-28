@@ -18,14 +18,14 @@ driver_loop() {
     while(_driver_running) {
         _mutex.lock();
 
+        // update internal sensor data frame
+        hdw_ctrl->get_frame(last_hdw_frame);
+
         // check for emergency and deal with them if found
         if(emergency_state()) {
             _mutex.unlock();
             continue;// restart loop if emergency was found
         }
-
-        // update internal sensor data frame
-        hdw_ctrl->get_frame(last_hdw_frame);
 
         // process any commands from clients
         if(link != nullptr)
