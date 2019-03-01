@@ -23,10 +23,11 @@ namespace uart_library {
      */
     int read(AC_data_frame & data, const int & fd);
 
-    /* send defautl no change command to device
+    /* send default no change command to device
      * TODO add a input command option
      */
-    int send_default(const int & fd);
+    void send_default(const int & fd);
+    //void send(const CM_UART_message & mes, const int & fd); // TODO implement this
 }
 
 #endif // _UART_LIBRARY_H_

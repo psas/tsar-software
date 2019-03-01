@@ -12,6 +12,7 @@ namespace {
 
         int len = serialDataAvail(fd);
         if(len > 0) { // has new message
+            //TODO add a peek at message ability to remove all data upto '/n'
             if(len >= AC_TO_CM_LEN) { // full message avaible
                 for(unsigned int i=0; i<AC_TO_CM_LEN; ++i) {
                     message[i] = serialGetchar(fd);
@@ -91,25 +92,25 @@ namespace {
 
 
     // TODO change default vs sequencer command
-    int
+    void
     make_uart_message(std::string & message) {
         message[0] = '\n';
         message[1] = AC_FM_NO_FAILURE;      // Next Failure Mode
         message[2] = AC_CMD_DO_NOTHING;     // Command
-        message[3] = 1;                     // sensor 1
-        message[4] = 1;                     // sensor 2
-        message[5] = 1;                     // sensor 3
-        message[6] = 1;                     // sensor 4
-        message[7] = 1;                     // sensor 5
-        generate_checksum(message); // handles inserting checksum into message
-        return 1;
+        message[3] = 0;                     // sensor 1
+        message[4] = 0;                     // sensor 2
+        message[5] = 0;                     // sensor 3
+        message[6] = 0;                     // sensor 4
+        message[7] = 0;                     // sensor 5
+        generate_checksum(message);         // handles inserting checksum into message
+        return;
     }
 }
 
 
 int
 read(AC_data_frame & data, const int & fd) {
-    std::string message('0', AC_TO_CM_LEN); //make a placeholder for the data in the container to reduce dynamic calls
+    std::string message('\0', AC_TO_CM_LEN); //make a placeholder for the data in the container to reduce dynamic calls
 
     int rv = read_uart_message(message, fd);
     if(rv <= 0) // no new message or error
@@ -124,14 +125,13 @@ read(AC_data_frame & data, const int & fd) {
     return 1;
 }
 
-int 
+void 
 send_default(const int & fd) {
-    std::string message('0', CM_TO_AC_LEN); //make a placeholder for the data in the container to reduce dynamic calls
-    if(!make_uart_message(message))
-        return 0;
-
-    serialPuts(fd, &message[0]);
-    return 1;
+    std::string message('\0', CM_TO_AC_LEN); //make a placeholder for the data in the container to reduce dynamic calls
+    make_uart_message(message);
+    for(unsigned int i=0; i<CM_TO_AC_LEN; ++i)
+        serialPutchar(fd, message[i]);
+    return;
 }
 
 }
