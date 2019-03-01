@@ -1,4 +1,3 @@
-data/
 CentralManager
-build/
-src/testing/
+a.out
+*.*.swp
