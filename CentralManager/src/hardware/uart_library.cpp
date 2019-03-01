@@ -13,9 +13,11 @@ namespace {
         int len = serialDataAvail(fd);
         if(len > 0) { // has new message
             if(len >= AC_TO_CM_LEN) { // full message avaible
-                for(unsigned int i=0; i<AC_TO_CM_LEN; ++i)
+                for(unsigned int i=0; i<AC_TO_CM_LEN; ++i) {
                     message[i] = serialGetchar(fd);
-                std::cout  << std::hex << message << std::endl;
+                    std::cout  << std::hex << (int)message[i];
+                }
+                std::cout << std::endl;
                 rv = 1;
             }
             else { // incomplete message
