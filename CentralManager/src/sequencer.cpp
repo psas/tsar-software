@@ -91,7 +91,7 @@ sequence() {
             status.next_state = eEnd;
             break;
         case eStart: // wait for start command
-            status.next_state = eStart;
+            status.next_state = eLightOn; // TODO for non sequence test
             break;
         case eHalt:
             status.next_state = eHalt;
@@ -113,7 +113,7 @@ sequence() {
             hdw_ctrl->light_off();
             wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(1);
             status.next_state = eWait;
-            status.state_after_wait = eLightOff;
+            status.state_after_wait = eLightOn;
             break;
         default :
             std::cout << "unknown state " << std::endl;

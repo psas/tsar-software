@@ -84,6 +84,7 @@ make_JSON_diff(std::string & output, const sequencer_status & other) {
     writer.Key("time");
     writer.String(time.c_str());
 
+
     if(current_state != other.current_state) {
         writer.Key("current_state");
         writer.String(enum_to_string(current_state).c_str());
@@ -102,8 +103,6 @@ make_JSON_diff(std::string & output, const sequencer_status & other) {
         writer.Key("state_after_wait");
         writer.String(enum_to_string(state_after_wait).c_str());
     }
-
-    writer.EndObject();
 
     writer.EndObject();
     output = s.GetString();

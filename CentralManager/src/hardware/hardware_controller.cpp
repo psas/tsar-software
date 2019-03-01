@@ -36,6 +36,9 @@ driver_loop() {
     std::chrono::system_clock::time_point current_time;
     hardware_data_frame data_frame;
 
+    uart_library::send_default(_uart_fd);
+    _next_heartbeat_time = current_time + std::chrono::milliseconds(HB_TIME_MS);
+
     _driver_running = true;
     while(_driver_running) {
         _mutex.lock();
@@ -43,7 +46,7 @@ driver_loop() {
         // update i2c and gpio values
         update_i2c_data();
         update_gpio_data();
-        
+
         // read uart message
         uart_library::read(_AC_data, _uart_fd);
 

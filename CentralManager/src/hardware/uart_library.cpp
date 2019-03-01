@@ -24,7 +24,7 @@ namespace {
             }
         }
         else if (len == -1) { // error
-            //std::cout << "serialDataAvail error" << std::endl; // TODO log this
+            std::cout << "serialDataAvail error" << std::endl; // TODO log this
             rv = -1;
         }
         return rv;
@@ -115,7 +115,6 @@ read(AC_data_frame & data, const int & fd) {
 
     if(process_uart_message(message, data) == -1) // no new message or error
         return -1;
-
 
     /* if read_uart_message() and process_uart_message return 1 
      * data is valid and over   riden

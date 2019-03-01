@@ -18,10 +18,9 @@ driver_loop() {
     while(_driver_running) {
         _mutex.lock();
         
+        // TODO get commands from server recv queue 
         while(send_q.size() > 0) {
             send_q.dequeue(temp_send_data);
-
-            // TODO get commands from server recv queue 
 
             // every x loop, send a message with all the data / status 
             if(i < FULL_SEND) {

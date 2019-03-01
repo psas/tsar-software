@@ -29,11 +29,12 @@ run_link(shared_ptr<link_logger> & l) {
 
 int
 main() {
-    cout << "Starting Hardware with Link Test" << endl;
-
     shared_ptr<link_logger> link;
 
-#ifndef LL_OFF
+#ifdef LL_OFF
+    cout << "Starting Hardware without Link Test" << endl;
+#else
+    cout << "Starting Hardware with Link Test" << endl;
     shared_ptr<server> serv = make_shared<server>();
     link = make_shared<link_logger>(serv);
     cout << "Server thread starting" << endl;
