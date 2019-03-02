@@ -3,6 +3,12 @@
 
 #include <cstdint>  // uintx_t
 
+#define AC_CMD_DO_NOTHING 0
+#define AC_CMD_PANIC 1
+
+#define AC_FM_NO_FAILURE 0xff
+#define AC_FM_OTHER_FAILURE 0x0f
+
 
 /* This a POD (Plain Old Data) struct used for to hold a snap shot of the data
  * received from the Actuactor Controller.

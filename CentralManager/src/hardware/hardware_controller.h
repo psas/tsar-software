@@ -12,8 +12,8 @@
 #include "../main_class.h"
 #include "../hardware_data_frame.h"
 #include "../link_logger.h"
+#include "pi_uart.h"
 #include "i2c_library.h"
-#include "uart_library.h"
 #include "i2c_data_frame.h"
 #include "AC_data_frame.h"
 #include "gpio_data_frame.h"
@@ -27,12 +27,16 @@
 
 // raspberry pi gpio pins
 #define LIGHT_1_GPIO 0                  // gpio17 or pin11 on pi
-#define LIGHT_2_GPIO 1                  // gpio18 or pin12 on pi (non exosting)
+#define LIGHT_2_GPIO 1                  // gpio18 or pin12 on pi (non existing)
 
 // uart
 #define BUAD_RATE 9600                  // UART buad rate
 #define UART_PATH "/dev/ttyACM0"        // UART path
 #define HB_TIME_MS 100                  // Time between sent heartbeats in milliseconds
+
+// actutor controller data
+#define AC_TO_CM_LEN 11                 // message length in Bytes (not package length)
+#define CM_TO_AC_LEN 7                 // message length in Bytes (not package length)
 
 
 // fd list for referencing by hardware controller
@@ -50,7 +54,6 @@ class hardware_controller : public main_class {
     public:
         // normal contructor for when not debugging
         hardware_controller(std::shared_ptr<link_logger> & input);
-        ~hardware_controller();
 
         // return a copy of current data frame
         void get_frame(hardware_data_frame & input);
@@ -58,12 +61,17 @@ class hardware_controller : public main_class {
         int light_on();
         int light_off();
         void driver_loop();
+        //TODO modify next uart message to be sent function (for sequencer to call)
     private:
         // reads sensor values, updates internal data frame
         void update_i2c_data();
 
-        // reads sensor values, updates internal data frame
+        // reads gpio values, updates internal data frame
         void update_gpio_data();
+
+        // send and reads uart message if availibe
+        void update_uart_data();
+        void update_uart_frame(const std::vector<char> & message);
 
         // makes a hardware data frame
         void make_frame(hardware_data_frame & input);
@@ -77,7 +85,11 @@ class hardware_controller : public main_class {
         // current data frames
         i2c_data_frame _i2c_data;
         gpio_data_frame _gpio_data;
-        bool _AC_connected;
         AC_data_frame _AC_data;
+
+        // for uart Actuator Controller
+        pi_uart _actuator_controller;
+        std::vector<int8_t> _next_uart_msg; // TODO make function to modify this
+        std::chrono::system_clock::time_point _next_heartbeat_time;
 };
 #endif

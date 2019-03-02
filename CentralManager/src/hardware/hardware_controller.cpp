@@ -3,7 +3,7 @@
 
 // constructor, need pointer to link
 hardware_controller::
-hardware_controller(std::shared_ptr<link_logger> & input) : _ll(input) {
+hardware_controller(std::shared_ptr<link_logger> & input) : _ll(input), _actuator_controller(UART_PATH, UART_PATH), _next_uart_msg(CM_TO_AC_LEN, 0) {
     wiringPiSetup();
 
     // setup i2c sensors
@@ -20,44 +20,25 @@ hardware_controller(std::shared_ptr<link_logger> & input) : _ll(input) {
     digitalWrite(LIGHT_2_GPIO, LOW);
     _gpio_data.light_2_status = digitalRead(LIGHT_2_GPIO);
 
-    // setup uart Actuator Controller connection
-    _uart_fd = serialOpen(UART_PATH, BUAD_RATE);
-    _AC_connected = true;
-}
-
-hardware_controller::
-~hardware_controller() {
-    serialClose(_uart_fd); // close uart connection
+    // setup uart heartbeat and 1st send message
+    _next_heartbeat_time = std::chrono::system_clock::now() - std::chrono::milliseconds(HB_TIME_MS);
+    _next_uart_msg[0] = 0xff;
+    _next_uart_msg[1] = 0x0f;
 }
 
 
 void hardware_controller::
 driver_loop() {
-    auto current_time = std::chrono::system_clock::now();
-    auto _next_heartbeat_time = current_time - std::chrono::milliseconds(HB_TIME_MS);
     hardware_data_frame data_frame;
 
     _driver_running = true;
     while(_driver_running) {
         _mutex.lock();
 
-        // update i2c and gpio values
         update_i2c_data();
         update_gpio_data();
+        update_uart_data();
 
-        // send uart message
-        current_time = std::chrono::system_clock::now();
-        if(current_time >= _next_heartbeat_time) {
-            uart_library::send_default(_uart_fd); // TODO add function for sequencer to call to change default message
-            _next_heartbeat_time = current_time + std::chrono::milliseconds(HB_TIME_MS);
-        }
-
-        // read uart message
-        if(uart_library::read(_AC_data, _uart_fd) == -1)
-            _AC_connected = false;
-        else
-            _AC_connected = true;
-        
         // update link_logger
         if(_ll != NULL) {
             make_frame(data_frame);
@@ -87,7 +68,7 @@ make_frame(hardware_data_frame & input) {
     get_time_us(input.time);
     input.i2c_data = _i2c_data;
     input.gpio_data = _gpio_data;
-    input.AC_connected = 1;
+    input.AC_connected = _actuator_controller.status();
     input.AC_data = _AC_data;
     return;
 }
@@ -116,6 +97,45 @@ void hardware_controller::
 update_gpio_data() {
     _gpio_data.light_1_status = digitalRead(LIGHT_1_GPIO);
     _gpio_data.light_2_status = digitalRead(LIGHT_2_GPIO);
+    return;
+}
+
+
+/* Send uart message if heartbeat timeout has happened and read all incomming data from
+ * the Actuator Controller.
+ */
+void hardware_controller::
+update_uart_data() {
+    // send hearbeat every HB_TIME_MS milliseconds
+    auto current_time = std::chrono::system_clock::now();
+    if(current_time >= _next_heartbeat_time) {
+        _actuator_controller.send(_next_uart_msg);
+        _next_heartbeat_time = current_time + std::chrono::milliseconds(HB_TIME_MS);
+    }
+
+    // recv message if available
+    if(_AC.status) {
+        std::vector<char> message(CM_TO_AC_LEN);
+        if(_actuator_controller.recv(message))
+            update_uart_frame(message) // only if new message
+    }
+    return;
+}
+
+
+// updates Actuator Controller data
+void hardware_controller::
+update_uart_frame(const std::vector<char> & message) {
+    _AC_data.next_failure_mode = message[0];
+    _AC_data.failure_mode = message[1];
+    _AC_data.failure_cause = message[2];
+    _AC_data.consecutive_checksum_errors = message[3];
+    _AC_data.lifetime_checksum_errors = message[4];
+    _AC_data.sensor1 = message[5];
+    _AC_data.sensor2 = message[6];
+    _AC_data.sensor3 = message[7];
+    _AC_data.sensor4 = message[8];
+    std::memcpy(&_AC_data.sensor5, &message[9], sizeof(uint16_t));
     return;
 }
 
