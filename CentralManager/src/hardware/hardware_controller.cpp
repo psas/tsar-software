@@ -36,6 +36,7 @@ driver_loop() {
     std::chrono::system_clock::time_point current_time;
     hardware_data_frame data_frame;
 
+    current_time = std::chrono::system_clock::now();
     uart_library::send_default(_uart_fd);
     _next_heartbeat_time = current_time + std::chrono::milliseconds(HB_TIME_MS);
 

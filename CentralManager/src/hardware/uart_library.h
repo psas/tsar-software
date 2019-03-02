@@ -5,13 +5,19 @@
 #include <cstdint>                  // uint_t
 #include <wiringSerial.h>           // raspberry pi uart
 #include <cstring>                  // memcpy
-#include <string>                   // std string lib
+#include <array>                    // std string lib
 
 #include "AC_data_frame.h"
 
 // UART data lengths
 #define AC_TO_CM_LEN 16             // message length in Bytes
-#define CM_TO_AC_LEN 7              // message length in Bytes
+#define CM_TO_AC_LEN 12             // message length in Bytes
+
+#define AC_CMD_DO_NOTHING 0
+#define AC_CMD_PANIC 1
+
+#define AC_FM_NO_FAILURE 0xff
+#define AC_FM_OTHER_FAILURE 0x0f
 
 
 /*

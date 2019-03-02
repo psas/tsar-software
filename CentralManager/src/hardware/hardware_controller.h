@@ -32,7 +32,7 @@
 // uart
 #define BUAD_RATE 9600                  // UART buad rate
 #define UART_PATH "/dev/ttyACM0"        // UART path
-#define HB_TIME_MS 3                   // Time between sent heartbeats in milliseconds
+#define HB_TIME_MS 100                  // Time between sent heartbeats in milliseconds
 
 
 // fd list for referencing by hardware controller

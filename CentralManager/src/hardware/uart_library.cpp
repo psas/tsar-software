@@ -7,23 +7,21 @@ namespace uart_library {
 namespace {
     // Checks and reads message from uart buffer
     int
-    read_uart_message(std::string & message, const int & fd) {
+    read_uart_message(std::array<char, AC_TO_CM_LEN> & message, const int & fd) {
         int rv = 0; 
 
         int len = serialDataAvail(fd);
         if(len > 0) { // has new message
-            //TODO add a peek at message ability to remove all data upto '/n'
             if(len >= AC_TO_CM_LEN) { // full message avaible
-                for(unsigned int i=0; i<AC_TO_CM_LEN; ++i) {
+                while(serialGetchar(fd) != '\n' && serialDataAvail(fd)); // remove all data upto '/n'
+                message[0] = '\n';
+
+                for(unsigned int i=1; i<AC_TO_CM_LEN; ++i)
                     message[i] = serialGetchar(fd);
-                    std::cout  << std::hex << (int)message[i];
-                }
-                std::cout << std::endl;
                 rv = 1;
             }
             else { // incomplete message
-                std::cout << "uart message length " << std::endl; // TODO log this
-                rv = -1;
+                rv = 0;
             }
         }
         else if (len == -1) { // error
@@ -36,7 +34,7 @@ namespace {
 
     // parses the message's from the Actuator Controller's checksum for correctness
     bool
-    check_checksum(const std::string & message) { 
+    check_checksum(const std::array<char, AC_TO_CM_LEN> & message) { 
         uint32_t value = 0;
 
         for(unsigned int i=0; i<AC_TO_CM_LEN-4; ++i) // dont check 4 checksum bytes
@@ -53,7 +51,7 @@ namespace {
 
     // store uart data into frame if it is valid
     int
-    process_uart_message(const std::string & message, AC_data_frame & data) {
+    process_uart_message(const std::array<char, AC_TO_CM_LEN> & message, AC_data_frame & data) {
         if(message[0] != '\n')
             return -1;
         if(check_checksum(message) == false) // TODO count this?
@@ -74,18 +72,17 @@ namespace {
     }
 
 
-    /* 
-     * this will generate a checksum for the message to the Actuator Controller 
+    /* This will generate a checksum for the message to the Actuator Controller 
      * and insert it into that message
      */
     void
-    generate_checksum(std::string & message) { 
+    generate_checksum(std::array<char, CM_TO_AC_LEN> & message) { 
         uint32_t checksum = 0;
 
-        for(unsigned int i=0; i<AC_TO_CM_LEN-4; ++i) // dont check 4 checksum bytes
+        for(unsigned int i=0; i<CM_TO_AC_LEN-4; ++i) // dont check 4 checksum bytes
             checksum += ((message[i] * message[i] * message[i]) % 251);
 
-        std::memcpy(&message[AC_TO_CM_LEN-4], &checksum, 4);
+        std::memcpy(&message[CM_TO_AC_LEN-4], &checksum, sizeof(uint32_t));
 
         return;
     }
@@ -93,10 +90,10 @@ namespace {
 
     // TODO change default vs sequencer command
     void
-    make_uart_message(std::string & message) {
+    make_uart_message(std::array<char, CM_TO_AC_LEN> & message) {
         message[0] = '\n';
-        message[1] = AC_FM_NO_FAILURE;      // Next Failure Mode
-        message[2] = AC_CMD_DO_NOTHING;     // Command
+        message[1] = 0xff;                  // Next Failure Mode
+        message[2] = 0x0f;                  // Command
         message[3] = 0;                     // sensor 1
         message[4] = 0;                     // sensor 2
         message[5] = 0;                     // sensor 3
@@ -110,7 +107,7 @@ namespace {
 
 int
 read(AC_data_frame & data, const int & fd) {
-    std::string message('\0', AC_TO_CM_LEN); //make a placeholder for the data in the container to reduce dynamic calls
+    std::array<char, AC_TO_CM_LEN> message;
 
     int rv = read_uart_message(message, fd);
     if(rv <= 0) // no new message or error
@@ -127,7 +124,7 @@ read(AC_data_frame & data, const int & fd) {
 
 void 
 send_default(const int & fd) {
-    std::string message('\0', CM_TO_AC_LEN); //make a placeholder for the data in the container to reduce dynamic calls
+    std::array<char, CM_TO_AC_LEN> message; //make a placeholder for the data in the container to reduce dynamic calls
     make_uart_message(message);
     for(unsigned int i=0; i<CM_TO_AC_LEN; ++i)
         serialPutchar(fd, message[i]);

@@ -56,10 +56,11 @@ int main() {
         if(serialDataAvail(fd) < 0) {
             cout << "error" << endl;
         }
-        while(serialDataAvail(fd) > 0) {
-            cout << hex << serialGetchar(fd) << endl;
+        if(serialDataAvail(fd) >= 16) {
+            for(int i=0; i<16; ++i)
+                cout << hex << serialGetchar(fd) << ' ';
+            cout << endl;
         }
-        cout << endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     
