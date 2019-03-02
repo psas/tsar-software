@@ -19,6 +19,9 @@ hardware_controller(std::shared_ptr<link_logger> & input) : _ll(input), _actuato
     pinMode(LIGHT_2_GPIO, OUTPUT);
     digitalWrite(LIGHT_2_GPIO, LOW);
     _gpio_data.light_2_status = digitalRead(LIGHT_2_GPIO);
+    pinMode(SEQ_EMERGENCY_LIGHT, OUTPUT);
+    digitalWrite(SEQ_EMERGENCY_LIGHT, LOW);
+    _gpio_data.light_2_status = digitalRead(SEQ_EMERGENCY_LIGHT);
 
     // setup uart heartbeat and 1st send message
     _next_heartbeat_time = std::chrono::system_clock::now() - std::chrono::milliseconds(HB_TIME_MS);
@@ -161,6 +164,25 @@ light_off() {
     digitalWrite(LIGHT_1_GPIO, LOW);
     _gpio_data.light_1_status = digitalRead(LIGHT_1_GPIO);
 
+    _mutex.unlock();
+    return 1;
+}
+
+// make gpio pin voltage high
+int hardware_controller::
+in_emergency() {
+    _mutex.lock();
+    digitalWrite(SEQ_EMERGENCY_LIGHT, HIGH);
+    _mutex.unlock();
+    return 1;
+}
+
+
+// make gpio pin voltage low
+int hardware_controller::
+not_in_emergency() {
+    _mutex.lock();
+    digitalWrite(SEQ_EMERGENCY_LIGHT, LOW);
     _mutex.unlock();
     return 1;
 }

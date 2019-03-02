@@ -38,6 +38,7 @@ struct sequencer_status {
         int next_state;
         int state_after_wait; // only used for waits
         int state_after_halt; // only used for halts
+        int state_after_emergency; // only used for emergencies
 };
 
 #endif

@@ -24,11 +24,12 @@
 
 // raspberry pi i2c senors
 #define MPL3115A2_1_ADD 0x60            // example MPL3115A2
-#define MPL3115A2_2_ADD 0x63            // example non existing MPL3115A2
+#define MPL3115A2_2_ADD 0x63            // example non existing MPL3115A2 device
 
 // raspberry pi gpio pins
 #define LIGHT_1_GPIO 0                  // gpio17 or pin11 on pi
-#define LIGHT_2_GPIO 1                  // gpio18 or pin12 on pi (non existing)
+#define LIGHT_2_GPIO 1                  // gpio18 or pin12 on pi (non existing light for testing)
+#define SEQ_EMERGENCY_LIGHT 2           // gpio21 or pin? on pi
 
 // uart
 #define BUAD_RATE 9600                  // UART buad rate
@@ -61,6 +62,8 @@ class hardware_controller : public main_class {
 
         int light_on();
         int light_off();
+        int in_emergency();
+        int not_in_emergency();
         void driver_loop();
         //TODO modify next uart message to be sent function (for sequencer to call)
     private:

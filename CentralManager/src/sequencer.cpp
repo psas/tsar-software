@@ -129,14 +129,31 @@ sequence() {
  *      true was in emergency state
  */
 bool sequencer::
-emergency_state() {
-    if(status.current_state == eUnknown || status.current_state == eEmergency) {
-        std::cout << "emergency_state" << std::endl;
-        status.current_state = eEmergency;
-        // call emergency hardware functions, TODO make emergency hardware functions
-        return true;
+emergency_state() { // call emergency hardware functions, TODO make emergency hardware functions
+    bool emergency;
+
+    if(status.current_state == eEmergency) {
+        if(last_hdw_frame.AC_connected == true) {
+            status.next_state = status.state_after_emergency;
+            hdw_ctrl->not_in_emergency();
+            emergency = false;
+        }
+        else
+            emergency = true;
     }
-    return false;
+    else{
+        if(last_hdw_frame.AC_connected == false) {
+            status.current_state = eEmergency;
+            status.state_after_emergency = status.next_state;
+            status.next_state = eEmergency;
+            hdw_ctrl->in_emergency();
+            emergency = true;
+        }
+        else
+            emergency = false;
+    }
+
+    return emergency;
 }
 
 
