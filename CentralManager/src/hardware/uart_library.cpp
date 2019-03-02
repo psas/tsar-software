@@ -25,7 +25,7 @@ namespace {
             }
         }
         else if (len == -1) { // error
-            std::cout << "serialDataAvail error" << std::endl; // TODO log this
+            //std::cout << "serialDataAvail error" << std::endl; // TODO log this
             rv = -1;
         }
         return rv;

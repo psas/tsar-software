@@ -79,7 +79,5 @@ class hardware_controller : public main_class {
         gpio_data_frame _gpio_data;
         bool _AC_connected;
         AC_data_frame _AC_data;
-
-        std::chrono::system_clock::time_point _next_heartbeat_time;
 };
 #endif

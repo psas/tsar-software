@@ -33,12 +33,9 @@ hardware_controller::
 
 void hardware_controller::
 driver_loop() {
-    std::chrono::system_clock::time_point current_time;
+    auto current_time = std::chrono::system_clock::now();
+    auto _next_heartbeat_time = current_time - std::chrono::milliseconds(HB_TIME_MS);
     hardware_data_frame data_frame;
-
-    current_time = std::chrono::system_clock::now();
-    uart_library::send_default(_uart_fd);
-    _next_heartbeat_time = current_time + std::chrono::milliseconds(HB_TIME_MS);
 
     _driver_running = true;
     while(_driver_running) {
@@ -48,15 +45,18 @@ driver_loop() {
         update_i2c_data();
         update_gpio_data();
 
-        // read uart message
-        uart_library::read(_AC_data, _uart_fd);
-
         // send uart message
         current_time = std::chrono::system_clock::now();
         if(current_time >= _next_heartbeat_time) {
             uart_library::send_default(_uart_fd); // TODO add function for sequencer to call to change default message
             _next_heartbeat_time = current_time + std::chrono::milliseconds(HB_TIME_MS);
         }
+
+        // read uart message
+        if(uart_library::read(_AC_data, _uart_fd) == -1)
+            _AC_connected = false;
+        else
+            _AC_connected = true;
         
         // update link_logger
         if(_ll != NULL) {

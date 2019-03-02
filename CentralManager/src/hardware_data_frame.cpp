@@ -65,6 +65,8 @@ make_JSON(std::string & output) {
     writer.Bool(gpio_data.light_2_status);
 
     // uart
+    writer.Key("AC_connected"); 
+    writer.Bool(AC_connected);
     writer.Key("AC_next_failure_mode"); 
     writer.Int((int)AC_data.next_failure_mode);
     writer.Key("AC_failure_mode"); 
@@ -147,6 +149,10 @@ make_JSON_diff(std::string & output, const hardware_data_frame & other) {
     }
 
     // uart
+    if(AC_connected != other.AC_connected) {
+        writer.Key("AC_connected"); 
+        writer.Bool(AC_connected);
+    }
     if(AC_data.next_failure_mode != other.AC_data.next_failure_mode) {
         writer.Key("AC_next_failure_mode"); 
         writer.Int((int)AC_data.next_failure_mode);
