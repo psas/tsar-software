@@ -35,7 +35,7 @@ server = ['server', 'main_class']
 link = ['link_logger', 'sequencer_status', 'hardware_data_frame','client_command']
 link.extend(server)
 
-hardware = ['hardware/hardware_controller', 'hardware/i2c_library', 'hardware/uart_library']
+hardware = ['hardware/hardware_controller', 'hardware/i2c_library', 'hardware/pi_uart']
 hardware.extend(link)
 
 sequencer = ['sequencer']

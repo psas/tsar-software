@@ -12,14 +12,16 @@
  */
 class pi_uart {
     public:
-        pi_uart();
+        pi_uart(const char * path, const int & buad);
         ~pi_uart();
         bool read(std::vector<char> & message);
         bool send(const std::vector<char> & message);
         bool status() const;
     private:
+        uint32_t make_checksum(const std::vector<char> & message) const;
+        
         std::string _path;
-        int _baud; 
+        int _buad; 
         bool _connected;
         int _fd;
 };

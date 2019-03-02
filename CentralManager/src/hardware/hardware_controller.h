@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <memory>                       // shared_ptr
 #include <thread>                       // sleep_for
+#include <vector>                       // sleep_for
 #include <wiringPi.h>                   // raspberry pi UART/GPIO
 #include <wiringSerial.h>               // raspberry pi UART
 
@@ -71,7 +72,7 @@ class hardware_controller : public main_class {
 
         // send and reads uart message if availibe
         void update_uart_data();
-        void update_uart_frame(const std::vector<char> & message);
+        void update_AC_data(const std::vector<char> & message);
 
         // makes a hardware data frame
         void make_frame(hardware_data_frame & input);
@@ -89,7 +90,7 @@ class hardware_controller : public main_class {
 
         // for uart Actuator Controller
         pi_uart _actuator_controller;
-        std::vector<int8_t> _next_uart_msg; // TODO make function to modify this
+        std::vector<char> _next_uart_msg; // TODO make function to modify this
         std::chrono::system_clock::time_point _next_heartbeat_time;
 };
 #endif

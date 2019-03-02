@@ -2,7 +2,7 @@
 
 
 // default construtor
-pi_uart::pi_uart(const char * path, const int & baud) _path(path), _baud(baud), _connected(false) {}
+pi_uart::pi_uart(const char * path, const int & buad) : _path(path), _buad(buad), _connected(false) {}
 
 
 // closes the uart connecction if open;
@@ -17,10 +17,10 @@ pi_uart::~pi_uart() {
  * the message and a 4 byte checksum after the message. The checksum include the '\n'.
  */
 bool pi_uart::
-send(std::vector<char> & message) {
+send(const std::vector<char> & message) {
     // open uart connection if one is not open
     if(_connected == false) { 
-        _fd = serialOpen(&_path[0], _baud);
+        _fd = serialOpen(&_path[0], _buad);
         if(_fd == -1) // no connection availible
             return 0;
         else // connection openned
@@ -82,8 +82,8 @@ read(std::vector<char> & message) {
 /* Calculates checksum for message. This expects the message not the entire package 
  * (no starting '\n' or 4 byte checksum space at end).
  */
-uint32_t
-make_checksum(const std::vector<char> & message) { 
+uint32_t pi_uart::
+make_checksum(const std::vector<char> & message) const { 
     uint64_t checksum = ('\n' * '\n' * '\n') % 251;
 
     for(unsigned int i=0; i<message.size(); ++i)

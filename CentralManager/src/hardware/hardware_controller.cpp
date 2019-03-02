@@ -3,7 +3,7 @@
 
 // constructor, need pointer to link
 hardware_controller::
-hardware_controller(std::shared_ptr<link_logger> & input) : _ll(input), _actuator_controller(UART_PATH, UART_PATH), _next_uart_msg(CM_TO_AC_LEN, 0) {
+hardware_controller(std::shared_ptr<link_logger> & input) : _ll(input), _actuator_controller(UART_PATH, BUAD_RATE), _next_uart_msg(CM_TO_AC_LEN, 0) {
     wiringPiSetup();
 
     // setup i2c sensors
@@ -113,11 +113,11 @@ update_uart_data() {
         _next_heartbeat_time = current_time + std::chrono::milliseconds(HB_TIME_MS);
     }
 
-    // recv message if available
-    if(_AC.status) {
-        std::vector<char> message(CM_TO_AC_LEN);
-        if(_actuator_controller.recv(message))
-            update_uart_frame(message) // only if new message
+    // read message if available
+    if(_actuator_controller.status()) {
+        std::vector<char> message(AC_TO_CM_LEN, 0);
+        if(_actuator_controller.read(message))
+            update_AC_data(message); // only if new message
     }
     return;
 }
@@ -125,7 +125,7 @@ update_uart_data() {
 
 // updates Actuator Controller data
 void hardware_controller::
-update_uart_frame(const std::vector<char> & message) {
+update_AC_data(const std::vector<char> & message) {
     _AC_data.next_failure_mode = message[0];
     _AC_data.failure_mode = message[1];
     _AC_data.failure_cause = message[2];
