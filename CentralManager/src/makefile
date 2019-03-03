@@ -20,8 +20,8 @@ PI_FLAGS=-lwiringPi
 PROGS=CentralManager
 
 SERVERFILES=server.cpp main_class.cpp
-LINKFILES=link_logger.cpp $(SERVERFILES) sensor_data_frame.cpp client_command.cpp sequencer_status.cpp
-HARDWAREFILES=hardware_controller.cpp hardware_library.cpp $(LINKFILES)
+LINKFILES=link_logger.cpp $(SERVERFILES) hardware_data_frame.cpp client_command.cpp sequencer_status.cpp
+HARDWAREFILES=hardware_controller.cpp i2c_library.cpp pi_uart.cpp $(LINKFILES)
 SEQUENCERFILES=sequencer.cpp $(HARDWAREFILES)
 ALLFILES= governor.cpp $(SEQUENCERFILES)
 
