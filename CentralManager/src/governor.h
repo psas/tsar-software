@@ -5,7 +5,7 @@
 #include <atomic>           // atomic
 #include <mutex>            // mutex
 
-#include "main_class.h"
+#include "base_class.h"
 #include "sequencer.h"
 #include "hardware/hardware_controller.h"
 #include "link_logger.h"
@@ -24,7 +24,7 @@
  * Once the Sequencer has declared it has finish sequencing, the Governor will end all 
  * threads and exit.
  */
-class governor : public main_class {
+class governor : public base_class {
     public:
         governor();
         ~governor();

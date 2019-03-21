@@ -6,7 +6,7 @@
 #include <chrono>                           // time
 #include <thread>                           // sleep_for
 
-#include "main_class.h"
+#include "base_class.h"
 #include "server.h"
 #include "fixed_queue.hpp"
 #include "client_command.h"
@@ -40,7 +40,7 @@ struct send_data {
  * into a command class object for the sequencer to process. 
  * This will also save all strings made for later data/system analysis.
  */
-class link_logger : public main_class {
+class link_logger : public base_class {
     public:
         link_logger(std::shared_ptr<server> input_server);
 

@@ -16,7 +16,7 @@
 #include <atomic>                   // atomic
 #include <iostream>                 // cout, cerr
 
-#include "main_class.h"
+#include "base_class.h"
 #include "fixed_queue.hpp"
 
 #define PORT 8080
@@ -28,7 +28,7 @@
 #define RECV_Q_LENGTH 50
 
 // Asynchronous TCP server.
-class server : public main_class {
+class server : public base_class {
     public:
         server();
 

@@ -1,5 +1,5 @@
-#ifndef _MAIN_CLASS_
-#define _MAIN_CLASS_
+#ifndef _BASE_CLASS_
+#define _BASE_CLASS_
 
 #include <iostream>     // cout, cerr
 #include <string>       // string
@@ -8,7 +8,7 @@
 #include <mutex>        // mutex
 
 
-// for throwing exceptions in the constructor of main classes
+// for throwing exceptions in the constructor of base classes
 class CM_Exception {
     public: 
         CM_Exception(std::string str) : msg(str) {}
@@ -18,15 +18,15 @@ class CM_Exception {
 };
 
 
-class main_class {
+class base_class {
     public:
-        //main_class(const main_class &) = delete;
-        //main_class(main_class &&) = delete;
-        //main_class& operator=(const main_class &) = delete;
+        //base_class(const base_class &) = delete;
+        //base_class(base_class &&) = delete;
+        //base_class& operator=(const base_class &) = delete;
         virtual void driver_loop() = 0;
         void stop_driver();
     protected:
-        main_class();
+        base_class();
         // gets current time in microseconds as a string
         void get_time_us(std::string & time) const;
 
@@ -35,4 +35,4 @@ class main_class {
     private:
         long long _system_epoch;
 };
-#endif
+#endif // _BASE_CLASS_

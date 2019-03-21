@@ -10,7 +10,7 @@
 #include <wiringPi.h>                   // raspberry pi UART/GPIO
 #include <wiringSerial.h>               // raspberry pi UART
 
-#include "../main_class.h"
+#include "../base_class.h"
 #include "../hardware_data_frame.h"
 #include "../link_logger.h"
 #include "pi_uart.h"
@@ -62,7 +62,7 @@ enum eGPIO {
  * Controls the hardware, the hardware interface for the sequencer.
  * It also maintains a connection to the Actuator Contoller (AC) for issuing command to.
  */
-class hardware_controller : public main_class {
+class hardware_controller : public base_class {
     public:
         // normal contructor for when not debugging
         hardware_controller(std::shared_ptr<link_logger> & input);

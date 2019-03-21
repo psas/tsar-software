@@ -30,7 +30,7 @@ to uses this:
 
 
 # the list of sub-class need by selectec class
-server = ['server', 'main_class']
+server = ['server', 'base_class']
 
 link = ['link_logger', 'sequencer_status', 'hardware_data_frame','client_command']
 link.extend(server)

@@ -1,7 +1,7 @@
-#include "main_class.h"
+#include "base_class.h"
 
-main_class::
-main_class() : _driver_running(false) {
+base_class::
+base_class() : _driver_running(false) {
     auto now = std::chrono::steady_clock::now();
     auto now_us = std::chrono::time_point_cast<std::chrono::microseconds>(now);
     auto epoch = now_us.time_since_epoch();
@@ -13,7 +13,7 @@ main_class() : _driver_running(false) {
  * gets monotonic time from hardware (in microseconds) as a string
  * used for logging and data frames sent to clients
  */
-void main_class::
+void base_class::
 get_time_us(std::string & time) const {
     auto now = std::chrono::steady_clock::now();
     auto now_us = std::chrono::time_point_cast<std::chrono::microseconds>(now);
@@ -24,7 +24,7 @@ get_time_us(std::string & time) const {
 }
 
 
-void main_class::
+void base_class::
 stop_driver() {
     _mutex.lock();
     _driver_running = false;

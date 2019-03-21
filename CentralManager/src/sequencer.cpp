@@ -3,7 +3,7 @@
 // main constructor
 sequencer::
 sequencer(std::shared_ptr<link_logger> & link_input, std::shared_ptr<hardware_controller> & hdw_ctrl_input) : 
-        link(link_input), hdw_ctrl(hdw_ctrl_input) {
+        link(link_input), hdw_ctrl(hdw_ctrl_input), _system_needed(true) {
     status.current_state = eStart;
     status.next_state = eStart;
 }
@@ -163,7 +163,7 @@ emergency_state() { // call emergency hardware functions, TODO make emergency ha
 bool sequencer::
 is_running() {
     _mutex.lock();
-    bool r = _driver_running;
+    bool r = _system_needed;
     _mutex.unlock();
     return r;
 }
