@@ -14,6 +14,7 @@
 #include "../hardware_data_frame.h"
 #include "../link_logger.h"
 #include "pi_uart.h"
+#include "pi_gpio.h"
 #include "i2c_library.h"
 #include "i2c_data_frame.h"
 #include "AC_data_frame.h"
@@ -48,6 +49,15 @@ struct i2c_fd_list {
 };
 
 
+// GPIO list for sequencer to use to issue command to specific GPIO pins
+enum eGPIO {
+    eLight1,
+    eLight2,
+    eEmergencyLight,
+    GPIO_COUNT // this must always be the last item in the enum, only used to get size
+};
+
+
 /*
  * Controls the hardware, the hardware interface for the sequencer.
  * It also maintains a connection to the Actuator Contoller (AC) for issuing command to.
@@ -65,6 +75,7 @@ class hardware_controller : public main_class {
         int in_emergency();
         int not_in_emergency();
         void driver_loop();
+        void set_gpio_value(const int & in, const int & value);
         //TODO modify next uart message to be sent function (for sequencer to call)
     private:
         // reads sensor values, updates internal data frame
@@ -82,7 +93,10 @@ class hardware_controller : public main_class {
 
         std::shared_ptr<link_logger> _ll;
 
-        // all fd info
+        // GPIO array for sequencer to call, uses gpio enum as index
+        std::vector<pi_gpio> _gpio_pins;
+
+        // all i2c fd info
         i2c_fd_list _i2c_fds;
         int _uart_fd;
 

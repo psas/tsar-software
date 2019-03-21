@@ -104,13 +104,13 @@ sequence() {
                 status.next_state = status.current_state;
             break;
         case eLightOn:
-            hdw_ctrl->light_on();
+            hdw_ctrl->set_gpio_value(eLight1, HIGH);
             wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(1);
             status.next_state = eWait;
             status.state_after_wait = eLightOff;
             break;
         case eLightOff:
-            hdw_ctrl->light_off();
+            hdw_ctrl->set_gpio_value(eLight1, LOW);
             wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(1);
             status.next_state = eWait;
             status.state_after_wait = eLightOn;
@@ -135,10 +135,11 @@ emergency_state() { // call emergency hardware functions, TODO make emergency ha
     if(status.current_state == eEmergency) {
         if(last_hdw_frame.AC_connected == true) {
             status.next_state = status.state_after_emergency;
-            hdw_ctrl->not_in_emergency();
+            hdw_ctrl->set_gpio_value(eEmergencyLight, LOW);
             emergency = false;
         }
         else
+            // call emergency function(s)
             emergency = true;
     }
     else{
@@ -146,7 +147,8 @@ emergency_state() { // call emergency hardware functions, TODO make emergency ha
             status.current_state = eEmergency;
             status.state_after_emergency = status.next_state;
             status.next_state = eEmergency;
-            hdw_ctrl->in_emergency();
+            hdw_ctrl->set_gpio_value(eEmergencyLight, HIGH);
+            // call emergency function(s)
             emergency = true;
         }
         else

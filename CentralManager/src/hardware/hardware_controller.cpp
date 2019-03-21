@@ -12,16 +12,10 @@ hardware_controller(std::shared_ptr<link_logger> & input) : _ll(input), _actuato
     _i2c_fds.MPL3115A2_2 = i2c_library::MPL3115A2_setup(MPL3115A2_2_ADD);
     _i2c_data.sensor_2_connected = true;
 
-    // setup gpio pins
-    pinMode(LIGHT_1_GPIO, OUTPUT);
-    digitalWrite(LIGHT_1_GPIO, LOW);
-    _gpio_data.light_1_status = digitalRead(LIGHT_1_GPIO);
-    pinMode(LIGHT_2_GPIO, OUTPUT);
-    digitalWrite(LIGHT_2_GPIO, LOW);
-    _gpio_data.light_2_status = digitalRead(LIGHT_2_GPIO);
-    pinMode(SEQ_EMERGENCY_LIGHT, OUTPUT);
-    digitalWrite(SEQ_EMERGENCY_LIGHT, LOW);
-    _gpio_data.light_2_status = digitalRead(SEQ_EMERGENCY_LIGHT);
+    // setup gpio pins, since this are built in a vector a enum can be used to index
+    _gpio_pins.push_back(new pi_gpio(LIGHT_1_GPIO, LOW));
+    _gpio_pins.push_back(new pi_gpio(LIGHT_2_GPIO, LOW));
+    _gpio_pins.push_back(new pi_gpio(SEQ_EMERGENCY_LIGHT, LOW));
 
     // setup uart heartbeat and 1st send message
     _next_heartbeat_time = std::chrono::system_clock::now() - std::chrono::milliseconds(HB_TIME_MS);
@@ -98,8 +92,8 @@ update_i2c_data() {
 // build new sensor frame from live sensors 
 void hardware_controller::
 update_gpio_data() {
-    _gpio_data.light_1_status = digitalRead(LIGHT_1_GPIO);
-    _gpio_data.light_2_status = digitalRead(LIGHT_2_GPIO);
+    _gpio_data.light_1_status = _gpio_pins[eLight1];
+    _gpio_data.light_2_status = _gpio_pins[eLight2];
     return;
 }
 
@@ -143,47 +137,12 @@ update_AC_data(const std::vector<char> & message) {
 }
 
 
-// make gpio pin voltage high
-int hardware_controller::
-light_on() {
+// set a gpio pin value, in must be a valid number from gpio enum
+void hardware_controller::
+set_gpio_value(const int & in, const int & value) {
     _mutex.lock();
-
-    digitalWrite(LIGHT_1_GPIO, HIGH);
-    _gpio_data.light_1_status = digitalRead(LIGHT_1_GPIO);
-
+    if(in > 0 && in < GPIO_COUNT)
+        _gpio_pins[in]->set_value(value);
     _mutex.unlock();
-    return 1;
+    return;
 }
-
-
-// make gpio pin voltage low
-int hardware_controller::
-light_off() {
-    _mutex.lock();
-
-    digitalWrite(LIGHT_1_GPIO, LOW);
-    _gpio_data.light_1_status = digitalRead(LIGHT_1_GPIO);
-
-    _mutex.unlock();
-    return 1;
-}
-
-// make gpio pin voltage high
-int hardware_controller::
-in_emergency() {
-    _mutex.lock();
-    digitalWrite(SEQ_EMERGENCY_LIGHT, HIGH);
-    _mutex.unlock();
-    return 1;
-}
-
-
-// make gpio pin voltage low
-int hardware_controller::
-not_in_emergency() {
-    _mutex.lock();
-    digitalWrite(SEQ_EMERGENCY_LIGHT, LOW);
-    _mutex.unlock();
-    return 1;
-}
-
