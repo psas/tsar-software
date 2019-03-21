@@ -1,4 +1,4 @@
-#include "wiringPi"
+#include "wiringPi.h"
 
 struct pi_gpio {
     pi_gpio(const int & pin, const int & value);

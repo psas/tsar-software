@@ -54,7 +54,7 @@ enum eGPIO {
     eLight1,
     eLight2,
     eEmergencyLight,
-    GPIO_COUNT // this must always be the last item in the enum, only used to get size
+    eGPIO_COUNT // this must always be the last item in the enum, only used to get size
 };
 
 

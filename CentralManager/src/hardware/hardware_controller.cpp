@@ -13,9 +13,9 @@ hardware_controller(std::shared_ptr<link_logger> & input) : _ll(input), _actuato
     _i2c_data.sensor_2_connected = true;
 
     // setup gpio pins, since this are built in a vector a enum can be used to index
-    _gpio_pins.push_back(new pi_gpio(LIGHT_1_GPIO, LOW));
-    _gpio_pins.push_back(new pi_gpio(LIGHT_2_GPIO, LOW));
-    _gpio_pins.push_back(new pi_gpio(SEQ_EMERGENCY_LIGHT, LOW));
+    _gpio_pins.push_back(pi_gpio(LIGHT_1_GPIO, LOW));
+    _gpio_pins.push_back(pi_gpio(LIGHT_2_GPIO, LOW));
+    _gpio_pins.push_back(pi_gpio(SEQ_EMERGENCY_LIGHT, LOW));
 
     // setup uart heartbeat and 1st send message
     _next_heartbeat_time = std::chrono::system_clock::now() - std::chrono::milliseconds(HB_TIME_MS);
@@ -92,8 +92,8 @@ update_i2c_data() {
 // build new sensor frame from live sensors 
 void hardware_controller::
 update_gpio_data() {
-    _gpio_data.light_1_status = _gpio_pins[eLight1];
-    _gpio_data.light_2_status = _gpio_pins[eLight2];
+    _gpio_data.light_1_status = _gpio_pins[eLight1].get_status();
+    _gpio_data.light_2_status = _gpio_pins[eLight2].get_status();
     return;
 }
 
@@ -141,8 +141,8 @@ update_AC_data(const std::vector<char> & message) {
 void hardware_controller::
 set_gpio_value(const int & in, const int & value) {
     _mutex.lock();
-    if(in > 0 && in < GPIO_COUNT)
-        _gpio_pins[in]->set_value(value);
+    if(in >= 0 && in < eGPIO_COUNT)
+        _gpio_pins[in].set_value(value);
     _mutex.unlock();
     return;
 }
