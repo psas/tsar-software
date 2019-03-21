@@ -12,6 +12,13 @@ main() {
         std::cout << "Setting nice to " << NICE_VALUE << " failed." << std::endl;
         // TODO: return or continue ?
     }
+    
+    sched_param new_param;
+    new_param.sched_priority = GOV_THREAD_PRIO;
+    
+    int r = pthread_setschedparam(pthread_self(), SCHED_FIFO, &new_param); // SCHED_FIFO is an RT policy
+    if(r != 0)
+        std::cout << "\ngovernor thread FIFO policy not enabled\n" << std::endl;
 
     governor gov;
     gov.driver_loop();

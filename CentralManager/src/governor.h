@@ -12,9 +12,15 @@
 #include "server.h"
 
 #define GOV_DRIVER_DELAY 500    // mircoseconds
-#define NICE_VALUE -20          // nice
-#define SEQ_THREAD_PRIO 20 
-#define HDW_THREAD_PRIO 15
+#define NICE_VALUE -20          // niceness
+
+// Thread Priorities:
+// The higher the value, the higher the prio (it will be negative in htop).
+// Values can be 0 to 100. 
+// Since everything else on PI has a prio of 0, kept these value closer to 0 than 100.
+#define GOV_THREAD_PRIO 25
+#define HDW_THREAD_PRIO 20
+#define SEQ_THREAD_PRIO 15  
 #define LINK_THREAD_PRIO 10
 #define SERV_THREAD_PRIO 5
 
