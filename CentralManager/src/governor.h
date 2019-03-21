@@ -13,10 +13,10 @@
 
 #define GOV_DRIVER_DELAY 500    // mircoseconds
 #define NICE_VALUE -20          // nice
-#define SEQ_THREAD_PRIO 10
-#define HDW_THREAD_PRIO 10
+#define SEQ_THREAD_PRIO 20 
+#define HDW_THREAD_PRIO 15
 #define LINK_THREAD_PRIO 10
-#define SERV_THREAD_PRIO 10
+#define SERV_THREAD_PRIO 5
 
 
 /* This class will handle the setup/end the entire Central Manager system and will 

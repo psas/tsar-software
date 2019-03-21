@@ -97,14 +97,16 @@ run_hdw() {
     hdw_thread_running = true;
     std::cout << "Hardware thread has started." << std::endl;
     pthread_setname_np(pthread_self(), "Hardware");
-    /*
-    TODO: thread prio
-    sched_param param;
-    int policy;
-    int r1 = pthread_getschedparam(pthread_self(), &policy, &param);
-    int r2 = pthread_setschedparam(pthread_self(), SCHED_FIFO, &param); // SCHED_FIFO is an RT policy
-    */
+    
+    sched_param new_param;
+    new_param.sched_priority = HDW_THREAD_PRIO;
+    
+    int r = pthread_setschedparam(pthread_self(), SCHED_FIFO, &new_param); // SCHED_FIFO is an RT policy
+    if(r != 0)
+        std::cout << "\nhardware controller thread FIFO policy not enabled\n" << std::endl;
+    
     hdw_ctrl->driver_loop();
+
     std::cout << "Hardware thread has stoped." << std::endl;
     hdw_thread_running = false;
 }
@@ -116,6 +118,14 @@ run_seq() {
     seq_thread_running = true;
     std::cout << "Sequencer thread has started." << std::endl;
     pthread_setname_np(pthread_self(), "Sequencer");
+
+    sched_param new_param;
+    new_param.sched_priority = SEQ_THREAD_PRIO;
+    
+    int r = pthread_setschedparam(pthread_self(), SCHED_FIFO, &new_param); // SCHED_FIFO is an RT policy
+    if(r != 0)
+        std::cout << "\nsequencer thread FIFO policy not enabled\n" << std::endl;
+
     seq->driver_loop();
     std::cout << "Sequencer thread has stoped." << std::endl;
     seq_thread_running = false;
@@ -128,6 +138,14 @@ run_link() {
     link_thread_running = true;
     std::cout << "Link thread has started." << std::endl;
     pthread_setname_np(pthread_self(), "Link");
+
+    sched_param new_param;
+    new_param.sched_priority = LINK_THREAD_PRIO;
+    
+    int r = pthread_setschedparam(pthread_self(), SCHED_FIFO, &new_param); // SCHED_FIFO is an RT policy
+    if(r != 0)
+        std::cout << "\nlink logger thread FIFO policy not enabled\n" << std::endl;
+
     link->driver_loop();
     std::cout << "Link thread has stoped." << std::endl;
     link_thread_running = false;
@@ -140,6 +158,14 @@ run_server() {
     server_thread_running = true;
     std::cout << "Server thread has started." << std::endl;
     pthread_setname_np(pthread_self(), "Server");
+
+    sched_param new_param;
+    new_param.sched_priority = SERV_THREAD_PRIO;
+    
+    int r = pthread_setschedparam(pthread_self(), SCHED_FIFO, &new_param); // SCHED_FIFO is an RT policy
+    if(r != 0)
+        std::cout << "\nserver thread FIFO policy not enabled\n" << std::endl;
+
     serv->driver_loop();
     std::cout << "Server thread has stoped." << std::endl;
     server_thread_running = false;
