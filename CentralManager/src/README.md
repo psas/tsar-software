@@ -59,19 +59,23 @@ Fixed Queue (a c++ template class)
 - [ ] Skeletal Protoype
   - [x] Governor
     - [x] Makes all threads needed
+    - [x] RT Thread priority
     - [x] Handles threads stopping early
   - [ ] Sequencer
     - [x] Working test sequence
-    - [ ] Emergency state check
+    - [x] Emergency state check
+    - [ ] Client command reader
   - [ ] Hardware Controller
+    - [ ] Control function for Sequencer to call
     - [x] I2C
     - [x] GPIO pins
-    - [ ] UART 
+    - [x] UART 
   - [x] LinkLogger
-    - [x] Send/Recv Queue
-    - [x] Send data to JSON
-    - [x] Sequencer status to JSON
-    - [x] JSON to commands
-  - [x] Server
+    - [x] Send/Recv Queues
+    - [x] Outgoing data to JSON
+    - [x] Incoming JSON to Commands data
+  - [ ] Server
     - [x] General TCP Server
     - [x] Send/Recv Queues
+    - [x] Test read client
+    - [ ] Asynchronous tcp test client
