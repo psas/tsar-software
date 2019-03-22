@@ -66,10 +66,11 @@ Fixed Queue (a c++ template class)
     - [x] Emergency state check
     - [ ] Client command reader
   - [ ] Hardware Controller
-    - [ ] Control function for Sequencer to call
-    - [x] I2C
-    - [x] GPIO pins
-    - [x] UART 
+    - [x] I2C example reader
+    - [x] GPIO pins control
+    - [x] GPIO control function for Sequencer to call
+    - [x] UART protocal to AC (with a heartbeat timeout)
+    - [ ] Control function for sending new UART message to AC
   - [x] LinkLogger
     - [x] Send/Recv Queues
     - [x] Outgoing data to JSON
@@ -77,5 +78,5 @@ Fixed Queue (a c++ template class)
   - [ ] Server
     - [x] General TCP Server
     - [x] Send/Recv Queues
-    - [x] Test read client
-    - [ ] Asynchronous tcp test client
+    - [x] Test read only client
+    - [ ] Test Asynchronous read/write client
