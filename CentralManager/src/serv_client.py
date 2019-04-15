@@ -1,91 +1,69 @@
 import socket #because it is a server client
 import json #for use with json strings
-import time #for the sleep oject.
 from threading import Thread #for multithreading
+import time
 
-#will create a while look
-#then take in a argument in python, stash into variable
-#then pass variable into encoder, and then put that into the queue.
-#and then send off all items in queue.
-
-#get local host machine name
-host = '192.168.0.14' #the hosts IP
-port = 8080 #configured port
-
-#create the socket
-#AF_NET is used because you are using two strings host, port .
-#SOCK_STREAM used because using a TCP Socket
-serv_sock = socket.socket(socket.AF_INET , socket.SOCK_STREAM)
-serv_sock.connect((host,port))
+def Main():	
+    print("Beginning") 
+    CMTT = CentralManagerTCPTester(host = '127.0.0.1')    
+    command_thread = Thread(target = CommandInterface , args = (CMTT))
+    command_thread.start()
+    CMTT.join()
 
 
-#This function writes all the data server sends to a file.
-def recieve(sock):
-    while(1):
-        data = sock.recv(1024) #This will be in a seperate thread
-        i_data = open("writing.txt" , "a")
-        i_data.write(repr(data))
-        i_data.close()
-        #print('Recieved:\n\n' , repr(data) , '\n\n') #as will this.
+def CommandInterface(CMTT):
+    while True:
+        commandChoices = ('Power': 'FALSE', 'Lights': 'FALSE', 'Camera': 'FALSE') ,
+                ('Power': 'TRUE' , 'Lights': 'TRUE' , 'Camera': 'TRUE'),
+                ('Power': 'TRUE' , 'Lights': 'FALSE', 'Camera': 'TRUE'),
+                ('Power': 'TRUE' , 'Lights': 'TRUE' , 'Camera': 'FALSE'),
+                ('Sequencer_Start': 'FALSE'),
+                ('Sequencer_Start': 'TRUE'),
+                ('Sequencer_Start': 'HALT')
+        
+        choice = int(input("\n\nWhat would you like to do?: \n 1) Turn all off. \n 2) Turn all on.\n 3) Turn lights off.\n 4) Turn Camera off. \n 5) End Sequencer. \n 6) Start Sequencer. \n 7) Halt Sequencer. \n\n type 'exit' to shut down.\n\n"))
+        CMTT.sock.sendall(commandChoices[choice])
 
 
-#allows the user to select the commands they send to the server.
-def commands(serv_sock):
-    #python dict's containing commands:
-    com0 = {'Power': 'FALSE', 'Lights': 'FALSE', 'Camera': 'FALSE'}
-    com1 = {'Power': 'TRUE' , 'Lights': 'TRUE' , 'Camera': 'TRUE'}
-    com2 = {'Power': 'TRUE' , 'Lights': 'FALSE', 'Camera': 'TRUE'}
-    com3 = {'Power': 'TRUE' , 'Lights': 'TRUE' , 'Camera': 'FALSE'}
 
-    seq0 = {'Sequencer_Start': 'FALSE'}
-    seq1 = {'Sequencer_Start': 'TRUE'}
-    seq2 = {'Sequencer_Start': 'HALT'}
+class CentralManagerTCPTester:
+    def __init__(self, host = '192.168.0.14', port = 8080):
+        print("Connecting TSAR Server")
+        self.host = host
+        self.port = port
 
-    choice = 0; #set the choice to 0.
-    while (choice != 'exit'):
+        #create the socket
+        #AF_NET is used because you are using two strings host, port .
+        #SOCK_STREAM used because using a TCP Socket
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.connect((self.host,self.port))
+        self.receiveThread = Thread(target = self.recieve) #creates the thread to collect the data
+        print("Client Receive Threads Initialized")
+        self.receiveThread.start()
 
-        choice = input("\n\nWhat would you like to do?: \n 1) Turn all off. \n 2) Turn all on.\n 3) Turn lights off.\n 4) Turn Camera off. \n 5) End Sequencer. \n 6) Start Sequencer. \n 7) Halt Sequencer. \n\n type 'exit' to shut down.\n\n")
+    #TODO: For some reason, this is printout out python type prefixes on data? Just print raw data to text file!
+    #TODO: Start new file for every execution of program. Use UUID library for name generation. Use format TSAR_DATA_[date]_[UUID]
+    def recieve(self):
+        print("Client Receive Thread executing")
+        while(1):
+            data = self.sock.recv(1024) #This will be in a separate thread
+            i_data = open("writing.txt" , "a")
+            i_data.write(repr(data))
+            i_data.close()
+            print('Recieved:\n\n' , repr(data) , '\n\n') #as will this.
 
-        if(choice == '1'):
-            json_com = json.dumps( com0 )
-            send_mess = bytes(json_com, 'utf-8')
-            serv_sock.sendall( send_mess  )
-        elif(choice == '2'):
-            json_com = json.dumps( com1 )
-            send_mess = bytes(json_com, 'utf-8')
-            serv_sock.sendall( send_mess  )
-        elif(choice == '3'):
-            json_com = json.dumps( com2 )
-            send_mess = bytes(json_com, 'utf-8')
-            serv_sock.sendall( send_mess  )
-        elif(choice == '4'):
-            json_com = json.dumps( com3 )
-            send_mess = bytes(json_com, 'utf-8')
-            serv_sock.sendall( send_mess  )
-        elif(choice == '5'):
-            json_com = json.dumps( seq0 )
-            send_mess = bytes(json_com, 'utf-8')
-            serv_sock.sendall( send_mess  )
-        elif(choice == '6'):
-            json_com = json.dumps( seq1 )
-            send_mess = bytes(json_com, 'utf-8')
-            serv_sock.sendall( send_mess  )
-        elif(choice == '7'):
-            json_com = json.dumps( seq2 )
-            send_mess = bytes(json_com, 'utf-8')
-            serv_sock.sendall( send_mess  )
+    def sendCommand(self, command):
+        #TODO: Send four-byte-long prefix containing length of JSON string
+        self.sock.sendall(bytes(json.dumps(command),'utf-8'))
 
-        print(send_mess)
+    def close(self):
+        self.sock.close()
+        self.receiveThread.exit()
+        print('\n\nConnection Closed Sucessfully\n')
+
+###########################################################
+###########################################################
+###########################################################
+
 if __name__ == "__main__":
-    
-    thread = Thread(target = recieve , args = (serv_sock , )) #creates the thread to collect the data
-    thread_comm = Thread(target = commands , args = (serv_sock , ))
-
-    thread.start() #starts the thread to write all sensor changes to a file.
-    thread_comm.start() #options thread
-
-    thread.join() #force the threads to stop.
-    thread_comm.join()
-
-    serv_sock.close()
-    print('\n\nConnection Closed Sucessfully\n')
+    Main()
