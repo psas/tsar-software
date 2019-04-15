@@ -4,3 +4,7 @@ CentralManager
 build.ninja
 .ninja*
 *.txt
+
+.DS_Store
+../../.DS_Store
+../.DS_Store
