@@ -1,0 +1,394 @@
+EESchema Schematic File Version 2
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:thermocouple-cache
+EELAYER 25 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 4
+Title "tutorial"
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Sheet
+S 1725 4900 1700 1350
+U 5B54EF84
+F0 "power" 60
+F1 "power.sch" 60
+F2 "+12V" I L 1725 5250 60 
+F3 "+10V" O R 3425 5250 60 
+F4 "-10V" O R 3425 5900 60 
+F5 "+5V" O R 3425 5575 60 
+F6 "GND" I L 1725 5900 60 
+$EndSheet
+$Sheet
+S 5475 1825 1700 1550
+U 5B55146C
+F0 "thermocouple_ckt" 60
+F1 "thermocouple_ckt.sch" 60
+F2 "+10V" I L 5475 2725 60 
+F3 "-10V" I L 5475 3025 60 
+F4 "TC_1-" I R 7175 2225 60 
+F5 "TC_1+" I R 7175 2100 60 
+F6 "+5V" I L 5475 2875 60 
+F7 "SCL" I L 5475 2150 60 
+F8 "SDA" O L 5475 2025 60 
+F9 "TC_2-" I R 7175 2525 60 
+F10 "TC_2+" I R 7175 2400 60 
+F11 "TC_3-" I R 7175 2825 60 
+F12 "TC_3+" I R 7175 2700 60 
+F13 "TC_4-" I R 7175 3125 60 
+F14 "TC_4+" I R 7175 3000 60 
+F15 "GND" I L 5475 3200 60 
+$EndSheet
+$Sheet
+S 5475 3825 1700 1350
+U 5B5D0E4B
+F0 "pressure_ckt" 60
+F1 "pressure_ckt.sch" 60
+F2 "+5V" I L 5475 4775 60 
+F3 "SCL" I L 5475 4100 60 
+F4 "SDA" O L 5475 3975 60 
+F5 "DiffChan_1+" I R 7175 3975 60 
+F6 "DiffChan_2+" I R 7175 4275 60 
+F7 "DiffChan_3+" I R 7175 4575 60 
+F8 "DiffChan_4+" I R 7175 4875 60 
+F9 "DiffChan_1-" I R 7175 4100 60 
+F10 "DiffChan_2-" I R 7175 4400 60 
+F11 "DiffChan_3-" I R 7175 4700 60 
+F12 "DiffChan_4-" I R 7175 5000 60 
+F13 "GND" I L 5475 4950 60 
+F14 "+10V" I L 5475 4625 60 
+$EndSheet
+$Comp
+L CONN_02X13 P1
+U 1 1 5B7A2DCC
+P 2375 2650
+F 0 "P1" H 2375 3350 50  0000 C CNN
+F 1 "CONN_02X13" V 2375 2650 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_2x13" H 2375 1775 50  0000 C CNN
+F 3 "" H 2375 1500 50  0001 C CNN
+F 4 "-" H -375 0   50  0001 C CNN "MFR"
+F 5 "-" H -375 0   50  0001 C CNN "MPN"
+F 6 "-" H -375 0   50  0001 C CNN "SPR"
+F 7 "-" H -375 0   50  0001 C CNN "SPN"
+F 8 "-" H -375 0   50  0001 C CNN "SPURL"
+	1    2375 2650
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR01
+U 1 1 5B7AA22C
+P 1225 6000
+F 0 "#PWR01" H 1225 5750 50  0001 C CNN
+F 1 "GND" H 1225 5850 50  0000 C CNN
+F 2 "" H 1225 6000 50  0000 C CNN
+F 3 "" H 1225 6000 50  0000 C CNN
+	1    1225 6000
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR02
+U 1 1 5B7AA90A
+P 5275 5025
+F 0 "#PWR02" H 5275 4775 50  0001 C CNN
+F 1 "GND" H 5275 4875 50  0000 C CNN
+F 2 "" H 5275 5025 50  0000 C CNN
+F 3 "" H 5275 5025 50  0000 C CNN
+	1    5275 5025
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR03
+U 1 1 5B7AAF41
+P 5275 3275
+F 0 "#PWR03" H 5275 3025 50  0001 C CNN
+F 1 "GND" H 5275 3125 50  0000 C CNN
+F 2 "" H 5275 3275 50  0000 C CNN
+F 3 "" H 5275 3275 50  0000 C CNN
+	1    5275 3275
+	1    0    0    -1  
+$EndComp
+Text Notes 2700 2850 0    60   ~ 0
+Stacking Connector\n(multiple boards\nmust have\ndifferent addresses)
+Text Notes 9600 5125 0    60   ~ 0
+Sensor IO\n
+Wire Wire Line
+	2125 2050 1425 2050
+Wire Wire Line
+	1425 2050 1425 5250
+Wire Wire Line
+	1425 5250 1725 5250
+Wire Wire Line
+	1225 5900 1725 5900
+Wire Wire Line
+	1225 1850 1225 6000
+Wire Wire Line
+	1225 3250 2125 3250
+Wire Wire Line
+	2625 3250 2725 3250
+Wire Wire Line
+	2725 3250 2725 3425
+Wire Wire Line
+	2725 3425 1425 3425
+Wire Wire Line
+	2625 2050 2725 2050
+Wire Wire Line
+	2725 2050 2725 1850
+Wire Wire Line
+	2725 1850 1225 1850
+Wire Wire Line
+	2900 2025 5475 2025
+Wire Wire Line
+	2900 1650 2900 2250
+Wire Wire Line
+	2900 2250 2625 2250
+Wire Wire Line
+	3050 2150 5475 2150
+Wire Wire Line
+	3050 1500 3050 2350
+Wire Wire Line
+	3050 2350 2625 2350
+Wire Wire Line
+	3675 5250 3425 5250
+Wire Wire Line
+	3675 2725 3675 5250
+Wire Wire Line
+	3675 2725 5475 2725
+Wire Wire Line
+	5475 2875 3850 2875
+Wire Wire Line
+	3850 2875 3850 5575
+Wire Wire Line
+	3850 5575 3425 5575
+Wire Wire Line
+	3425 5900 4025 5900
+Wire Wire Line
+	4025 5900 4025 3025
+Wire Wire Line
+	4025 3025 5475 3025
+Wire Wire Line
+	5475 4775 3850 4775
+Wire Wire Line
+	5475 4625 3675 4625
+Wire Wire Line
+	4875 2150 4875 4100
+Wire Wire Line
+	4875 4100 5475 4100
+Wire Wire Line
+	5475 3975 5050 3975
+Wire Wire Line
+	5050 3975 5050 2025
+Wire Wire Line
+	5275 5025 5275 4950
+Wire Wire Line
+	5275 4950 5475 4950
+Wire Wire Line
+	5275 3275 5275 3200
+Wire Wire Line
+	5275 3200 5475 3200
+Wire Wire Line
+	7175 2100 9175 2100
+Wire Wire Line
+	9175 2100 9175 2400
+Wire Wire Line
+	9175 2400 9450 2400
+Wire Wire Line
+	7175 2225 9050 2225
+Wire Wire Line
+	9050 2225 9050 2500
+Wire Wire Line
+	9050 2500 9450 2500
+Wire Wire Line
+	7175 2400 8925 2400
+Wire Wire Line
+	8925 2400 8925 2600
+Wire Wire Line
+	8925 2600 9450 2600
+Wire Wire Line
+	7175 2525 8800 2525
+Wire Wire Line
+	8800 2525 8800 2700
+Wire Wire Line
+	8800 2700 9450 2700
+Wire Wire Line
+	7175 2700 8675 2700
+Wire Wire Line
+	8675 2700 8675 2800
+Wire Wire Line
+	8675 2800 9450 2800
+Wire Wire Line
+	7175 2825 8550 2825
+Wire Wire Line
+	8550 2825 8550 2900
+Wire Wire Line
+	8550 2900 9450 2900
+Wire Wire Line
+	7175 3000 9450 3000
+Wire Wire Line
+	7175 3125 8300 3125
+Wire Wire Line
+	8300 3125 8300 3100
+Wire Wire Line
+	8300 3100 9450 3100
+Wire Wire Line
+	7175 3975 7725 3975
+Wire Wire Line
+	7725 3975 7725 4100
+Wire Wire Line
+	7725 4100 9450 4100
+Wire Wire Line
+	7175 4100 7600 4100
+Wire Wire Line
+	7600 4100 7600 4200
+Wire Wire Line
+	7600 4200 9450 4200
+Wire Wire Line
+	7175 4275 7725 4275
+Wire Wire Line
+	7725 4275 7725 4300
+Wire Wire Line
+	7725 4300 9450 4300
+Wire Wire Line
+	7175 4400 9450 4400
+Wire Wire Line
+	9450 4500 7975 4500
+Wire Wire Line
+	7975 4500 7975 4575
+Wire Wire Line
+	7975 4575 7175 4575
+Wire Wire Line
+	9450 4600 8100 4600
+Wire Wire Line
+	8100 4600 8100 4700
+Wire Wire Line
+	8100 4700 7175 4700
+Wire Wire Line
+	9450 4700 8225 4700
+Wire Wire Line
+	8225 4700 8225 4875
+Wire Wire Line
+	8225 4875 7175 4875
+Wire Wire Line
+	9450 4800 8350 4800
+Wire Wire Line
+	8350 4800 8350 5000
+Wire Wire Line
+	8350 5000 7175 5000
+Wire Wire Line
+	2900 1650 1625 1650
+Wire Wire Line
+	1625 1650 1625 3050
+Wire Wire Line
+	1625 3050 2125 3050
+Wire Wire Line
+	3050 1500 1775 1500
+Wire Wire Line
+	1775 1500 1775 2950
+Wire Wire Line
+	1775 2950 2125 2950
+Connection ~ 1425 3425
+Connection ~ 1225 3250
+Connection ~ 3850 4775
+Connection ~ 3675 4625
+Connection ~ 4875 2150
+Connection ~ 5050 2025
+Connection ~ 2900 2025
+Connection ~ 3050 2150
+NoConn ~ 2625 2450
+NoConn ~ 2625 2550
+NoConn ~ 2625 2650
+NoConn ~ 2625 2750
+NoConn ~ 2625 2850
+NoConn ~ 2625 2950
+NoConn ~ 2625 3050
+NoConn ~ 2625 3150
+NoConn ~ 2125 3150
+NoConn ~ 2125 2850
+NoConn ~ 2125 2750
+NoConn ~ 2125 2650
+NoConn ~ 2125 2550
+NoConn ~ 2125 2450
+NoConn ~ 2125 2350
+NoConn ~ 2125 2250
+NoConn ~ 2125 2150
+NoConn ~ 2625 2150
+$Comp
+L DB25 J1
+U 1 1 5BA45C8A
+P 9900 3600
+F 0 "J1" H 9950 4950 50  0000 C CNN
+F 1 "DB25" H 9850 2250 50  0000 C CNN
+F 2 "snapEda:TE_Conn_5747846_4_DB25" V 10125 3575 50  0000 C CNN
+F 3 "" H 9900 3600 50  0000 C CNN
+F 4 "Digikey" H 9900 3600 60  0001 C CNN "SPR"
+F 5 "A32126-ND" H 9900 3600 60  0001 C CNN "SPN"
+F 6 "5747846-4" H 9900 3600 60  0001 C CNN "MPN"
+F 7 "TE Connectivity" H 9900 3600 60  0001 C CNN "MFR"
+F 8 "CONN D-SUB RCPT 25POS R/A SOLDER" H 9900 3600 60  0001 C CNN "DESCR"
+	1    9900 3600
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9450 3200
+NoConn ~ 9450 3500
+NoConn ~ 9450 3600
+NoConn ~ 9450 3700
+NoConn ~ 9450 3800
+NoConn ~ 9450 3900
+NoConn ~ 9450 3300
+NoConn ~ 9450 3400
+NoConn ~ 9450 4000
+Text Notes 1525 4650 0    60   ~ 0
+input from battery\n(via stacking connector):\n12V nominal\nmin: 11.6V  max: 27.6V
+Text Notes 10475 2925 0    60   ~ 0
+Type K\nThermocouple\nInputs
+Text Notes 10500 4550 0    60   ~ 0
+4-20 mA\nSensor \nInputs
+Wire Notes Line
+	10200 2325 10425 2325
+Wire Notes Line
+	10425 2325 10425 3250
+Wire Notes Line
+	10425 3250 10250 3250
+Wire Notes Line
+	10225 3950 10450 3950
+Wire Notes Line
+	10450 3950 10450 4875
+Wire Notes Line
+	10450 4875 10275 4875
+Text Notes 3375 1950 0    60   ~ 0
+Computer Connects to I2C Bus \nvia Stacking Connector
+$EndSCHEMATC
