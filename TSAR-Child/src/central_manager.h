@@ -12,6 +12,6 @@ class CentralManager {
         int update();
         int state_machine();
         int control();
-}
+};
 
 #endif
