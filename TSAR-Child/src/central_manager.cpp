@@ -1,8 +1,10 @@
 #include "central_manager.h"
 
+
 CentralManager::
-CentralManager() {
+CentralManager(std::shared_ptr<SystemStatus> & input) : status(input) {
     //TODO set i2c reg
+    // make state struct
 }
 
 
@@ -24,39 +26,25 @@ CM_loop() {
 
 
 int CentralManager::
-read_hardware() {}
+read_hardware() {
+    return 1;
+}
 
 
 int CentralManager::
-update() {}
+update() {
+    return 1;
+}
 
 
 int CentralManager::
-state_machine() {}
+state_machine() {
+    return 1;
+}
 
 
 //TODO
 int CentralManager::
 control() { 
-    std::chrono::system_clock::time_point current_time;
-
-    status.current_state = status.next_state;
-
-    switch(status.current_state) {
-        case eEnd:
-            break;
-        case eStart:
-            break;
-        case eHalt:
-            break;
-        case eWait: 
-            break;
-        case eLightOn:
-            break;
-        case eLightOff:
-            break;
-        default :
-            break;
-    }
     return 1; 
 }

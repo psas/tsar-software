@@ -1,10 +1,11 @@
 #include "command_control.h"
-#include "central_manager.h"
 
 CommandControl::
 CommandControl() {
+    status = std::shared_ptr<SystemStatus>(new SystemStatus);
+    //CM(status);
     // set default state
-    // start cm thread
+    // start cm thread?
 }
 
 CommandControl::
@@ -14,7 +15,7 @@ CommandControl::
 
 int CommandControl::
 start_system() {
-    //start CM thred
+    //start CM thred here?
 
     interface();
 
@@ -22,13 +23,13 @@ start_system() {
 }
 
 
-void CommandControl::
-inferface() {
+int CommandControl::
+interface() {
 
     while(1) { //TODO add end state or break
         // interface output
     }
 
-    return;
+    return 1;
 }
 
