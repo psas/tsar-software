@@ -1,6 +1,8 @@
 #ifndef __CM__
 #define __CM__
 
+#include <iostream> //printing stuff
+
 class CentralManager {
     public:
         CentralManager();
