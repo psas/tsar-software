@@ -3,19 +3,26 @@
 CommandControl::
 CommandControl() {
     status = std::shared_ptr<SystemStatus>(new SystemStatus);
+    CM = std::shared_ptr<CentralManager>(new CentralManager(status));
+
+    status->current_state = "test";
+    status->last_state = "test";
     //CM(status);
     // set default state
     // start cm thread?
 }
+
 
 CommandControl::
 ~CommandControl() {
     // shut down other thread
 }
 
+
 int CommandControl::
 start_system() {
     //start CM thred here?
+    CM->CM_loop();
 
     interface();
 
@@ -26,8 +33,10 @@ start_system() {
 int CommandControl::
 interface() {
 
-    while(1) { //TODO add end state or break
+    for(unsigned int i=0; i<10; ++i) { //TODO change back to while(1), add end state or break
+        std::cout << "CC loop\n";
         // interface output
+        std::this_thread::sleep_for(std::chrono::milliseconds(CC_DELAY));
     }
 
     return 1;
