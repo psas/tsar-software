@@ -131,14 +131,18 @@ state_machine() {
     
     // emergency-stop
         case eEmergencyPurge:
-                status->current_state = eLockout;
+            std::cout << "\nGOING INTO EMERGENCY STATE!!!!!!!!\n\n" << std::endl;
+            status->current_state = eLockout;
             break;
 
         case eLockout:
+            else if(strncmp(state->last_command.c_str(), "shutdown", strlen("shutdown")) == 0) {
                 status->current_state = eSafeShutdown;
+            }
             break;
 
         case eSafeShutdown: // dead state
+            // TODO end thread
             break;
 
     // firing sequence
@@ -178,6 +182,8 @@ state_machine() {
 
         default:
             std::cout << "\nUNKNOWN STATE WTF!!!!!!!!\n\n" << std::endl;
+            status->current_state = eEmergencyPurge;
+            break;
     }
 
     return 1;
@@ -220,6 +226,7 @@ control() {
             break;
         default:
             std::cout << "\nUNKNOWN STATE WTF!!!!!!!!\n\n" << std::endl;
+            status->current_state = eEmergencyPurge;
             break;
     }
     return 1; 
