@@ -1,1 +1,8 @@
+<<<<<<< HEAD
 *.swp
+=======
+TSAR-Child
+*.o
+a.out
+*.csv
+>>>>>>> master

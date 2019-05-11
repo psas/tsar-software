@@ -1,22 +1,32 @@
 #include "central_manager.h"
 #include "command_control.h"
 
-CentralManager::CentralManager() {
-    //TODO set i2c regA
+
+CentralManager::
+CentralManager(std::shared_ptr<SystemStatus> & input) : status(input) {
+    state = std::shared_ptr<State>(new State);
+    datafile.open("startup.csv", std::fstream::app); //append to file
+    //TODO set i2c reg
+    // make state struct
 }
 
 
 CentralManager::~CentralManager() {
     // TODO may not be needed
+    datafile.close();
 }
 
 
-void CentralManager::CM_loop() {
-    while(1) { //TODO add end state or break
+void CentralManager::
+CM_loop() {
+    for(unsigned int i=0; i<10; ++i) { //TODO change back to while(1), add end state or break
+        std::cout << "CM loop" << std::endl;
         read_hardware();
         update();
         state_machine();
         control();
+        save();
+        std::this_thread::sleep_for(std::chrono::milliseconds(CM_DELAY));
     }
 }
 
@@ -38,25 +48,18 @@ int CentralManager::state_machine() {
 
 //TODO
 int CentralManager::control() { 
-    std::chrono::system_clock::time_point current_time;
+    return 1;
+}
 
-    status.current_state = status.next_state;
+int CentralManager::
+save() {
+    if(!datafile.is_open())
+        return 0;
 
-    switch(status.current_state) {
-        case eEnd:
-            break;
-        case eStart:
-            break;
-        case eHalt:
-            break;
-        case eWait: 
-            break;
-        case eLightOn:
-            break;
-        case eLightOff:
-            break;
-        default :
-            break;
-    }
-    return 1; 
+    datafile << status->current_state;
+    datafile << ',';
+    datafile << status->last_state;
+    datafile << '\n';
+    
+    return 1;
 }

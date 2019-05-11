@@ -2,7 +2,6 @@
 #define __STATE__
 
 #include <string>       // string
-#include <atomic>       // atomic
 
 struct State {
     std::string current_state;

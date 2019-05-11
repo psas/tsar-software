@@ -1,11 +1,14 @@
 #ifndef __CC__
 #define __CC__
 
-#include "system_status.h"
+#include <thread>               // sleep_for
+#include <chrono>               // time
+#include <memory>               // shared ptr
 #include "central_manager.h"
 #include "system_status.h"
-#include <thread> //for multithreading
 #include <iostream> //printing stuff
+
+#define CC_DELAY 500            // milliseconds
 
 class CommandControl{
     public:
@@ -15,8 +18,9 @@ class CommandControl{
 
     private:
         int interface();
-        
-        SystemStatus status;
+
+        std::shared_ptr<CentralManager> CM;
+        std::shared_ptr<SystemStatus> status;
 };
 
-#endif 
+#endif  // __CC__
