@@ -136,7 +136,7 @@ state_machine() {
             break;
 
         case eLockout:
-            else if(strncmp(state->last_command.c_str(), "shutdown", strlen("shutdown")) == 0) {
+            if(strncmp(state->last_command.c_str(), "shutdown", strlen("shutdown")) == 0) {
                 status->current_state = eSafeShutdown;
             }
             break;
