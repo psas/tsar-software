@@ -8,6 +8,7 @@ struct State {
     std::string last_command;
 
     int fire_count; // 0 for start up, 0 > for count
+    std::mutex state_mutex;
 
     // TODO add any data needed
 };

@@ -294,3 +294,13 @@ new_file_name() {
     file.append(".csv");
     return file;
 }
+
+
+int CentralManager::
+input_command(std::string &command){
+    state -> state_mutex.lock();
+    state -> last_command = command;
+    state -> state_mutex.unlock();
+    return 0;
+}
+

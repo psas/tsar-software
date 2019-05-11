@@ -63,8 +63,8 @@ interface() {
         command.clear();
         std::cout << std::endl << "Enter a command: ";
         std::cin >> command;
-        std::cout << std::endl << command << std::endl << std::endl;
-        status -> current_state = command;
+        std::cout << std::endl << std::endl << command << std::endl << std::endl; //keep this
+        CM -> input_command(command);
         
         std::this_thread::sleep_for(std::chrono::milliseconds(CC_DELAY));
     }

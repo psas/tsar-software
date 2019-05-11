@@ -45,6 +45,7 @@ class CentralManager {
         CentralManager(std::shared_ptr<SystemStatus> & input);
         ~CentralManager();
         void CM_loop();
+        int input_command(std::string &command);
 
     private:
         int read_hardware();
