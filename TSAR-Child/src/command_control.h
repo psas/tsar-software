@@ -18,9 +18,11 @@ class CommandControl{
 
     private:
         int interface();
+        void start_CM_thread();
 
         std::shared_ptr<CentralManager> CM;
         std::shared_ptr<SystemStatus> status;
+        std::thread CM_thread;
 };
 
 #endif  // __CC__

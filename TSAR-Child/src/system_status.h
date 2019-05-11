@@ -7,7 +7,7 @@
 
 struct SystemStatus {
     std::string current_state;
-    std::string last_state;
+    std::string last_command;
     std::atomic<bool> emergency_stop;
 
     // TODO add any data needed by interface display
