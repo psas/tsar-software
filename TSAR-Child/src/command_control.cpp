@@ -41,7 +41,11 @@ int CommandControl::interface() {
 
     while(1) { //TODO add end state or break
         // interface output
-
+        std::string command;
+        command.clear();
+        std::cout << std::endl << "Enter a command: ";
+        std::cin >> command;
+        status.current_state = command;
     }
 
     return 0;
