@@ -56,13 +56,14 @@ void CommandControl::start_CM_thread(){
 int CommandControl::
 interface() {
 
-    for(unsigned int i=0; i<10; ++i) { //TODO change back to while(1), add end state or break
+    while(1){ //TODO change back to while(1), add end state or break
 
         // interface output
         std::string command;
         command.clear();
         std::cout << std::endl << "Enter a command: ";
         std::cin >> command;
+        std::cout << std::endl << command << std::endl << std::endl;
         status -> current_state = command;
         
         std::this_thread::sleep_for(std::chrono::milliseconds(CC_DELAY));

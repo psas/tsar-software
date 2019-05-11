@@ -18,7 +18,7 @@ CentralManager::
 void CentralManager::
 CM_loop() {
 
-    for(unsigned int i=0; i<10; ++i) { // TODO change back to while(1), add end state or break
+   while(1){ // TODO change back to while(1), add end state or break
         std::cout << "CM loop" << std::endl;
         read_hardware();
         update();
