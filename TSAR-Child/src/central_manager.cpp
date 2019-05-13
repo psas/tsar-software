@@ -4,6 +4,13 @@ CentralManager::
 CentralManager() {
     system_epoch = get_time_us();
     state = std::shared_ptr<State>(new State);
+
+
+    // default values in state struct
+    state->current_state = 0;
+    state->current_state_name = "standby";
+    state->fire_count =0;
+
     //TODO set i2c reg
 }
 
@@ -19,7 +26,8 @@ void CentralManager::
 CM_loop() {
 
    while(1){ // TODO change back to while(1), add end state or break
-        std::cout << "CM loop" << std::endl;
+        state->state_mutex.lock();
+        std::cout << state->current_state_name << std::endl;
         read_hardware();
         update();
         state_machine();
@@ -27,6 +35,7 @@ CM_loop() {
         if(state->current_state >= eArmed) {
             save();
         }
+        state->state_mutex.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(CM_DELAY));
     }
 }
@@ -51,10 +60,11 @@ state_machine() {
             }
             else if(strncmp(state->last_command.c_str(), "arm", strlen("arm")) == 0) {
                 state->current_state = eArmed;
+                state->current_state_name ="armed";
                 datafile.open("startup.csv");
             }
             else {
-                std::cout << "Command: " << state->last_command << " not reconizied for standby state\n" << std::endl;
+                print_input_error(state->last_command, state->current_state_name);
             }
             state->last_command = "";
             break;
@@ -65,9 +75,10 @@ state_machine() {
             }
             else if(strncmp(state->last_command.c_str(), "chill", strlen("chill")) == 0) {
                 state->current_state = ePreChill;
+                state->current_state_name = "pre-chill";
             }
             else {
-                std::cout << "Command: " << state->last_command << " not reconizied for armed state\n" << std::endl;
+                print_input_error(state->last_command, state->current_state_name);
             }
             state->last_command = "";
             break;
@@ -77,10 +88,11 @@ state_machine() {
                 break;
             }
             else if(strncmp(state->last_command.c_str(), "ready", strlen("ready")) == 0) {
-                state->current_state = ePreChill;
+                state->current_state = eReady;
+                state->current_state_name = "ready";
             }
             else {
-                std::cout << "Command: " << state->last_command << " not reconizied for pre-chill state\n" << std::endl;
+                print_input_error(state->last_command, state->current_state_name);
             }
             state->last_command = "";
             break;
@@ -91,9 +103,10 @@ state_machine() {
             }
             else if(strncmp(state->last_command.c_str(), "pressurize", strlen("pressurize")) == 0) {
                 state->current_state = ePressurized;
+                state->current_state_name = "pressurized";
             }
             else {
-                std::cout << "Command: " << state->last_command << " not reconizied for ready state\n" << std::endl;
+                print_input_error(state->last_command, state->current_state_name);
             }
             state->last_command = "";
             break;
@@ -114,27 +127,31 @@ state_machine() {
                     datafile.open(new_file_name());
 
                     state->current_state = eIgnitionStart;
+                    state->current_state_name = "ignition start";
                     wait_until_time = std::chrono::system_clock::now() + std::chrono::milliseconds(IGNITION_START_TIME);
                 }
             }
             else if(strncmp(state->last_command.c_str(), "shutdown", strlen("shutdown")) == 0) {
                 state->current_state = eSafeShutdown;
+                state->current_state_name = "safe shutdown";
             }
             else {
-                std::cout << "Command: " << state->last_command << " not reconizied for pressurized state\n" << std::endl;
+                print_input_error(state->last_command, state->current_state_name);
             }
             state->last_command = "";
             break;
     
     // emergency-stop
         case eEmergencyPurge:
-            std::cout << "\nGOING INTO EMERGENCY STATE!!!!!!!!\n\n" << std::endl;
+            std::cout << TEXT_RED << "\nGOING INTO EMERGENCY STATE!!!!!!!!\n\n" << TEXT_WHITE << std::endl;
             state->current_state = eLockout;
+            state->current_state_name = "lockout";
             break;
 
         case eLockout:
             if(strncmp(state->last_command.c_str(), "shutdown", strlen("shutdown")) == 0) {
                 state->current_state = eSafeShutdown;
+                state->current_state_name = "safe shutdown";
             }
             break;
 
@@ -146,6 +163,7 @@ state_machine() {
         case eIgnitionStart:
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state->current_state = eIgnitionMain;
+                state->current_state_name = "ignition main";
                 wait_until_time = std::chrono::system_clock::now() + std::chrono::milliseconds(IGNITION_MAIN_TIME);
             }
             break;
@@ -153,6 +171,7 @@ state_machine() {
         case eIgnitionMain:
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state->current_state = eFiring;
+                state->current_state_name = "firing";
                 wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(firetime-1);
             }
             break;
@@ -160,6 +179,7 @@ state_machine() {
         case eFiring:
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state->current_state = eFiringStop;
+                state->current_state_name = "firing stop";
                 wait_until_time = std::chrono::system_clock::now() + std::chrono::milliseconds(FIRING_STOP_TIME);
             }
             break;
@@ -167,6 +187,7 @@ state_machine() {
         case eFiringStop:
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state->current_state = ePurge;
+                state->current_state_name = "purge";
                 wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(PURGE_TIME);
             }
             break;
@@ -174,12 +195,14 @@ state_machine() {
         case ePurge:
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state->current_state = ePressurized;
+                state->current_state_name = "pressurized";
             }
             break;
 
         default:
-            std::cout << "\nUNKNOWN STATE WTF!!!!!!!!\n\n" << std::endl;
+            std::cout << TEXT_RED <<"\nUNKNOWN STATE WTF!!!!!!!!\n\n" << TEXT_WHITE << std::endl;
             state->current_state = eEmergencyPurge;
+            state->current_state_name = "emergency purge";
             break;
     }
 
@@ -189,43 +212,6 @@ state_machine() {
 
 int CentralManager::
 control() { 
-    switch(state->current_state) {
-    // general
-        case eStandby:
-            break;
-        case eArmed:
-            break;
-        case ePreChill:
-            break;
-        case eReady:
-            break;
-        case ePressurized:
-            break;
-    
-    // emergency-stop
-        case eEmergencyPurge:
-            break;
-        case eLockout:
-            break;
-        case eSafeShutdown:
-            break;
-    
-    // firing sequence
-        case eIgnitionStart:
-            break;
-        case eIgnitionMain:
-            break;
-        case eFiring:
-            break;
-        case eFiringStop:
-            break;
-        case ePurge:
-            break;
-        default:
-            std::cout << "\nUNKNOWN STATE WTF!!!!!!!!\n\n" << std::endl;
-            state->current_state = eEmergencyPurge;
-            break;
-    }
     return 1; 
 }
 
@@ -302,5 +288,11 @@ input_command(std::string &command){
     state -> last_command = command;
     state -> state_mutex.unlock();
     return 0;
+}
+
+void CentralManager::
+print_input_error(std::string & command, std::string & state) {
+    std::cout << TEXT_YELLOW << "Command: " << command << " not reconizied for " << state << " state\n" << TEXT_WHITE << std::endl;
+    return;
 }
 

@@ -17,6 +17,10 @@
 #define FIRING_STOP_TIME        500     // milliseconds
 #define PURGE_TIME              3       // seconds
 
+#define TEXT_WHITE              "\033[0m"
+#define TEXT_RED                "\033[31m"
+#define TEXT_YELLOW             "\033[33m"
+
 enum eStates {
     // general
     eStandby,
@@ -55,6 +59,7 @@ class CentralManager {
         int parse_fire_command(std::string & command);
         long long get_time_us() const;
         std::string new_file_name();
+        void print_input_error(std::string & command, std::string & state);
 
         long long system_epoch;
         int firetime;

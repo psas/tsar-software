@@ -2,10 +2,11 @@
 #define __STATE__
 
 #include <string>       // string
-#include <mutex>       // mutex
+#include <mutex>        // mutex
 
 struct State {
     int current_state;
+    std::string current_state_name;
     std::string last_command;
 
     int fire_count; // 0 for start up, 0 > for count

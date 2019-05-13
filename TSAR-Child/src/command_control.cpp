@@ -33,7 +33,6 @@ interface() {
 
         // interface output
         command.clear();
-        std::cout << std::endl << "Enter a command: ";
         std::cin >> command;
         std::cout << std::endl << std::endl << command << std::endl << std::endl; //keep this
         CM -> input_command(command);
