@@ -32,7 +32,7 @@ CM_loop() {
         update();
         state_machine();
         control();
-        if(state->current_state >= eArmed) {
+        if(state->current_state >= eArmed && state->current_state != eSafeShutdown) {
             save();
         }
         state->state_mutex.unlock();
@@ -60,7 +60,7 @@ state_machine() {
             }
             else if(strncmp(state->last_command.c_str(), "arm", strlen("arm")) == 0) {
                 state->current_state = eArmed;
-                state->current_state_name ="armed";
+                state->current_state_name = "armed";
                 datafile.open("startup.csv");
             }
             else {
@@ -115,7 +115,7 @@ state_machine() {
             if(state->last_command.empty()) {
                 break;
             }
-            else if(strncmp(state->last_command.c_str(), "fire ", strlen("fire ")) == 0) {
+            else if(strncmp(state->last_command.c_str(), "fire", strlen("fire")) == 0) {
                 firetime = parse_fire_command(state->last_command);
                 if(firetime != -1) {
                     ++state->fire_count;
@@ -156,7 +156,9 @@ state_machine() {
             break;
 
         case eSafeShutdown: // dead state
-            // TODO end thread
+            if(datafile.is_open())
+                datafile.close();
+            // TODO end this thread
             break;
 
     // firing sequence
@@ -225,12 +227,13 @@ save() {
     // TODO add data here
     datafile << (get_time_us() - system_epoch); // TODO put in read hardware
     datafile << ',';
-    datafile << state->current_state;
+    datafile << state->current_state_name;
     datafile << ',';
     datafile << state->last_command;
     datafile << ',';
     datafile << state->fire_count;
     datafile << '\n';
+    datafile.flush();
     
     return 1;
 }
@@ -245,7 +248,7 @@ parse_fire_command(std::string & command) {
     int time_int;
 
     // create new string with "fire " remove from input string
-    std::string time = command.substr(strlen("fire "), command.length() - strlen("fire "));
+    std::string time = command.substr(strlen("fire"), command.length() - strlen("fire"));
 
     try {
         time_int = std::stoi(time);
@@ -265,9 +268,9 @@ parse_fire_command(std::string & command) {
 long long CentralManager::
 get_time_us() const {
     auto now = std::chrono::steady_clock::now();
-    auto now_us = std::chrono::time_point_cast<std::chrono::microseconds>(now);
+    auto now_us = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
     auto epoch = now_us.time_since_epoch();
-    auto value = std::chrono::duration_cast<std::chrono::microseconds>(epoch);
+    auto value = std::chrono::duration_cast<std::chrono::milliseconds>(epoch);
     return value.count();
 }
 
