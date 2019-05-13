@@ -2,6 +2,7 @@
 #define __STATE__
 
 #include <string>       // string
+#include <mutex>       // mutex
 
 struct State {
     int current_state;

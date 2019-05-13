@@ -9,7 +9,6 @@
 #include <string>               // strings
 #include <cstring>               // strcmp
 
-#include "system_status.h"
 #include "state.h"
 
 #define CM_DELAY                500     // milliseconds
@@ -42,7 +41,7 @@ enum eStates {
 
 class CentralManager {
     public:
-        CentralManager(std::shared_ptr<SystemStatus> & input);
+        CentralManager();
         ~CentralManager();
         void CM_loop();
         int input_command(std::string &command);
@@ -61,7 +60,6 @@ class CentralManager {
         int firetime;
         std::chrono::system_clock::time_point wait_until_time;
 
-        std::shared_ptr<SystemStatus> status;
         std::shared_ptr<State> state;
         std::ofstream datafile;
 };
