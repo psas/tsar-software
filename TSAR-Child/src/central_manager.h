@@ -42,7 +42,9 @@ enum eStates {
     ePurge,
 };
 
-
+// This class handles most of the hard work of controlling the system.
+// Handles reading/controlling hardware, controls the state of the system, 
+// and updates the user on progress.
 class CentralManager {
     public:
         CentralManager();

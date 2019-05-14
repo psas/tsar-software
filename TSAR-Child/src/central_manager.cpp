@@ -1,5 +1,6 @@
 #include "central_manager.h"
 
+// constructor
 CentralManager::
 CentralManager() {
     system_epoch = get_time_us();
@@ -11,10 +12,22 @@ CentralManager() {
     state->current_state_name = "standby";
     state->fire_count =0;
 
+    state->VVO = OPEN;
+    state->VVF = OPEN;
+    state->OPV = CLOSED;
+    state->FPV = CLOSED;
+    state->PPV = CLOSED;
+    state->IV1 = CLOSED;
+    state->IV2 = CLOSED;
+    state->MFV = CLOSED;
+    state->MOV = CLOSED;
+    state->IG = OFF;
+
     //TODO set i2c reg
 }
 
 
+// deconstructor
 CentralManager::
 ~CentralManager() {
     if(datafile.is_open())
@@ -22,10 +35,11 @@ CentralManager::
 }
 
 
+// main loop for central manager, that call the main functions
 void CentralManager::
 CM_loop() {
 
-   while(1){ // TODO change back to while(1), add end state or break
+   while(1){ // TODO add end state or break
         state->state_mutex.lock();
         std::cout << state->current_state_name << std::endl;
         read_hardware();
@@ -40,16 +54,21 @@ CM_loop() {
     }
 }
 
-
+// Handle reading all the I2C sensors
 int CentralManager::read_hardware() {
     return 0;
 }
 
 
+// TODO Updates the user?
 int CentralManager::update() {
     return 0;
 }
 
+
+// Determine if the a transistion can be made for the current state.
+// If the tranistion requriment(s) are met, the settings for the next state 
+// are set as it swap to the next state.
 int CentralManager::
 state_machine() {
     switch(state->current_state) {
@@ -62,6 +81,16 @@ state_machine() {
                 state->current_state = eArmed;
                 state->current_state_name = "armed";
                 datafile.open("startup.csv");
+                state->VVO = OPEN;
+                state->VVF = OPEN;
+                state->OPV = CLOSED;
+                state->FPV = CLOSED;
+                state->PPV = CLOSED;
+                state->IV1 = CLOSED;
+                state->IV2 = CLOSED;
+                state->MFV = CLOSED;
+                state->MOV = CLOSED;
+                state->IG = OFF;
             }
             else {
                 print_input_error(state->last_command, state->current_state_name);
@@ -76,6 +105,16 @@ state_machine() {
             else if(strncmp(state->last_command.c_str(), "chill", strlen("chill")) == 0) {
                 state->current_state = ePreChill;
                 state->current_state_name = "pre-chill";
+                state->VVO = OPEN;
+                state->VVF = OPEN;
+                state->OPV = CLOSED;
+                state->FPV = CLOSED;
+                state->PPV = CLOSED;
+                state->IV1 = CLOSED;
+                state->IV2 = CLOSED;
+                state->MFV = CRACKED;
+                state->MOV = CLOSED;
+                state->IG = OFF;
             }
             else {
                 print_input_error(state->last_command, state->current_state_name);
@@ -90,6 +129,16 @@ state_machine() {
             else if(strncmp(state->last_command.c_str(), "ready", strlen("ready")) == 0) {
                 state->current_state = eReady;
                 state->current_state_name = "ready";
+                state->VVO = OPEN;
+                state->VVF = OPEN;
+                state->OPV = CLOSED;
+                state->FPV = CLOSED;
+                state->PPV = CLOSED;
+                state->IV1 = CLOSED;
+                state->IV2 = CLOSED;
+                state->MFV = CLOSED;
+                state->MOV = CLOSED;
+                state->IG = OFF;
             }
             else {
                 print_input_error(state->last_command, state->current_state_name);
@@ -104,6 +153,16 @@ state_machine() {
             else if(strncmp(state->last_command.c_str(), "pressurize", strlen("pressurize")) == 0) {
                 state->current_state = ePressurized;
                 state->current_state_name = "pressurized";
+                state->VVO = OPEN;
+                state->VVF = OPEN;
+                state->OPV = OPEN;
+                state->FPV = OPEN;
+                state->PPV = CLOSED;
+                state->IV1 = CLOSED;
+                state->IV2 = CLOSED;
+                state->MFV = CLOSED;
+                state->MOV = CLOSED;
+                state->IG = OFF;
             }
             else {
                 print_input_error(state->last_command, state->current_state_name);
@@ -128,6 +187,16 @@ state_machine() {
 
                     state->current_state = eIgnitionStart;
                     state->current_state_name = "ignition start";
+                    state->VVO = CLOSED;
+                    state->VVF = CLOSED;
+                    state->OPV = OPEN;
+                    state->FPV = OPEN;
+                    state->PPV = CLOSED;
+                    state->IV1 = OPEN;
+                    state->IV2 = OPEN;
+                    state->MFV = CLOSED;
+                    state->MOV = CLOSED;
+                    state->IG = ON;
                     wait_until_time = std::chrono::system_clock::now() + std::chrono::milliseconds(IGNITION_START_TIME);
                 }
             }
@@ -146,6 +215,16 @@ state_machine() {
             std::cout << TEXT_RED << "\nGOING INTO EMERGENCY STATE!!!!!!!!\n\n" << TEXT_WHITE << std::endl;
             state->current_state = eLockout;
             state->current_state_name = "lockout";
+            state->VVO = OPEN;
+            state->VVF = OPEN;
+            state->OPV = CLOSED;
+            state->FPV = CLOSED;
+            state->PPV = CLOSED;
+            state->IV1 = CLOSED;
+            state->IV2 = CLOSED;
+            state->MFV = CLOSED;
+            state->MOV = CLOSED;
+            state->IG = OFF;
             break;
 
         case eLockout:
@@ -166,6 +245,16 @@ state_machine() {
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state->current_state = eIgnitionMain;
                 state->current_state_name = "ignition main";
+                state->VVO = CLOSED;
+                state->VVF = CLOSED;
+                state->OPV = OPEN;
+                state->FPV = OPEN;
+                state->PPV = CLOSED;
+                state->IV1 = OPEN;
+                state->IV2 = OPEN;
+                state->MFV = OPEN;
+                state->MOV = OPEN;
+                state->IG = ON;
                 wait_until_time = std::chrono::system_clock::now() + std::chrono::milliseconds(IGNITION_MAIN_TIME);
             }
             break;
@@ -174,6 +263,16 @@ state_machine() {
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state->current_state = eFiring;
                 state->current_state_name = "firing";
+                state->VVO = CLOSED;
+                state->VVF = CLOSED;
+                state->OPV = OPEN;
+                state->FPV = OPEN;
+                state->PPV = CLOSED;
+                state->IV1 = CLOSED;
+                state->IV2 = CLOSED;
+                state->MFV = OPEN;
+                state->MOV = OPEN;
+                state->IG = OFF;
                 wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(firetime-1);
             }
             break;
@@ -182,6 +281,16 @@ state_machine() {
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state->current_state = eFiringStop;
                 state->current_state_name = "firing stop";
+                state->VVO = CLOSED;
+                state->VVF = CLOSED;
+                state->OPV = OPEN;
+                state->FPV = OPEN;
+                state->PPV = CLOSED;
+                state->IV1 = CLOSED;
+                state->IV2 = CLOSED;
+                state->MFV = CLOSED;
+                state->MOV = CLOSED;
+                state->IG = OFF;
                 wait_until_time = std::chrono::system_clock::now() + std::chrono::milliseconds(FIRING_STOP_TIME);
             }
             break;
@@ -190,6 +299,16 @@ state_machine() {
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state->current_state = ePurge;
                 state->current_state_name = "purge";
+                state->VVO = CLOSED;
+                state->VVF = CLOSED;
+                state->OPV = CLOSED;
+                state->FPV = CLOSED;
+                state->PPV = OPEN;
+                state->IV1 = CLOSED;
+                state->IV2 = CLOSED;
+                state->MFV = CLOSED;
+                state->MOV = CLOSED;
+                state->IG = OFF;
                 wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(PURGE_TIME);
             }
             break;
@@ -198,6 +317,16 @@ state_machine() {
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state->current_state = ePressurized;
                 state->current_state_name = "pressurized";
+                state->VVO = OPEN;
+                state->VVF = OPEN;
+                state->OPV = OPEN;
+                state->FPV = OPEN;
+                state->PPV = CLOSED;
+                state->IV1 = CLOSED;
+                state->IV2 = CLOSED;
+                state->MFV = CLOSED;
+                state->MOV = CLOSED;
+                state->IG = OFF;
             }
             break;
 
@@ -212,11 +341,14 @@ state_machine() {
 }
 
 
+// Handles controlling the valve
 int CentralManager::
 control() { 
     return 1; 
 }
 
+
+// save all the data in the state struct
 int CentralManager::
 save() {
     if(!datafile.is_open()) {
@@ -237,7 +369,6 @@ save() {
     
     return 1;
 }
-
 
 
 // expects a command input of "fire x" where x is any number of any length
@@ -264,6 +395,7 @@ parse_fire_command(std::string & command) {
     return time_int;
 }
 
+
 // get the current time as a long long to save
 long long CentralManager::
 get_time_us() const {
@@ -285,6 +417,7 @@ new_file_name() {
 }
 
 
+// allows the command and control thread to set input the last command
 int CentralManager::
 input_command(std::string &command){
     state -> state_mutex.lock();
@@ -293,6 +426,8 @@ input_command(std::string &command){
     return 0;
 }
 
+
+// prints colored output text for command input errors in the statemachine
 void CentralManager::
 print_input_error(std::string & command, std::string & state) {
     std::cout << TEXT_YELLOW << "Command: " << command << " not reconizied for " << state << " state\n" << TEXT_WHITE << std::endl;

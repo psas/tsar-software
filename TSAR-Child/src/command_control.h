@@ -9,6 +9,9 @@
 
 #define CC_DELAY 500            // milliseconds
 
+
+// This class will start the system, make both threads, 
+// and handle input from the user.
 class CommandControl{
     public:
         CommandControl();

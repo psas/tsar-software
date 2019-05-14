@@ -9,8 +9,6 @@ CommandControl() {
 
 int CommandControl::
 start_system(){
-    //start CM thred here?
-
     std::thread CM_thread(&CommandControl::start_CM_thread , this); //Creates a thread CM_thread, and sends CM_loop as a function pointer
     
     interface();
@@ -20,16 +18,19 @@ start_system(){
 
     return 1;
 }
+
+
 void CommandControl::start_CM_thread(){
     CM->CM_loop();
     return;
 }
 
+
 int CommandControl::
 interface() {
 
     std::string command;
-    while(1){ //TODO change back to while(1), add end state or break
+    while(1){ //TODO add end state or break
 
         // interface output
         command.clear();
