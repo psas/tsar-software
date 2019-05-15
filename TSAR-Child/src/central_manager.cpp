@@ -71,6 +71,20 @@ int CentralManager::update() {
 // are set as it swap to the next state.
 int CentralManager::
 state_machine() {
+
+    // check fore emergency command
+    if(strncmp(state->last_command.c_str(), "er", strlen("er")) == 0) {
+        state->last_command = "";
+        if(state->current_state == eStandby) {
+            state->current_state = eLockout;
+            state->current_state_name = "lockout";
+        }
+        else {
+            state->current_state = eEmergencyPurge;
+            state->current_state_name = "emergency purge";
+        }
+    }
+
     switch(state->current_state) {
     // general
         case eStandby:
@@ -212,14 +226,14 @@ state_machine() {
     
     // emergency-stop
         case eEmergencyPurge:
-            std::cout << TEXT_RED << "\nGOING INTO EMERGENCY STATE!!!!!!!!\n\n" << TEXT_WHITE << std::endl;
+            std::cout << TEXT_RED << "\nIN EMERGENCY STATE!!!!!!!!\n\n" << TEXT_WHITE << std::endl;
             state->current_state = eLockout;
             state->current_state_name = "lockout";
             state->VVO = OPEN;
             state->VVF = OPEN;
             state->OPV = CLOSED;
             state->FPV = CLOSED;
-            state->PPV = CLOSED;
+            state->PPV = OPEN;
             state->IV1 = CLOSED;
             state->IV2 = CLOSED;
             state->MFV = CLOSED;
@@ -360,8 +374,6 @@ save() {
     datafile << (get_time_us() - system_epoch); // TODO put in read hardware
     datafile << ',';
     datafile << state->current_state_name;
-    datafile << ',';
-    datafile << state->last_command;
     datafile << ',';
     datafile << state->fire_count;
     datafile << '\n';
