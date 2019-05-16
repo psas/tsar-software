@@ -66,7 +66,7 @@ int CentralManager::update() {
         std::cout << state->current_state_name << std::endl;
         next_print_time = std::chrono::system_clock::now() + std::chrono::milliseconds(PRINT_DELAY);
     }
-    return 0;
+    return 1;
 }
 
 
@@ -376,8 +376,6 @@ save() {
 
     // TODO add data here
     datafile << (get_time_us() - system_epoch); // TODO put in read hardware
-    datafile << ',';
-    datafile << state->current_state_name;
     datafile << ',';
     datafile << state->fire_count;
     datafile << '\n';
