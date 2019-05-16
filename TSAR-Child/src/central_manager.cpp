@@ -377,6 +377,8 @@ save() {
     // TODO add data here
     datafile << (get_time_us() - system_epoch); // TODO put in read hardware
     datafile << ',';
+    datafile << state->current_state_name;
+    datafile << ',';
     datafile << state->fire_count;
     datafile << '\n';
     datafile.flush();
