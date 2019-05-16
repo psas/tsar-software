@@ -5,6 +5,7 @@ CentralManager::
 CentralManager() {
     system_epoch = get_time_us();
     state = std::shared_ptr<State>(new State);
+    next_print_time = std::chrono::system_clock::now();
 
 
     // default values in state struct
@@ -41,7 +42,6 @@ CM_loop() {
 
    while(1){ // TODO add end state or break
         state->state_mutex.lock();
-        std::cout << state->current_state_name << std::endl;
         read_hardware();
         update();
         state_machine();
@@ -62,6 +62,10 @@ int CentralManager::read_hardware() {
 
 // TODO Updates the user?
 int CentralManager::update() {
+    if(std::chrono::system_clock::now() >= next_print_time) {
+        std::cout << state->current_state_name << std::endl;
+        next_print_time = std::chrono::system_clock::now() + std::chrono::milliseconds(PRINT_DELAY);
+    }
     return 0;
 }
 

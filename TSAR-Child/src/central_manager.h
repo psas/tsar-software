@@ -11,7 +11,8 @@
 
 #include "state.h"
 
-#define CM_DELAY                500     // milliseconds
+#define CM_DELAY                100     // milliseconds
+#define PRINT_DELAY             500     // milliseconds
 #define IGNITION_START_TIME     100     // milliseconds
 #define IGNITION_MAIN_TIME      900     // milliseconds
 #define FIRING_STOP_TIME        500     // milliseconds
@@ -66,6 +67,7 @@ class CentralManager {
         long long system_epoch;
         int firetime;
         std::chrono::system_clock::time_point wait_until_time;
+        std::chrono::system_clock::time_point next_print_time;
 
         std::shared_ptr<State> state;
         std::ofstream datafile;
