@@ -24,6 +24,29 @@ CentralManager() {
     state->MOV = CLOSED;
     state->IG = OFF;
 
+    // gpio
+    gp = GPIO::GPIOManager::getInstance();
+    VVO_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(VVO_PIN);
+    VVF_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(VVF_PIN);
+    OPV_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(OPV_PIN);
+    FPV_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(FPV_PIN);
+    PPV_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(PPV_PIN);
+    IV1_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(IV1_PIN);
+    IV2_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(IV2_PIN);
+    MFV_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(MFV_PIN); // TODO swap to uart later
+    MOV_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(MOV_PIN);
+    IG_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(IG_PIN);
+    gp->setDirection(VVO_pin, GPIO::OUTPUT);
+    gp->setDirection(VVF_pin, GPIO::OUTPUT);
+    gp->setDirection(OPV_pin, GPIO::OUTPUT);
+    gp->setDirection(FPV_pin, GPIO::OUTPUT);
+    gp->setDirection(PPV_pin, GPIO::OUTPUT);
+    gp->setDirection(IV1_pin, GPIO::OUTPUT);
+    gp->setDirection(IV2_pin, GPIO::OUTPUT);
+    gp->setDirection(MOV_pin, GPIO::OUTPUT); //TODO swap to uart later
+    gp->setDirection(FPV_pin, GPIO::OUTPUT);
+    gp->setDirection(IG_pin, GPIO::OUTPUT);
+
     //TODO set i2c reg
 }
 
@@ -219,8 +242,8 @@ state_machine() {
                 }
             }
             else if(strncmp(state->last_command.c_str(), "shutdown", strlen("shutdown")) == 0) {
-                state->current_state = eSafeShutdown;
-                state->current_state_name = "safe shutdown";
+                state->current_state = eEmergencyPurge;
+                state->current_state_name = "emergency purge";
             }
             else {
                 print_input_error(state->last_command, state->current_state_name);
@@ -362,6 +385,56 @@ state_machine() {
 // Handles controlling the valve
 int CentralManager::
 control() { 
+    if(state->VVO == OPEN)
+        gp->setValue(VVO_pin, GPIO::HIGH);
+    else if(state->VVO == CLOSED)
+        gp->setValue(VVO_pin, GPIO::LOW);
+
+    if(state->VVF == OPEN)
+        gp->setValue(VVF_pin, GPIO::HIGH);
+    else if(state->VVF == CLOSED)
+        gp->setValue(VVF_pin, GPIO::LOW);
+
+    if(state->FPV == OPEN)
+        gp->setValue(FPV_pin, GPIO::HIGH);
+    else if(state->FPV == CLOSED)
+        gp->setValue(FPV_pin, GPIO::LOW);
+
+    if(state->PPV == OPEN)
+        gp->setValue(PPV_pin, GPIO::HIGH);
+    else if(state->PPV == CLOSED)
+        gp->setValue(PPV_pin, GPIO::LOW);
+
+    if(state->PPV == OPEN)
+        gp->setValue(PPV_pin, GPIO::HIGH);
+    else if(state->PPV == CLOSED)
+        gp->setValue(PPV_pin, GPIO::LOW);
+
+    if(state->IV1 == OPEN)
+        gp->setValue(IV1_pin, GPIO::HIGH);
+    else if(state->IV1 == CLOSED)
+        gp->setValue(IV1_pin, GPIO::LOW);
+
+    if(state->IV2 == OPEN)
+        gp->setValue(IV2_pin, GPIO::HIGH);
+    else if(state->IV2 == CLOSED)
+        gp->setValue(IV2_pin, GPIO::LOW);
+
+    if(state->MFV == OPEN)
+        gp->setValue(MFV_pin, GPIO::HIGH);
+    else if(state->MFV == CLOSED)
+        gp->setValue(MFV_pin, GPIO::LOW);
+
+    if(state->MOV == OPEN)
+        gp->setValue(MOV_pin, GPIO::HIGH);
+    else if(state->MOV == CLOSED)
+        gp->setValue(MOV_pin, GPIO::LOW);
+
+    if(state->IG ==  ON)
+        gp->setValue(IG_pin, GPIO::HIGH);
+    else if(state->IG == OFF)
+        gp->setValue(IG_pin, GPIO::LOW);
+
     return 1; 
 }
 
