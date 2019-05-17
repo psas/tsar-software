@@ -217,7 +217,7 @@ state_machine() {
             }
             else if(strncmp(state->last_command.c_str(), "fire", strlen("fire")) == 0) {
                 firetime = parse_fire_command(state->last_command);
-                if(firetime != -1) {
+                if(firetime > 1) {
                     ++state->fire_count;
 
                     // make new file for data
