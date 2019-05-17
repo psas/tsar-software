@@ -4,7 +4,7 @@ D_FLAGS=-Wall -g
 
 PROGS=TSAR-Child
 
-ALLFILES= main.cpp command_control.cpp central_manager.cpp
+ALLFILES= main.cpp command_control.cpp central_manager.cpp GPIO/GPIOManager.cpp GPIO/GPIOConst.cpp
 
 run:
 	$(CC) $(C_FLAGS) -o $(PROGS) $(ALLFILES)
