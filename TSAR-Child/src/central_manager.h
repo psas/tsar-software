@@ -81,20 +81,21 @@ class CentralManager {
         int firetime;
         std::chrono::system_clock::time_point wait_until_time;
         std::chrono::system_clock::time_point next_print_time;
-
         std::shared_ptr<State> state;
         std::ofstream datafile;
+
+        // GPIO, add fd are file descriptor for pins
         GPIO::GPIOManager * gp;
-        int VVO_pin;
-        int VVF_pin;
-        int OPV_pin;
-        int FPV_pin;
-        int PPV_pin;
-        int IV1_pin;
-        int IV2_pin;
-        int MFV_pin;
-        int MOV_pin;
-        int IG_pin;
+        int VVO_fd;
+        int VVF_fd;
+        int OPV_fd;
+        int FPV_fd;
+        int PPV_fd;
+        int IV1_fd;
+        int IV2_fd;
+        int MFV_fd;
+        int MOV_fd;
+        int IG_fd;
 };
 
 #endif  // __CM__

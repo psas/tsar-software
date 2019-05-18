@@ -7,13 +7,14 @@ CentralManager() {
     state = std::shared_ptr<State>(new State);
     next_print_time = std::chrono::system_clock::now();
 
+    // make new data foldN folders
 
     // default values in state struct
     state->current_state = 0;
     state->current_state_name = "standby";
     state->fire_count =0;
 
-    state->VVO = OPEN;
+    state->VVO = OPEN; //TODO make a funtion for this
     state->VVF = OPEN;
     state->OPV = CLOSED;
     state->FPV = CLOSED;
@@ -26,26 +27,26 @@ CentralManager() {
 
     // gpio
     gp = GPIO::GPIOManager::getInstance();
-    VVO_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(VVO_PIN);
-    VVF_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(VVF_PIN);
-    OPV_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(OPV_PIN);
-    FPV_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(FPV_PIN);
-    PPV_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(PPV_PIN);
-    IV1_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(IV1_PIN);
-    IV2_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(IV2_PIN);
-    MFV_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(MFV_PIN); // TODO swap to uart later
-    MOV_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(MOV_PIN);
-    IG_pin = GPIO::GPIOConst::getInstance()->getGpioByKey(IG_PIN);
-    gp->setDirection(VVO_pin, GPIO::OUTPUT);
-    gp->setDirection(VVF_pin, GPIO::OUTPUT);
-    gp->setDirection(OPV_pin, GPIO::OUTPUT);
-    gp->setDirection(FPV_pin, GPIO::OUTPUT);
-    gp->setDirection(PPV_pin, GPIO::OUTPUT);
-    gp->setDirection(IV1_pin, GPIO::OUTPUT);
-    gp->setDirection(IV2_pin, GPIO::OUTPUT);
-    gp->setDirection(MOV_pin, GPIO::OUTPUT); //TODO swap to uart later
-    gp->setDirection(FPV_pin, GPIO::OUTPUT);
-    gp->setDirection(IG_pin, GPIO::OUTPUT);
+    VVO_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(VVO_PIN);
+    VVF_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(VVF_PIN);
+    OPV_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(OPV_PIN);
+    FPV_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(FPV_PIN);
+    PPV_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(PPV_PIN);
+    IV1_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(IV1_PIN);
+    IV2_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(IV2_PIN);
+    MFV_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(MFV_PIN); // TODO swap to uart later
+    MOV_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(MOV_PIN);
+    IG_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(IG_PIN);
+    gp->setDirection(VVO_fd, GPIO::OUTPUT);
+    gp->setDirection(VVF_fd, GPIO::OUTPUT);
+    gp->setDirection(OPV_fd, GPIO::OUTPUT);
+    gp->setDirection(FPV_fd, GPIO::OUTPUT);
+    gp->setDirection(PPV_fd, GPIO::OUTPUT);
+    gp->setDirection(IV1_fd, GPIO::OUTPUT);
+    gp->setDirection(IV2_fd, GPIO::OUTPUT);
+    gp->setDirection(MOV_fd, GPIO::OUTPUT); //TODO swap to uart later
+    gp->setDirection(FPV_fd, GPIO::OUTPUT);
+    gp->setDirection(IG_fd, GPIO::OUTPUT);
 
     //TODO set i2c reg
 }
@@ -56,6 +57,7 @@ CentralManager::
 ~CentralManager() {
     if(datafile.is_open())
         datafile.close();
+    // TODO deconstructor for gp or change to smart ptr
 }
 
 
@@ -386,56 +388,56 @@ state_machine() {
 int CentralManager::
 control() { 
     if(state->VVO == OPEN)
-        gp->setValue(VVO_pin, GPIO::HIGH);
+        gp->setValue(VVO_fd, GPIO::HIGH);
     else if(state->VVO == CLOSED)
-        gp->setValue(VVO_pin, GPIO::LOW);
+        gp->setValue(VVO_fd, GPIO::LOW);
 
     if(state->VVF == OPEN)
-        gp->setValue(VVF_pin, GPIO::HIGH);
+        gp->setValue(VVF_fd, GPIO::HIGH);
     else if(state->VVF == CLOSED)
-        gp->setValue(VVF_pin, GPIO::LOW);
+        gp->setValue(VVF_fd, GPIO::LOW);
 
     if(state->FPV == OPEN)
-        gp->setValue(FPV_pin, GPIO::HIGH);
+        gp->setValue(FPV_fd, GPIO::HIGH);
     else if(state->FPV == CLOSED)
-        gp->setValue(FPV_pin, GPIO::LOW);
+        gp->setValue(FPV_fd, GPIO::LOW);
 
     if(state->PPV == OPEN)
-        gp->setValue(PPV_pin, GPIO::HIGH);
+        gp->setValue(PPV_fd, GPIO::HIGH);
     else if(state->PPV == CLOSED)
-        gp->setValue(PPV_pin, GPIO::LOW);
+        gp->setValue(PPV_fd, GPIO::LOW);
 
     if(state->PPV == OPEN)
-        gp->setValue(PPV_pin, GPIO::HIGH);
+        gp->setValue(PPV_fd, GPIO::HIGH);
     else if(state->PPV == CLOSED)
-        gp->setValue(PPV_pin, GPIO::LOW);
+        gp->setValue(PPV_fd, GPIO::LOW);
 
     if(state->IV1 == OPEN)
-        gp->setValue(IV1_pin, GPIO::HIGH);
+        gp->setValue(IV1_fd, GPIO::HIGH);
     else if(state->IV1 == CLOSED)
-        gp->setValue(IV1_pin, GPIO::LOW);
+        gp->setValue(IV1_fd, GPIO::LOW);
 
     if(state->IV2 == OPEN)
-        gp->setValue(IV2_pin, GPIO::HIGH);
+        gp->setValue(IV2_fd, GPIO::HIGH);
     else if(state->IV2 == CLOSED)
-        gp->setValue(IV2_pin, GPIO::LOW);
+        gp->setValue(IV2_fd, GPIO::LOW);
 
     if(state->MFV == OPEN)
-        gp->setValue(MFV_pin, GPIO::HIGH);
+        gp->setValue(MFV_fd, GPIO::HIGH);
     else if(state->MFV == CLOSED)
-        gp->setValue(MFV_pin, GPIO::LOW);
+        gp->setValue(MFV_fd, GPIO::LOW);
 
     if(state->MOV == OPEN)
-        gp->setValue(MOV_pin, GPIO::HIGH);
+        gp->setValue(MOV_fd, GPIO::HIGH);
     else if(state->MOV == CLOSED)
-        gp->setValue(MOV_pin, GPIO::LOW);
+        gp->setValue(MOV_fd, GPIO::LOW);
 
     if(state->IG ==  ON)
-        gp->setValue(IG_pin, GPIO::HIGH);
+        gp->setValue(IG_fd, GPIO::HIGH);
     else if(state->IG == OFF)
-        gp->setValue(IG_pin, GPIO::LOW);
+        gp->setValue(IG_fd, GPIO::LOW);
 
-    return 1; 
+    return 1;  // TODO macro
 }
 
 
@@ -446,6 +448,7 @@ save() {
         std::cout << "No file open\n" << std::endl;
         return 0;
     }
+    // TODO header
 
     // TODO add data here
     datafile << (get_time_us() - system_epoch); // TODO put in read hardware
