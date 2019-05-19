@@ -12,6 +12,7 @@
 #include "GPIO/GPIOManager.h"
 #include "GPIO/GPIOConst.h"
 
+#define FILE_HEADER "time(ms), state, fire_count\n"
 #define CM_DELAY                100     // milliseconds
 #define PRINT_DELAY             500     // milliseconds
 #define IGNITION_START_TIME     100     // milliseconds
@@ -29,10 +30,6 @@
 #define MFV_PIN 		"P8_15" // TODO change to UART later
 #define MOV_PIN 		"P8_16"
 #define IG_PIN 			"P8_17"
-
-#define TEXT_WHITE              "\033[0m"
-#define TEXT_RED                "\033[31m"
-#define TEXT_YELLOW             "\033[33m"
 
 enum eStates {
     // general
@@ -68,6 +65,7 @@ class CentralManager {
 
     private:
         int read_hardware();
+        int check_for_emergency();
         int state_machine();
         int control();
         int save();

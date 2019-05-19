@@ -12,17 +12,6 @@ CentralManager() {
     state.current_state_name = "standby";
     state.fire_count =0;
 
-    state.VVO = OPEN; //TODO make a funtion for this
-    state.VVF = OPEN;
-    state.OPV = CLOSED;
-    state.FPV = CLOSED;
-    state.PPV = CLOSED;
-    state.IV1 = CLOSED;
-    state.IV2 = CLOSED;
-    state.MFV = CLOSED;
-    state.MOV = CLOSED;
-    state.IG = OFF;
-
     // gpio
     gp = GPIO::GPIOManager::getInstance();
     VVO_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(VVO_PIN);
@@ -55,7 +44,11 @@ CentralManager::
 ~CentralManager() {
     if(datafile.is_open())
         datafile.close();
-    // TODO deconstructor for gp or change to smart ptr
+
+    if(gp != nullptr) {
+        delete gp;
+        gp = nullptr;
+    }
 }
 
 
@@ -67,12 +60,10 @@ CM_loop() {
     while(1){ // TODO add end state or break
         state.state_mutex.lock();
         read_hardware();
-        // TODO add check for emergency function?
+        check_for_emergency();
         state_machine();
         control();
-        if(state.current_state >= eArmed && state.current_state != eSafeShutdown) {
-            save();
-        }
+        save();
         state.state_mutex.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(CM_DELAY));
     }
@@ -81,7 +72,13 @@ CM_loop() {
 // Handle reading all the I2C sensors
 int CentralManager::
 read_hardware() {
-    return 0;
+    return 1;
+}
+
+int CentralManager::
+check_for_emergency() {
+    // TODO add this later
+    return 1;
 }
 
 int CentralManager::
@@ -114,9 +111,9 @@ state_machine() {
                 state.current_state = eArmed;
                 state.current_state_name = "armed";
                 datafile.open("startup.csv");
+                datafile << FILE_HEADER;
                 valve_safe_state(); 
             }
-            state.last_command = "";
             break;
 
         case eArmed:
@@ -129,7 +126,6 @@ state_machine() {
                 valve_safe_state(); 
                 state.MFV = CRACKED;
             }
-            state.last_command = "";
             break;
 
         case ePreChill:
@@ -141,7 +137,6 @@ state_machine() {
                 state.current_state_name = "ready";
                 valve_safe_state(); 
             }
-            state.last_command = "";
             break;
 
         case eReady:
@@ -155,7 +150,6 @@ state_machine() {
                 state.OPV = OPEN;
                 state.FPV = OPEN;
             }
-            state.last_command = "";
             break;
 
         case ePressurized:
@@ -172,6 +166,7 @@ state_machine() {
                         datafile.close();
                     }
                     datafile.open(new_file_name());
+                    datafile << FILE_HEADER;
 
                     state.current_state = eIgnitionStart;
                     state.current_state_name = "ignition start";
@@ -192,7 +187,6 @@ state_machine() {
                 state.current_state = eEmergencyPurge;
                 state.current_state_name = "emergency purge";
             }
-            state.last_command = "";
             break;
     
     // emergency-stop
@@ -305,6 +299,7 @@ state_machine() {
             break;
     }
 
+    state.last_command = ""; // clear buffer
     return 1;
 }
 
@@ -359,10 +354,12 @@ valve_safe_state() {
 // save all the data in the state struct
 int CentralManager::
 save() {
-    if(!datafile.is_open()) {
+    if(state.current_state == eStandby || state.current_state == eSafeShutdown) {
         return 0;
     }
-    // TODO header
+    if(!datafile.is_open()) {
+        return -1;
+    }
 
     // TODO add data here
     datafile << (get_time_us() - system_epoch);
