@@ -74,6 +74,8 @@ class CentralManager {
         int parse_fire_command(std::string & command);
         long long get_time_us() const;
         std::string new_file_name();
+        int control_valve(const bool & valve, const int & fd);
+        void valve_safe_state();
 
         long long system_epoch;
         int firetime;
@@ -81,7 +83,7 @@ class CentralManager {
         State state;
         std::ofstream datafile;
 
-        // GPIO, add fd are file descriptor for pins
+        // GPIO stuff
         GPIO::GPIOManager * gp;
         int VVO_fd;
         int VVF_fd;

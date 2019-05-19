@@ -62,10 +62,12 @@ CentralManager::
 // main loop for central manager, that call the main functions
 void CentralManager::
 CM_loop() {
+    valve_safe_state(); 
 
-   while(1){ // TODO add end state or break
+    while(1){ // TODO add end state or break
         state.state_mutex.lock();
         read_hardware();
+        // TODO add check for emergency function?
         state_machine();
         control();
         if(state.current_state >= eArmed && state.current_state != eSafeShutdown) {
@@ -77,7 +79,8 @@ CM_loop() {
 }
 
 // Handle reading all the I2C sensors
-int CentralManager::read_hardware() {
+int CentralManager::
+read_hardware() {
     return 0;
 }
 
@@ -101,12 +104,6 @@ emergency() {
 int CentralManager::
 state_machine() {
 
-    // check fore emergency command
-    if(strncmp(state.last_command.c_str(), "er", strlen("er")) == 0) {
-        state.last_command = "";
-        emergency();
-    }
-
     switch(state.current_state) {
     // general
         case eStandby:
@@ -117,16 +114,7 @@ state_machine() {
                 state.current_state = eArmed;
                 state.current_state_name = "armed";
                 datafile.open("startup.csv");
-                state.VVO = OPEN;
-                state.VVF = OPEN;
-                state.OPV = CLOSED;
-                state.FPV = CLOSED;
-                state.PPV = CLOSED;
-                state.IV1 = CLOSED;
-                state.IV2 = CLOSED;
-                state.MFV = CLOSED;
-                state.MOV = CLOSED;
-                state.IG = OFF;
+                valve_safe_state(); 
             }
             state.last_command = "";
             break;
@@ -138,16 +126,8 @@ state_machine() {
             else if(strncmp(state.last_command.c_str(), "chill", strlen("chill")) == 0) {
                 state.current_state = ePreChill;
                 state.current_state_name = "pre-chill";
-                state.VVO = OPEN;
-                state.VVF = OPEN;
-                state.OPV = CLOSED;
-                state.FPV = CLOSED;
-                state.PPV = CLOSED;
-                state.IV1 = CLOSED;
-                state.IV2 = CLOSED;
+                valve_safe_state(); 
                 state.MFV = CRACKED;
-                state.MOV = CLOSED;
-                state.IG = OFF;
             }
             state.last_command = "";
             break;
@@ -159,16 +139,7 @@ state_machine() {
             else if(strncmp(state.last_command.c_str(), "ready", strlen("ready")) == 0) {
                 state.current_state = eReady;
                 state.current_state_name = "ready";
-                state.VVO = OPEN;
-                state.VVF = OPEN;
-                state.OPV = CLOSED;
-                state.FPV = CLOSED;
-                state.PPV = CLOSED;
-                state.IV1 = CLOSED;
-                state.IV2 = CLOSED;
-                state.MFV = CLOSED;
-                state.MOV = CLOSED;
-                state.IG = OFF;
+                valve_safe_state(); 
             }
             state.last_command = "";
             break;
@@ -180,16 +151,9 @@ state_machine() {
             else if(strncmp(state.last_command.c_str(), "pressurize", strlen("pressurize")) == 0) {
                 state.current_state = ePressurized;
                 state.current_state_name = "pressurized";
-                state.VVO = OPEN;
-                state.VVF = OPEN;
+                valve_safe_state(); 
                 state.OPV = OPEN;
                 state.FPV = OPEN;
-                state.PPV = CLOSED;
-                state.IV1 = CLOSED;
-                state.IV2 = CLOSED;
-                state.MFV = CLOSED;
-                state.MOV = CLOSED;
-                state.IG = OFF;
             }
             state.last_command = "";
             break;
@@ -235,16 +199,8 @@ state_machine() {
         case eEmergencyPurge:
             state.current_state = eLockout;
             state.current_state_name = "lockout";
-            state.VVO = OPEN;
-            state.VVF = OPEN;
-            state.OPV = CLOSED;
-            state.FPV = CLOSED;
+            valve_safe_state(); 
             state.PPV = OPEN;
-            state.IV1 = CLOSED;
-            state.IV2 = CLOSED;
-            state.MFV = CLOSED;
-            state.MOV = CLOSED;
-            state.IG = OFF;
             break;
 
         case eLockout:
@@ -337,20 +293,13 @@ state_machine() {
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state.current_state = ePressurized;
                 state.current_state_name = "pressurized";
-                state.VVO = OPEN;
-                state.VVF = OPEN;
+                valve_safe_state(); 
                 state.OPV = OPEN;
                 state.FPV = OPEN;
-                state.PPV = CLOSED;
-                state.IV1 = CLOSED;
-                state.IV2 = CLOSED;
-                state.MFV = CLOSED;
-                state.MOV = CLOSED;
-                state.IG = OFF;
             }
             break;
 
-        default:
+        default: // should never happen
             state.current_state = eEmergencyPurge;
             state.current_state_name = "emergency purge";
             break;
@@ -359,62 +308,52 @@ state_machine() {
     return 1;
 }
 
+// Handles controlling a valve
+int CentralManager::
+control_valve(const bool & valve, const int & fd) { 
+    if(valve == OPEN)
+        gp->setValue(fd, GPIO::HIGH);
+    else if(valve == CLOSED)
+        gp->setValue(fd, GPIO::LOW);
+    return 1;
+}
 
-// Handles controlling the valve
+// Handles controlling all the valves
 int CentralManager::
 control() { 
-    if(state.VVO == OPEN)
-        gp->setValue(VVO_fd, GPIO::HIGH);
-    else if(state.VVO == CLOSED)
-        gp->setValue(VVO_fd, GPIO::LOW);
-
-    if(state.VVF == OPEN)
-        gp->setValue(VVF_fd, GPIO::HIGH);
-    else if(state.VVF == CLOSED)
-        gp->setValue(VVF_fd, GPIO::LOW);
-
-    if(state.FPV == OPEN)
-        gp->setValue(FPV_fd, GPIO::HIGH);
-    else if(state.FPV == CLOSED)
-        gp->setValue(FPV_fd, GPIO::LOW);
-
-    if(state.PPV == OPEN)
-        gp->setValue(PPV_fd, GPIO::HIGH);
-    else if(state.PPV == CLOSED)
-        gp->setValue(PPV_fd, GPIO::LOW);
-
-    if(state.PPV == OPEN)
-        gp->setValue(PPV_fd, GPIO::HIGH);
-    else if(state.PPV == CLOSED)
-        gp->setValue(PPV_fd, GPIO::LOW);
-
-    if(state.IV1 == OPEN)
-        gp->setValue(IV1_fd, GPIO::HIGH);
-    else if(state.IV1 == CLOSED)
-        gp->setValue(IV1_fd, GPIO::LOW);
-
-    if(state.IV2 == OPEN)
-        gp->setValue(IV2_fd, GPIO::HIGH);
-    else if(state.IV2 == CLOSED)
-        gp->setValue(IV2_fd, GPIO::LOW);
-
-    if(state.MFV == OPEN)
-        gp->setValue(MFV_fd, GPIO::HIGH);
-    else if(state.MFV == CLOSED)
-        gp->setValue(MFV_fd, GPIO::LOW);
-
-    if(state.MOV == OPEN)
-        gp->setValue(MOV_fd, GPIO::HIGH);
-    else if(state.MOV == CLOSED)
-        gp->setValue(MOV_fd, GPIO::LOW);
-
+    control_valve(state.VVO, VVO_fd);
+    control_valve(state.VVF, VVF_fd);
+    control_valve(state.OPV, OPV_fd);
+    control_valve(state.FPV, FPV_fd);
+    control_valve(state.PPV, PPV_fd);
+    control_valve(state.IV1, IV1_fd);
+    control_valve(state.IV2, IV2_fd);
+    control_valve(state.MFV, MFV_fd);
+    control_valve(state.MOV, MOV_fd); // TODO UART
     if(state.IG ==  ON)
         gp->setValue(IG_fd, GPIO::HIGH);
     else if(state.IG == OFF)
         gp->setValue(IG_fd, GPIO::LOW);
 
-    return 1;  // TODO macro
+    return 1;
 }
+
+// Handle reading all the I2C sensors
+void CentralManager::
+valve_safe_state() {
+    state.VVO = OPEN;
+    state.VVF = OPEN;
+    state.OPV = CLOSED;
+    state.FPV = CLOSED;
+    state.PPV = CLOSED;
+    state.IV1 = CLOSED;
+    state.IV2 = CLOSED;
+    state.MFV = CLOSED;
+    state.MOV = CLOSED;
+    state.IG = OFF;
+    return;
+}
+
 
 
 // save all the data in the state struct
@@ -426,7 +365,7 @@ save() {
     // TODO header
 
     // TODO add data here
-    datafile << (get_time_us() - system_epoch); // TODO put in read hardware
+    datafile << (get_time_us() - system_epoch);
     datafile << ',';
     datafile << state.current_state_name;
     datafile << ',';
