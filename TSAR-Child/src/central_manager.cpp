@@ -4,26 +4,24 @@
 CentralManager::
 CentralManager() {
     system_epoch = get_time_us();
-    state = std::shared_ptr<State>(new State);
-    next_print_time = std::chrono::system_clock::now();
 
     // make new data foldN folders
 
     // default values in state struct
-    state->current_state = 0;
-    state->current_state_name = "standby";
-    state->fire_count =0;
+    state.current_state = 0;
+    state.current_state_name = "standby";
+    state.fire_count =0;
 
-    state->VVO = OPEN; //TODO make a funtion for this
-    state->VVF = OPEN;
-    state->OPV = CLOSED;
-    state->FPV = CLOSED;
-    state->PPV = CLOSED;
-    state->IV1 = CLOSED;
-    state->IV2 = CLOSED;
-    state->MFV = CLOSED;
-    state->MOV = CLOSED;
-    state->IG = OFF;
+    state.VVO = OPEN; //TODO make a funtion for this
+    state.VVF = OPEN;
+    state.OPV = CLOSED;
+    state.FPV = CLOSED;
+    state.PPV = CLOSED;
+    state.IV1 = CLOSED;
+    state.IV2 = CLOSED;
+    state.MFV = CLOSED;
+    state.MOV = CLOSED;
+    state.IG = OFF;
 
     // gpio
     gp = GPIO::GPIOManager::getInstance();
@@ -66,15 +64,14 @@ void CentralManager::
 CM_loop() {
 
    while(1){ // TODO add end state or break
-        state->state_mutex.lock();
+        state.state_mutex.lock();
         read_hardware();
-        update();
         state_machine();
         control();
-        if(state->current_state >= eArmed && state->current_state != eSafeShutdown) {
+        if(state.current_state >= eArmed && state.current_state != eSafeShutdown) {
             save();
         }
-        state->state_mutex.unlock();
+        state.state_mutex.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(CM_DELAY));
     }
 }
@@ -84,16 +81,19 @@ int CentralManager::read_hardware() {
     return 0;
 }
 
-
-// TODO Updates the user?
-int CentralManager::update() {
-    if(std::chrono::system_clock::now() >= next_print_time) {
-        std::cout << state->current_state_name << std::endl;
-        next_print_time = std::chrono::system_clock::now() + std::chrono::milliseconds(PRINT_DELAY);
+int CentralManager::
+emergency() {
+    state.in_emergency = true;
+    if(state.current_state == eStandby) {
+        state.current_state = eLockout;
+        state.current_state_name = "lockout";
     }
-    return 1;
+    else {
+        state.current_state = eEmergencyPurge;
+        state.current_state_name = "emergency purge";
+    }
+    return 0;
 }
-
 
 // Determine if the a transistion can be made for the current state.
 // If the tranistion requriment(s) are met, the settings for the next state 
@@ -102,125 +102,106 @@ int CentralManager::
 state_machine() {
 
     // check fore emergency command
-    if(strncmp(state->last_command.c_str(), "er", strlen("er")) == 0) {
-        state->last_command = "";
-        if(state->current_state == eStandby) {
-            state->current_state = eLockout;
-            state->current_state_name = "lockout";
-        }
-        else {
-            state->current_state = eEmergencyPurge;
-            state->current_state_name = "emergency purge";
-        }
+    if(strncmp(state.last_command.c_str(), "er", strlen("er")) == 0) {
+        state.last_command = "";
+        emergency();
     }
 
-    switch(state->current_state) {
+    switch(state.current_state) {
     // general
         case eStandby:
-            if(state->last_command.empty()) {
+            if(state.last_command.empty()) {
                 break;
             }
-            else if(strncmp(state->last_command.c_str(), "arm", strlen("arm")) == 0) {
-                state->current_state = eArmed;
-                state->current_state_name = "armed";
+            else if(strncmp(state.last_command.c_str(), "arm", strlen("arm")) == 0) {
+                state.current_state = eArmed;
+                state.current_state_name = "armed";
                 datafile.open("startup.csv");
-                state->VVO = OPEN;
-                state->VVF = OPEN;
-                state->OPV = CLOSED;
-                state->FPV = CLOSED;
-                state->PPV = CLOSED;
-                state->IV1 = CLOSED;
-                state->IV2 = CLOSED;
-                state->MFV = CLOSED;
-                state->MOV = CLOSED;
-                state->IG = OFF;
+                state.VVO = OPEN;
+                state.VVF = OPEN;
+                state.OPV = CLOSED;
+                state.FPV = CLOSED;
+                state.PPV = CLOSED;
+                state.IV1 = CLOSED;
+                state.IV2 = CLOSED;
+                state.MFV = CLOSED;
+                state.MOV = CLOSED;
+                state.IG = OFF;
             }
-            else {
-                print_input_error(state->last_command, state->current_state_name);
-            }
-            state->last_command = "";
+            state.last_command = "";
             break;
 
         case eArmed:
-            if(state->last_command.empty()) {
+            if(state.last_command.empty()) {
                 break;
             }
-            else if(strncmp(state->last_command.c_str(), "chill", strlen("chill")) == 0) {
-                state->current_state = ePreChill;
-                state->current_state_name = "pre-chill";
-                state->VVO = OPEN;
-                state->VVF = OPEN;
-                state->OPV = CLOSED;
-                state->FPV = CLOSED;
-                state->PPV = CLOSED;
-                state->IV1 = CLOSED;
-                state->IV2 = CLOSED;
-                state->MFV = CRACKED;
-                state->MOV = CLOSED;
-                state->IG = OFF;
+            else if(strncmp(state.last_command.c_str(), "chill", strlen("chill")) == 0) {
+                state.current_state = ePreChill;
+                state.current_state_name = "pre-chill";
+                state.VVO = OPEN;
+                state.VVF = OPEN;
+                state.OPV = CLOSED;
+                state.FPV = CLOSED;
+                state.PPV = CLOSED;
+                state.IV1 = CLOSED;
+                state.IV2 = CLOSED;
+                state.MFV = CRACKED;
+                state.MOV = CLOSED;
+                state.IG = OFF;
             }
-            else {
-                print_input_error(state->last_command, state->current_state_name);
-            }
-            state->last_command = "";
+            state.last_command = "";
             break;
 
         case ePreChill:
-            if(state->last_command.empty()) {
+            if(state.last_command.empty()) {
                 break;
             }
-            else if(strncmp(state->last_command.c_str(), "ready", strlen("ready")) == 0) {
-                state->current_state = eReady;
-                state->current_state_name = "ready";
-                state->VVO = OPEN;
-                state->VVF = OPEN;
-                state->OPV = CLOSED;
-                state->FPV = CLOSED;
-                state->PPV = CLOSED;
-                state->IV1 = CLOSED;
-                state->IV2 = CLOSED;
-                state->MFV = CLOSED;
-                state->MOV = CLOSED;
-                state->IG = OFF;
+            else if(strncmp(state.last_command.c_str(), "ready", strlen("ready")) == 0) {
+                state.current_state = eReady;
+                state.current_state_name = "ready";
+                state.VVO = OPEN;
+                state.VVF = OPEN;
+                state.OPV = CLOSED;
+                state.FPV = CLOSED;
+                state.PPV = CLOSED;
+                state.IV1 = CLOSED;
+                state.IV2 = CLOSED;
+                state.MFV = CLOSED;
+                state.MOV = CLOSED;
+                state.IG = OFF;
             }
-            else {
-                print_input_error(state->last_command, state->current_state_name);
-            }
-            state->last_command = "";
+            state.last_command = "";
             break;
 
         case eReady:
-            if(state->last_command.empty()) {
+            if(state.last_command.empty()) {
                 break;
             }
-            else if(strncmp(state->last_command.c_str(), "pressurize", strlen("pressurize")) == 0) {
-                state->current_state = ePressurized;
-                state->current_state_name = "pressurized";
-                state->VVO = OPEN;
-                state->VVF = OPEN;
-                state->OPV = OPEN;
-                state->FPV = OPEN;
-                state->PPV = CLOSED;
-                state->IV1 = CLOSED;
-                state->IV2 = CLOSED;
-                state->MFV = CLOSED;
-                state->MOV = CLOSED;
-                state->IG = OFF;
+            else if(strncmp(state.last_command.c_str(), "pressurize", strlen("pressurize")) == 0) {
+                state.current_state = ePressurized;
+                state.current_state_name = "pressurized";
+                state.VVO = OPEN;
+                state.VVF = OPEN;
+                state.OPV = OPEN;
+                state.FPV = OPEN;
+                state.PPV = CLOSED;
+                state.IV1 = CLOSED;
+                state.IV2 = CLOSED;
+                state.MFV = CLOSED;
+                state.MOV = CLOSED;
+                state.IG = OFF;
             }
-            else {
-                print_input_error(state->last_command, state->current_state_name);
-            }
-            state->last_command = "";
+            state.last_command = "";
             break;
 
         case ePressurized:
-            if(state->last_command.empty()) {
+            if(state.last_command.empty()) {
                 break;
             }
-            else if(strncmp(state->last_command.c_str(), "fire", strlen("fire")) == 0) {
-                firetime = parse_fire_command(state->last_command);
+            else if(strncmp(state.last_command.c_str(), "fire", strlen("fire")) == 0) {
+                firetime = parse_fire_command(state.last_command);
                 if(firetime > 1) {
-                    ++state->fire_count;
+                    ++state.fire_count;
 
                     // make new file for data
                     if(datafile.is_open()){
@@ -228,52 +209,48 @@ state_machine() {
                     }
                     datafile.open(new_file_name());
 
-                    state->current_state = eIgnitionStart;
-                    state->current_state_name = "ignition start";
-                    state->VVO = CLOSED;
-                    state->VVF = CLOSED;
-                    state->OPV = OPEN;
-                    state->FPV = OPEN;
-                    state->PPV = CLOSED;
-                    state->IV1 = OPEN;
-                    state->IV2 = OPEN;
-                    state->MFV = CLOSED;
-                    state->MOV = CLOSED;
-                    state->IG = ON;
+                    state.current_state = eIgnitionStart;
+                    state.current_state_name = "ignition start";
+                    state.VVO = CLOSED;
+                    state.VVF = CLOSED;
+                    state.OPV = OPEN;
+                    state.FPV = OPEN;
+                    state.PPV = CLOSED;
+                    state.IV1 = OPEN;
+                    state.IV2 = OPEN;
+                    state.MFV = CLOSED;
+                    state.MOV = CLOSED;
+                    state.IG = ON;
                     wait_until_time = std::chrono::system_clock::now() + std::chrono::milliseconds(IGNITION_START_TIME);
                 }
             }
-            else if(strncmp(state->last_command.c_str(), "shutdown", strlen("shutdown")) == 0) {
-                state->current_state = eEmergencyPurge;
-                state->current_state_name = "emergency purge";
+            else if(strncmp(state.last_command.c_str(), "shutdown", strlen("shutdown")) == 0) {
+                state.current_state = eEmergencyPurge;
+                state.current_state_name = "emergency purge";
             }
-            else {
-                print_input_error(state->last_command, state->current_state_name);
-            }
-            state->last_command = "";
+            state.last_command = "";
             break;
     
     // emergency-stop
         case eEmergencyPurge:
-            std::cout << TEXT_RED << "\nIN EMERGENCY STATE!!!!!!!!\n\n" << TEXT_WHITE << std::endl;
-            state->current_state = eLockout;
-            state->current_state_name = "lockout";
-            state->VVO = OPEN;
-            state->VVF = OPEN;
-            state->OPV = CLOSED;
-            state->FPV = CLOSED;
-            state->PPV = OPEN;
-            state->IV1 = CLOSED;
-            state->IV2 = CLOSED;
-            state->MFV = CLOSED;
-            state->MOV = CLOSED;
-            state->IG = OFF;
+            state.current_state = eLockout;
+            state.current_state_name = "lockout";
+            state.VVO = OPEN;
+            state.VVF = OPEN;
+            state.OPV = CLOSED;
+            state.FPV = CLOSED;
+            state.PPV = OPEN;
+            state.IV1 = CLOSED;
+            state.IV2 = CLOSED;
+            state.MFV = CLOSED;
+            state.MOV = CLOSED;
+            state.IG = OFF;
             break;
 
         case eLockout:
-            if(strncmp(state->last_command.c_str(), "shutdown", strlen("shutdown")) == 0) {
-                state->current_state = eSafeShutdown;
-                state->current_state_name = "safe shutdown";
+            if(strncmp(state.last_command.c_str(), "shutdown", strlen("shutdown")) == 0) {
+                state.current_state = eSafeShutdown;
+                state.current_state_name = "safe shutdown";
             }
             break;
 
@@ -286,97 +263,96 @@ state_machine() {
     // firing sequence
         case eIgnitionStart:
             if(std::chrono::system_clock::now() >= wait_until_time) {
-                state->current_state = eIgnitionMain;
-                state->current_state_name = "ignition main";
-                state->VVO = CLOSED;
-                state->VVF = CLOSED;
-                state->OPV = OPEN;
-                state->FPV = OPEN;
-                state->PPV = CLOSED;
-                state->IV1 = OPEN;
-                state->IV2 = OPEN;
-                state->MFV = OPEN;
-                state->MOV = OPEN;
-                state->IG = ON;
+                state.current_state = eIgnitionMain;
+                state.current_state_name = "ignition main";
+                state.VVO = CLOSED;
+                state.VVF = CLOSED;
+                state.OPV = OPEN;
+                state.FPV = OPEN;
+                state.PPV = CLOSED;
+                state.IV1 = OPEN;
+                state.IV2 = OPEN;
+                state.MFV = OPEN;
+                state.MOV = OPEN;
+                state.IG = ON;
                 wait_until_time = std::chrono::system_clock::now() + std::chrono::milliseconds(IGNITION_MAIN_TIME);
             }
             break;
 
         case eIgnitionMain:
             if(std::chrono::system_clock::now() >= wait_until_time) {
-                state->current_state = eFiring;
-                state->current_state_name = "firing";
-                state->VVO = CLOSED;
-                state->VVF = CLOSED;
-                state->OPV = OPEN;
-                state->FPV = OPEN;
-                state->PPV = CLOSED;
-                state->IV1 = CLOSED;
-                state->IV2 = CLOSED;
-                state->MFV = OPEN;
-                state->MOV = OPEN;
-                state->IG = OFF;
+                state.current_state = eFiring;
+                state.current_state_name = "firing";
+                state.VVO = CLOSED;
+                state.VVF = CLOSED;
+                state.OPV = OPEN;
+                state.FPV = OPEN;
+                state.PPV = CLOSED;
+                state.IV1 = CLOSED;
+                state.IV2 = CLOSED;
+                state.MFV = OPEN;
+                state.MOV = OPEN;
+                state.IG = OFF;
                 wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(firetime-1);
             }
             break;
 
         case eFiring:
             if(std::chrono::system_clock::now() >= wait_until_time) {
-                state->current_state = eFiringStop;
-                state->current_state_name = "firing stop";
-                state->VVO = CLOSED;
-                state->VVF = CLOSED;
-                state->OPV = OPEN;
-                state->FPV = OPEN;
-                state->PPV = CLOSED;
-                state->IV1 = CLOSED;
-                state->IV2 = CLOSED;
-                state->MFV = CLOSED;
-                state->MOV = CLOSED;
-                state->IG = OFF;
+                state.current_state = eFiringStop;
+                state.current_state_name = "firing stop";
+                state.VVO = CLOSED;
+                state.VVF = CLOSED;
+                state.OPV = OPEN;
+                state.FPV = OPEN;
+                state.PPV = CLOSED;
+                state.IV1 = CLOSED;
+                state.IV2 = CLOSED;
+                state.MFV = CLOSED;
+                state.MOV = CLOSED;
+                state.IG = OFF;
                 wait_until_time = std::chrono::system_clock::now() + std::chrono::milliseconds(FIRING_STOP_TIME);
             }
             break;
 
         case eFiringStop:
             if(std::chrono::system_clock::now() >= wait_until_time) {
-                state->current_state = ePurge;
-                state->current_state_name = "purge";
-                state->VVO = CLOSED;
-                state->VVF = CLOSED;
-                state->OPV = CLOSED;
-                state->FPV = CLOSED;
-                state->PPV = OPEN;
-                state->IV1 = CLOSED;
-                state->IV2 = CLOSED;
-                state->MFV = CLOSED;
-                state->MOV = CLOSED;
-                state->IG = OFF;
+                state.current_state = ePurge;
+                state.current_state_name = "purge";
+                state.VVO = CLOSED;
+                state.VVF = CLOSED;
+                state.OPV = CLOSED;
+                state.FPV = CLOSED;
+                state.PPV = OPEN;
+                state.IV1 = CLOSED;
+                state.IV2 = CLOSED;
+                state.MFV = CLOSED;
+                state.MOV = CLOSED;
+                state.IG = OFF;
                 wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(PURGE_TIME);
             }
             break;
 
         case ePurge:
             if(std::chrono::system_clock::now() >= wait_until_time) {
-                state->current_state = ePressurized;
-                state->current_state_name = "pressurized";
-                state->VVO = OPEN;
-                state->VVF = OPEN;
-                state->OPV = OPEN;
-                state->FPV = OPEN;
-                state->PPV = CLOSED;
-                state->IV1 = CLOSED;
-                state->IV2 = CLOSED;
-                state->MFV = CLOSED;
-                state->MOV = CLOSED;
-                state->IG = OFF;
+                state.current_state = ePressurized;
+                state.current_state_name = "pressurized";
+                state.VVO = OPEN;
+                state.VVF = OPEN;
+                state.OPV = OPEN;
+                state.FPV = OPEN;
+                state.PPV = CLOSED;
+                state.IV1 = CLOSED;
+                state.IV2 = CLOSED;
+                state.MFV = CLOSED;
+                state.MOV = CLOSED;
+                state.IG = OFF;
             }
             break;
 
         default:
-            std::cout << TEXT_RED <<"\nUNKNOWN STATE WTF!!!!!!!!\n\n" << TEXT_WHITE << std::endl;
-            state->current_state = eEmergencyPurge;
-            state->current_state_name = "emergency purge";
+            state.current_state = eEmergencyPurge;
+            state.current_state_name = "emergency purge";
             break;
     }
 
@@ -387,54 +363,54 @@ state_machine() {
 // Handles controlling the valve
 int CentralManager::
 control() { 
-    if(state->VVO == OPEN)
+    if(state.VVO == OPEN)
         gp->setValue(VVO_fd, GPIO::HIGH);
-    else if(state->VVO == CLOSED)
+    else if(state.VVO == CLOSED)
         gp->setValue(VVO_fd, GPIO::LOW);
 
-    if(state->VVF == OPEN)
+    if(state.VVF == OPEN)
         gp->setValue(VVF_fd, GPIO::HIGH);
-    else if(state->VVF == CLOSED)
+    else if(state.VVF == CLOSED)
         gp->setValue(VVF_fd, GPIO::LOW);
 
-    if(state->FPV == OPEN)
+    if(state.FPV == OPEN)
         gp->setValue(FPV_fd, GPIO::HIGH);
-    else if(state->FPV == CLOSED)
+    else if(state.FPV == CLOSED)
         gp->setValue(FPV_fd, GPIO::LOW);
 
-    if(state->PPV == OPEN)
+    if(state.PPV == OPEN)
         gp->setValue(PPV_fd, GPIO::HIGH);
-    else if(state->PPV == CLOSED)
+    else if(state.PPV == CLOSED)
         gp->setValue(PPV_fd, GPIO::LOW);
 
-    if(state->PPV == OPEN)
+    if(state.PPV == OPEN)
         gp->setValue(PPV_fd, GPIO::HIGH);
-    else if(state->PPV == CLOSED)
+    else if(state.PPV == CLOSED)
         gp->setValue(PPV_fd, GPIO::LOW);
 
-    if(state->IV1 == OPEN)
+    if(state.IV1 == OPEN)
         gp->setValue(IV1_fd, GPIO::HIGH);
-    else if(state->IV1 == CLOSED)
+    else if(state.IV1 == CLOSED)
         gp->setValue(IV1_fd, GPIO::LOW);
 
-    if(state->IV2 == OPEN)
+    if(state.IV2 == OPEN)
         gp->setValue(IV2_fd, GPIO::HIGH);
-    else if(state->IV2 == CLOSED)
+    else if(state.IV2 == CLOSED)
         gp->setValue(IV2_fd, GPIO::LOW);
 
-    if(state->MFV == OPEN)
+    if(state.MFV == OPEN)
         gp->setValue(MFV_fd, GPIO::HIGH);
-    else if(state->MFV == CLOSED)
+    else if(state.MFV == CLOSED)
         gp->setValue(MFV_fd, GPIO::LOW);
 
-    if(state->MOV == OPEN)
+    if(state.MOV == OPEN)
         gp->setValue(MOV_fd, GPIO::HIGH);
-    else if(state->MOV == CLOSED)
+    else if(state.MOV == CLOSED)
         gp->setValue(MOV_fd, GPIO::LOW);
 
-    if(state->IG ==  ON)
+    if(state.IG ==  ON)
         gp->setValue(IG_fd, GPIO::HIGH);
-    else if(state->IG == OFF)
+    else if(state.IG == OFF)
         gp->setValue(IG_fd, GPIO::LOW);
 
     return 1;  // TODO macro
@@ -445,7 +421,6 @@ control() {
 int CentralManager::
 save() {
     if(!datafile.is_open()) {
-        std::cout << "No file open\n" << std::endl;
         return 0;
     }
     // TODO header
@@ -453,9 +428,9 @@ save() {
     // TODO add data here
     datafile << (get_time_us() - system_epoch); // TODO put in read hardware
     datafile << ',';
-    datafile << state->current_state_name;
+    datafile << state.current_state_name;
     datafile << ',';
-    datafile << state->fire_count;
+    datafile << state.fire_count;
     datafile << '\n';
     datafile.flush();
     
@@ -476,11 +451,9 @@ parse_fire_command(std::string & command) {
     try {
         time_int = std::stoi(time);
         if (time_int < 1) {
-            std::cout << firetime  << " is less than 1 secound" << std::endl;
             time_int = -1;
         }
     } catch(...) {
-        std::cout << "Failed to parse: " << time  << " as a int" << std::endl;
         time_int = -1;
     }
 
@@ -503,7 +476,7 @@ get_time_us() const {
 std::string CentralManager::
 new_file_name() {
     std::string file = "fire";
-    file.append(std::to_string(state->fire_count));
+    file.append(std::to_string(state.fire_count));
     file.append(".csv");
     return file;
 }
@@ -512,17 +485,19 @@ new_file_name() {
 // allows the command and control thread to set input the last command
 int CentralManager::
 input_command(std::string &command){
-    state -> state_mutex.lock();
-    state -> last_command = command;
-    state -> state_mutex.unlock();
+    state.state_mutex.lock();
+    state.last_command = command;
+    state.state_mutex.unlock();
     return 0;
 }
 
 
-// prints colored output text for command input errors in the statemachine
-void CentralManager::
-print_input_error(std::string & command, std::string & state) {
-    std::cout << TEXT_YELLOW << "Command: " << command << " not reconizied for " << state << " state\n" << TEXT_WHITE << std::endl;
-    return;
+// allows the command and control thread to get a copy of the data
+int CentralManager::
+copy_data(State & input) {
+    state.state_mutex.lock();
+    std::memcpy(&input, &state, sizeof(state));
+    state.state_mutex.unlock();
+    return 0;
 }
 

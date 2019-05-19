@@ -1,5 +1,5 @@
 CC=g++
-C_FLAGS=-std=c++11 -pthread
+C_FLAGS=-std=c++11 -pthread -lncurses
 D_FLAGS=-Wall -g
 
 PROGS=TSAR-Child

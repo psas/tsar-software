@@ -1,7 +1,6 @@
 #ifndef __CM__
 #define __CM__
 
-#include <memory>               // shared ptr
 #include <fstream>              // file write
 #include <iostream>             // io
 #include <thread>               // sleep_for
@@ -57,31 +56,29 @@ enum eStates {
 };
 
 // This class handles most of the hard work of controlling the system.
-// Handles reading/controlling hardware, controls the state of the system, 
-// and updates the user on progress.
+// Handles reading/controlling hardware, and controls the state of the system.
 class CentralManager {
     public:
         CentralManager();
         ~CentralManager();
         void CM_loop();
         int input_command(std::string &command);
+        int copy_data(State & input);
+        int emergency();
 
     private:
         int read_hardware();
-        int update();
         int state_machine();
         int control();
         int save();
         int parse_fire_command(std::string & command);
         long long get_time_us() const;
         std::string new_file_name();
-        void print_input_error(std::string & command, std::string & state);
 
         long long system_epoch;
         int firetime;
         std::chrono::system_clock::time_point wait_until_time;
-        std::chrono::system_clock::time_point next_print_time;
-        std::shared_ptr<State> state;
+        State state;
         std::ofstream datafile;
 
         // GPIO, add fd are file descriptor for pins
