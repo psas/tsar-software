@@ -205,8 +205,15 @@ print_data() {
     else
         mvprintw(STATE_ROW_10, STATE_LABEL_LENGTH, "%s", "OFF");
 
+    move(SAVE_FILE_ROW, 10);
+    clrtoeol();
     mvprintw(SAVE_FILE_ROW, 10, "%s", state.save_file_name.c_str());
-    mvprintw(SAVE_FILE_ROW, 40, "%d", state.saving);
+    if(state.saving == 1)
+        mvprintw(SAVE_FILE_ROW, 40, "%s", "Saving");
+    else if(state.saving == 0)
+        mvprintw(SAVE_FILE_ROW, 40, "%s", "NOT Saving");
+    else
+        mvprintw(SAVE_FILE_ROW, 40, "%s", "ERROR, NOT Saving");
 
     mvprintw(LAST_COMMAND_ROW, 14, "%s", command.c_str());
     mvprintw(INPUT_ROW, 7, "%s", input_buf);
