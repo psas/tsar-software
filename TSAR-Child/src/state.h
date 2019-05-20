@@ -17,6 +17,8 @@ struct State {
     std::string last_command;
     bool in_emergency;
 
+    std::string save_file_name;
+    int saving;
     int fire_count; // 0 for start up, 0 > for count
     std::mutex state_mutex;
 

@@ -82,6 +82,8 @@ print_labels() {
     mvprintw(DATA_ROW_4, 0, "DATA HERE");
     mvprintw(DATA_ROW_5, 0, "DATA HERE");
 
+    mvprintw(SAVE_FILE_ROW, 0, "Saving to: ");
+
     mvprintw(LAST_COMMAND_ROW, 0, "Last Command: ");
     mvprintw(INPUT_ROW, 0, "Input: "); 
 
@@ -154,6 +156,8 @@ read_input() {
 
 int CommandControl::
 print_state_info(bool & valve_state, int print_row) { 
+    move(print_row, STATE_LABEL_LENGTH);
+    clrtoeol();
     if(valve_state == OPEN)
         mvprintw(print_row, STATE_LABEL_LENGTH, "%s", "OPEN");
     else
@@ -184,16 +188,25 @@ print_data() {
     print_state_info(state.IV1, STATE_ROW_6); 
     print_state_info(state.IV2, STATE_ROW_7); 
     print_state_info(state.MFV, STATE_ROW_8); 
+
+    move(STATE_ROW_9, STATE_LABEL_LENGTH);
+    clrtoeol();
     if(state.MOV == OPEN)
         mvprintw(STATE_ROW_9, STATE_LABEL_LENGTH, "%s", "OPEN");
     else if(state.MOV == CRACKED)
         mvprintw(STATE_ROW_9, STATE_LABEL_LENGTH, "%s", "CRACKED");
     else
         mvprintw(STATE_ROW_9, STATE_LABEL_LENGTH, "%s", "CLOSED");
+
+    move(STATE_ROW_10, STATE_LABEL_LENGTH);
+    clrtoeol();
     if(state.IG == ON)
         mvprintw(STATE_ROW_10, STATE_LABEL_LENGTH, "%s", "ON");
     else
         mvprintw(STATE_ROW_10, STATE_LABEL_LENGTH, "%s", "OFF");
+
+    mvprintw(SAVE_FILE_ROW, 10, "%s", state.save_file_name.c_str());
+    mvprintw(SAVE_FILE_ROW, 40, "%d", state.saving);
 
     mvprintw(LAST_COMMAND_ROW, 14, "%s", command.c_str());
     mvprintw(INPUT_ROW, 7, "%s", input_buf);

@@ -10,6 +10,7 @@ CentralManager() {
     // default values in state struct
     state.current_state = 0;
     state.current_state_name = "standby";
+    state.save_file_name = "";
     state.fire_count =0;
 
     // gpio
@@ -62,8 +63,8 @@ CM_loop() {
         read_hardware();
         check_for_emergency();
         state_machine();
-        control();
-        save();
+        //control();
+        state.saving = save();
         state.state_mutex.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(CM_DELAY));
     }
@@ -110,7 +111,8 @@ state_machine() {
             else if(strncmp(state.last_command.c_str(), "arm", strlen("arm")) == 0) {
                 state.current_state = eArmed;
                 state.current_state_name = "armed";
-                datafile.open("startup.csv");
+                state.save_file_name = "data/startup.csv";
+                datafile.open(state.save_file_name);
                 datafile << FILE_HEADER;
                 valve_safe_state(); 
             }
@@ -165,7 +167,8 @@ state_machine() {
                     if(datafile.is_open()){
                         datafile.close();
                     }
-                    datafile.open(new_file_name());
+                    state.save_file_name = new_file_name();
+                    datafile.open(state.save_file_name);
                     datafile << FILE_HEADER;
 
                     state.current_state = eIgnitionStart;
@@ -411,7 +414,7 @@ get_time_us() const {
 // make new name for file with the format "fireX.csv", where X is the current fire count
 std::string CentralManager::
 new_file_name() {
-    std::string file = "fire";
+    std::string file = "data/fire";
     file.append(std::to_string(state.fire_count));
     file.append(".csv");
     return file;

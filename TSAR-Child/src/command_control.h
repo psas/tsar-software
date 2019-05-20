@@ -37,8 +37,10 @@
 #define DATA_ROW_4          18
 #define DATA_ROW_5          19
     // line 20 is empty
-#define LAST_COMMAND_ROW    21
-#define INPUT_ROW           22
+#define SAVE_FILE_ROW       21
+    // line 22 is empty
+#define LAST_COMMAND_ROW    23
+#define INPUT_ROW           24
 
 #define STATE_LABEL_LENGTH  5
 
