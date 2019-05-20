@@ -63,7 +63,7 @@ CM_loop() {
         read_hardware();
         check_for_emergency();
         state_machine();
-        //control();
+        control();
         state.saving = save();
         state.state_mutex.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(CM_DELAY));
