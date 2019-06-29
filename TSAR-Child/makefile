@@ -1,4 +1,4 @@
-CC=g++
+CC=g++4.1
 C_FLAGS=-std=c++11 -pthread -lncurses
 D_FLAGS=-Wall -g
 
