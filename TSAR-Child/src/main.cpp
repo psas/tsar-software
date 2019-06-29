@@ -1,4 +1,3 @@
-#include "command_control.h"
 #include "mcp342x.h"
 
 #define S 1000000
