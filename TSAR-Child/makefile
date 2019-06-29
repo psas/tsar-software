@@ -4,7 +4,8 @@ D_FLAGS=-Wall -g
 
 PROGS=TSAR-Child
 
-ALLFILES= src/main.cpp src/command_control.cpp src/central_manager.cpp src/GPIO/GPIOManager.cpp src/GPIO/GPIOConst.cpp
+EXCLUDE=src/central_manager.cpp src/command_control.cpp src/GPIO/*.cpp
+ALLFILES=$(filter-out $(EXCLUDE), $(wildcard src/*.cpp) $(wildcard src/GPIO/*.cpp))
 
 run:
 	$(CC) $(C_FLAGS) -o $(PROGS) $(ALLFILES)

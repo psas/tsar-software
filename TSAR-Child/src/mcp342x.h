@@ -1,9 +1,11 @@
+#ifndef TSAR_MCP342X
+#define TSAR_MCP342X
+
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
-#include <unistd.h>
 
 //Raw Config Bit Definitions
 #define CFG_RDY 1<<7
@@ -41,20 +43,28 @@
 
 #define CFG_DEFAULT (CFG_CHAN1 | CFG_240SPS | CFG_X1)
 
-int main(){
-	char buffer[3];
-	int address = 0x68;
-	int file = open("/dev/i2c-1", O_RDWR);
+class mcp342x{
+  private:
+    int address;
+    int file_descriptor;
+    char* device;
+    int register_size;
+    char* register_data;
 
-	buffer[0] = address;
+  public:
+    // Constructor / destructor stuff
+    mcp342x();
+    mcp342x(const int, const char*, const int);
+    ~mcp342x();
 
-	ioctl(file, I2C_SLAVE, address);
+    // Function stuff
+    const bool set_settings();
+    const bool set_channel();
+    void start_read();
+    const bool is_ready();
+    const int read();
+    const int read(const int, const char*);
+    const int write();
+};
 
-	while(1){
-		printf("Reading the first three bytes from reg %i\n", address);
-		read(file, buffer, 3);		
-		usleep(1000000);
-	}
-
-	return 0;
-}
+#endif
