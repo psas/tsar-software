@@ -9,7 +9,7 @@ mcp342x::mcp342x(const int address, const char* input_device) : address(address)
   strcpy(device, input_device);
   strcat(device, "\0");
   configuration = CFG_OC;
- 
+
   file_descriptor = open(device, O_RDWR);
 
   if(file_descriptor < 0){
@@ -29,7 +29,7 @@ mcp342x::~mcp342x(){
 }
 
 const int mcp342x::to_signed(const int data){
-	return data ^ 1;		
+	return data ^ 1;
 }
 
 const int mcp342x::set_settings(const bool one_shot, const int sample_rate, const int pga_gain){
@@ -79,9 +79,9 @@ const int mcp342x::set_settings(const bool one_shot, const int sample_rate, cons
 
 const int mcp342x::set_channel(const int channel){
 	configuration &= ~(CFG_C1 | CFG_C0); // Wipes the current channel config
-	
+
 	switch(channel){
-		case 1: 
+		case 1:
 			configuration |= CFG_CHAN1;
 			break;
 		case 2:
@@ -108,21 +108,26 @@ void mcp342x::start_read(){
 const bool mcp342x::is_ready(){
 	__u8 data[5];
 	bool is_18 = (configuration & CFG_3SPS) != 0;
-	
-	read(file_descriptor, data, is_18 ? 4 : 3);
-	return (data[is_18 ? 3 : 2] & CFG_RDY) == 0;
+
+	read(file_descriptor, data, is_18 ? 5 : 4);
+	return (data[is_18 ? 4 : 3] & CFG_RDY) == 0;
 }
 
 const int mcp342x::read_register(){
-	__u8 data[5];
+	__u8 data[4];
 	bool is_18 = (configuration & CFG_3SPS) != 0;
-	
-	read(file_descriptor, data, is_18 ? 3 : 2);
+
+	read(file_descriptor, data, is_18 ? 4 : 3);
 
 	if(is_18)
-		return (((int) data[0]) << 16) + (((int) data[1]) << 8) + ((int) data[2]);
+    data[1]<<6;
+    data[1]>>6;
+
+		return (((int) data[1]) << 16) + (((int) data[2]) << 8) + ((int) data[3]);
 	else
-		return (((int) data[0]) << 8) + ((int) data[1]);
+    data[1]<<4;
+    data[1]>>4;
+		return (((int) data[1]) << 8) + ((int) data[2]);
 }
 
 std::ostream& operator <<(std::ostream& buffer, const mcp342x& src){

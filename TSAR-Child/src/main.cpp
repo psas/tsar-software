@@ -25,7 +25,7 @@ int main(const int argc, const char** argv) {
 					delay += S;
 				}
 				cout << "Waited for " << delay << " micro-seconds (" << (delay / 1000) << " ms) to read!" << endl;
-				int response = adc.to_signed(adc.read_register());
+				int response = adc.read_register();
 				cout << "Got response from chip: " << bitset<24>(response).to_string() << endl;
 				usleep(S);
 		}

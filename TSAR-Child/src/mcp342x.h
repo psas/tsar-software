@@ -53,7 +53,11 @@ class mcp342x{
     int file_descriptor;
     char* device;
 
-	__u8 configuration;
+	  __u8 configuration;
+
+    //private utility for internally masking the bits
+    const __u24 mask_12(const __u8);
+    const __u24 mask_18(const __u8);
 
   public:
     // Constructor / destructor stuff
@@ -62,7 +66,6 @@ class mcp342x{
     ~mcp342x();
 
     // Function stuff
-	const int to_signed(const int);
     const int set_settings(const bool, const int, const int);
     const int set_channel(const int);
     void start_read();
