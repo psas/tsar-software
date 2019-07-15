@@ -2,6 +2,8 @@
 #define TSAR_MCP342X
 
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 #include <fstream>
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -55,10 +57,6 @@ class mcp342x{
 
 	  __u8 configuration;
 
-    //private utility for internally masking the bits
-    const __u24 mask_12(const __u8);
-    const __u24 mask_18(const __u8);
-
   public:
     // Constructor / destructor stuff
     mcp342x();
@@ -72,6 +70,7 @@ class mcp342x{
     const bool is_ready();
     const int read_register();
 
+	// Other
 	friend std::ostream& operator <<(std::ostream&, const mcp342x&);
 };
 
