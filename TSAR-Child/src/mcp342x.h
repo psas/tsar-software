@@ -56,12 +56,14 @@ class mcp342x{
     char* device;
 
 	 __u8 configuration;
-	
+
+ 	// Helper function for adding the sign bit into the converted data	 
 	const int convert(const int, const int);
 
   public:
     // Constructor / destructor stuff
     mcp342x();
+	mcp342x(const mcp342x&);
     mcp342x(const int, const char*);
     ~mcp342x();
 

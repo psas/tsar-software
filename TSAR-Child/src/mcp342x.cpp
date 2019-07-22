@@ -4,6 +4,14 @@
 // MCP342X Implementation
 //
 mcp342x::mcp342x() : address(0), file_descriptor(0), device(NULL){}
+
+mcp342x::mcp342x(const mcp342x& src)
+		: address(src.address), file_descriptor(src.file_descriptor), configuration(src.configuration){
+	if(device) delete device;
+	device = new char[strlen(src.device) + 1];
+	strcpy(device, src.device);
+}
+
 mcp342x::mcp342x(const int address, const char* input_device) : address(address){
   device = new char[strlen(input_device) + 1];
   strcpy(device, input_device);
