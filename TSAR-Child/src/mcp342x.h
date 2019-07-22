@@ -55,7 +55,9 @@ class mcp342x{
     int file_descriptor;
     char* device;
 
-	  __u8 configuration;
+	 __u8 configuration;
+	
+	const int convert(const int, const int);
 
   public:
     // Constructor / destructor stuff
