@@ -18,7 +18,7 @@ class lowrate_daq{
 	lowrate_daq(const char*, const int, const int, const int, const int);
 	~lowrate_daq();
 
-	void read_adcs(const int*&);
+	void read_adcs(int*&);
 };
 
 #endif

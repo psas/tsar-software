@@ -25,7 +25,7 @@ lowrate_daq::~lowrate_daq(){
 	device = NULL;
 }
 
-void lowrate_daq::read_adcs(const int *& data){
+void lowrate_daq::read_adcs(int *& data){
 	data = new int[16];
 	for(int i = 0; i < 4; ++i){
 		for(int j = 0; j < 4; ++j){
