@@ -9,6 +9,15 @@ lowrate_daq::lowrate_daq(const char* device, const int addr_1, const int addr_2,
 	this->device = new char[strlen(device) + 1];
 	strcpy(this->device, device);
 	strcat(this->device, "\0");
+
+	chips = new mcp342x[4];
+	chips[0] = new mcp342x(addr_1, this->device);
+	chips[1] = new mcp342x(addr_2, this->device);
+	chips[2] = new mcp342x(addr_3, this->device);
+	chips[3] = new mcp342x(addr_4, this->device);
+
+	for(int i = 0; i < 4; ++i)
+		chips[i].set_settings(true, 260, 1);
 }
 
 lowrate_daq::~lowrate_daq(){
@@ -16,6 +25,14 @@ lowrate_daq::~lowrate_daq(){
 	device = NULL;
 }
 
-void lowrate_daq::read_adc(const int *&){
-	
+void lowrate_daq::read_adcs(const int *& data){
+	data = new int[16];
+	for(int i = 0; i < 4; ++i){
+		for(int j = 0; j < 4; ++j){
+			chips[i].set_channel(j);
+			chips[i].start_read();
+			while(!chips[i].is_ready()) usleep(S);
+			data[i * 4 + j] = chips[i].read_register();
+		}
+	}
 }
