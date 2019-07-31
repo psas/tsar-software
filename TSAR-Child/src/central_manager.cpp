@@ -189,22 +189,32 @@ state_machine() {
             else if(strncmp(state.last_command.c_str(), "shutdown", strlen("shutdown")) == 0) {
                 state.current_state = eEmergencyPurge;
                 state.current_state_name = "emergency purge";
+		valve_safe_state();
+		state.PPV = OPEN;
+                wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(PURGE_TIME);
             }
             break;
-    
     // emergency-stop
         case eEmergencyPurge:
-            state.current_state = eLockout;
-            state.current_state_name = "lockout";
-            valve_safe_state(); 
-            state.PPV = OPEN;
+	    if(std::chrono::system_clock::now() >= wait_until_time) {
+                state.current_state = eEmergencySafe;
+                state.current_state_name = "emergency safe";
+	        wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(EMERGENCY_SAFE_TIME);
+	    }
             break;
+
+	case eEmergencySafe:
+	    if(std::chrono::system_clock::now() >= wait_until_time) {
+	        state.current_state = eLockout;
+	        state.current_state_name = "lockout";
+	    }
+	    break;
 
         case eLockout:
             if(strncmp(state.last_command.c_str(), "shutdown", strlen("shutdown")) == 0) {
                 state.current_state = eSafeShutdown;
                 state.current_state_name = "safe shutdown";
-            }
+	    }
             break;
 
         case eSafeShutdown: // dead state
@@ -216,8 +226,8 @@ state_machine() {
     // firing sequence
         case eIgnitionStart:
             if(std::chrono::system_clock::now() >= wait_until_time) {
-                state.current_state = eIgnitionMain;
-                state.current_state_name = "ignition main";
+                state.current_state = eIgnitionOxidize;
+                state.current_state_name = "ignition oxidize";
                 state.VVO = CLOSED;
                 state.VVF = CLOSED;
                 state.OPV = OPEN;
@@ -225,12 +235,32 @@ state_machine() {
                 state.PPV = CLOSED;
                 state.IV1 = OPEN;
                 state.IV2 = OPEN;
-                state.MFV = OPEN;
-                state.MOV = OPEN;
+                state.MFV = CLOSED;
+                state.MOV = CLOSED;
                 state.IG = ON;
-                wait_until_time = std::chrono::system_clock::now() + std::chrono::milliseconds(IGNITION_MAIN_TIME);
+                wait_until_time = std::chrono::system_clock::now() + std::chrono::milliseconds(IGNITION_OXIDIZE_TIME);
             }
             break;
+
+	case eIgnitionOxidize:
+	    if(std::chrono::system_clock::now() >= wait_until_time) {
+		state.current_state = eIgnitionMain;
+		state.current_state_name = "ignition main";
+		state.VVO = CLOSED;
+		state.VVF = CLOSED;
+		state.OPV = OPEN;
+		state.FPV = OPEN;
+		state.PPV = CLOSED;
+		state.IV1 = OPEN;
+		state.IV2 = OPEN;
+		state.MFV = CLOSED;
+		state.MOV = CLOSED;
+		state.IG = ON;
+		wait_until_time = std::chrono::system_clock::now() + std::chrono::milliseconds(IGNITION_MAIN_TIME);
+	    }
+	    break;
+
+
 
         case eIgnitionMain:
             if(std::chrono::system_clock::now() >= wait_until_time) {
