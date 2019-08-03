@@ -26,7 +26,9 @@ lowrate_daq::~lowrate_daq(){
 }
 
 void lowrate_daq::read_adcs(int *& data){
+	if(data) delete [] data;
 	data = new int[16];
+
 	for(int channel = 0; channel < 4; ++channel){
 		for(int chip = 0; chip < 4; ++chip){
 			chips[chip].set_channel(channel);
