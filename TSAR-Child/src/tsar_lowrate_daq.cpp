@@ -27,12 +27,15 @@ lowrate_daq::~lowrate_daq(){
 
 void lowrate_daq::read_adcs(int *& data){
 	data = new int[16];
-	for(int i = 0; i < 4; ++i){
-		for(int j = 0; j < 4; ++j){
-			chips[i].set_channel(j);
-			chips[i].start_read();
-			while(!chips[i].is_ready()) usleep(S);
-			data[i * 4 + j] = chips[i].read_register();
+	for(int channel = 0; channel < 4; ++channel){
+		for(int chip = 0; chip < 4; ++chip){
+			chips[chip].set_channel(channel);
+			chips[chip].start_read();
+		}
+
+		for(int chip = 0; chip < 4; ++chip){
+			while(!chips[chip].is_ready()) usleep(S);
+			data[chip * 4 + channel] = chips[chip].read_register();
 		}
 	}
 }
