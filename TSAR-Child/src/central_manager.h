@@ -22,6 +22,7 @@
 #define PURGE_TIME              3       // seconds
 #define EMERGENCY_SAFE_TIME     10      // seconds 
 
+#define APC_PIN                 "P8_18"
 #define VVO_PIN 		"P8_7"
 #define VVF_PIN 		"P8_8"
 #define OPV_PIN			"P8_9"
@@ -87,6 +88,7 @@ class CentralManager {
 
         // GPIO stuff
         GPIO::GPIOManager * gp;
+        int APC_fd;
         int VVO_fd;
         int VVF_fd;
         int OPV_fd;

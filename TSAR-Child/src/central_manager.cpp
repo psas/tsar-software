@@ -10,11 +10,13 @@ CentralManager() {
     // default values in state struct
     state.current_state = 0;
     state.current_state_name = "standby";
+    state.APC = OFF;           //Is this correct??
     state.save_file_name = "";
     state.fire_count =0;
 
     // gpio
     gp = GPIO::GPIOManager::getInstance();
+    APC_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(APC_PIN);
     VVO_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(VVO_PIN);
     VVF_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(VVF_PIN);
     OPV_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(OPV_PIN);
@@ -25,6 +27,7 @@ CentralManager() {
     MFV_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(MFV_PIN); // TODO swap to uart later
     MOV_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(MOV_PIN);
     IG_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(IG_PIN);
+    gp->setDirection(APC_fd, GPIO::OUTPUT);
     gp->setDirection(VVO_fd, GPIO::OUTPUT);
     gp->setDirection(VVF_fd, GPIO::OUTPUT);
     gp->setDirection(OPV_fd, GPIO::OUTPUT);
@@ -33,7 +36,7 @@ CentralManager() {
     gp->setDirection(IV1_fd, GPIO::OUTPUT);
     gp->setDirection(IV2_fd, GPIO::OUTPUT);
     gp->setDirection(MOV_fd, GPIO::OUTPUT); //TODO swap to uart later
-    gp->setDirection(FPV_fd, GPIO::OUTPUT);
+    gp->setDirection(MFV_fd, GPIO::OUTPUT);
     gp->setDirection(IG_fd, GPIO::OUTPUT);
 
     //TODO set i2c reg
@@ -105,6 +108,7 @@ state_machine() {
     switch(state.current_state) {
     // general
         case eStandby:
+            valve_safe_state();
             if(state.last_command.empty()) {
                 break;
             }
@@ -112,9 +116,8 @@ state_machine() {
                 state.current_state = eArmed;
                 state.current_state_name = "armed";
                 state.save_file_name = "data/startup.csv";
-                datafile.open(state.save_file_name);
+                datafile.open(state.save_file_name, std::ios_base::app);
                 datafile << FILE_HEADER;
-                valve_safe_state(); 
             }
             break;
 
@@ -149,6 +152,8 @@ state_machine() {
                 state.current_state = ePressurized;
                 state.current_state_name = "pressurized";
                 valve_safe_state(); 
+                state.VVO = CLOSED;
+                state.VVF = CLOSED;
                 state.OPV = OPEN;
                 state.FPV = OPEN;
             }
@@ -173,6 +178,7 @@ state_machine() {
 
                     state.current_state = eIgnitionStart;
                     state.current_state_name = "ignition start";
+                    state.APC = ON;
                     state.VVO = CLOSED;
                     state.VVF = CLOSED;
                     state.OPV = OPEN;
@@ -189,7 +195,11 @@ state_machine() {
             else if(strncmp(state.last_command.c_str(), "shutdown", strlen("shutdown")) == 0) {
                 state.current_state = eEmergencyPurge;
                 state.current_state_name = "emergency purge";
-		valve_safe_state();
+                bool temp = state.APC; 
+		valve_safe_state();    //TODO wait for more info
+                state.APC = temp;
+                state.VVO = CLOSED;
+                state.VVF = CLOSED;
 		state.PPV = OPEN;
                 wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(PURGE_TIME);
             }
@@ -199,6 +209,9 @@ state_machine() {
 	    if(std::chrono::system_clock::now() >= wait_until_time) {
                 state.current_state = eEmergencySafe;
                 state.current_state_name = "emergency safe";
+                bool temp = state.APC;
+                valve_safe_state();
+                state.APC = temp;
 	        wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(EMERGENCY_SAFE_TIME);
 	    }
             break;
@@ -207,6 +220,7 @@ state_machine() {
 	    if(std::chrono::system_clock::now() >= wait_until_time) {
 	        state.current_state = eLockout;
 	        state.current_state_name = "lockout";
+                state.APC = OFF;
 	    }
 	    break;
 
@@ -228,6 +242,7 @@ state_machine() {
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state.current_state = eIgnitionOxidize;
                 state.current_state_name = "ignition oxidize";
+                state.APC = ON;
                 state.VVO = CLOSED;
                 state.VVF = CLOSED;
                 state.OPV = OPEN;
@@ -236,7 +251,7 @@ state_machine() {
                 state.IV1 = OPEN;
                 state.IV2 = OPEN;
                 state.MFV = CLOSED;
-                state.MOV = CLOSED;
+                state.MOV = OPEN;
                 state.IG = ON;
                 wait_until_time = std::chrono::system_clock::now() + std::chrono::milliseconds(IGNITION_OXIDIZE_TIME);
             }
@@ -246,6 +261,7 @@ state_machine() {
 	    if(std::chrono::system_clock::now() >= wait_until_time) {
 		state.current_state = eIgnitionMain;
 		state.current_state_name = "ignition main";
+                state.APC = ON;
 		state.VVO = CLOSED;
 		state.VVF = CLOSED;
 		state.OPV = OPEN;
@@ -253,8 +269,8 @@ state_machine() {
 		state.PPV = CLOSED;
 		state.IV1 = OPEN;
 		state.IV2 = OPEN;
-		state.MFV = CLOSED;
-		state.MOV = CLOSED;
+		state.MFV = OPEN;
+		state.MOV = OPEN;
 		state.IG = ON;
 		wait_until_time = std::chrono::system_clock::now() + std::chrono::milliseconds(IGNITION_MAIN_TIME);
 	    }
@@ -266,6 +282,7 @@ state_machine() {
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state.current_state = eFiring;
                 state.current_state_name = "firing";
+                state.APC = ON;
                 state.VVO = CLOSED;
                 state.VVF = CLOSED;
                 state.OPV = OPEN;
@@ -284,6 +301,7 @@ state_machine() {
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state.current_state = eFiringStop;
                 state.current_state_name = "firing stop";
+                state.APC = ON;
                 state.VVO = CLOSED;
                 state.VVF = CLOSED;
                 state.OPV = OPEN;
@@ -302,6 +320,7 @@ state_machine() {
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state.current_state = ePurge;
                 state.current_state_name = "purge";
+                state.APC = ON;
                 state.VVO = CLOSED;
                 state.VVF = CLOSED;
                 state.OPV = CLOSED;
@@ -321,6 +340,8 @@ state_machine() {
                 state.current_state = ePressurized;
                 state.current_state_name = "pressurized";
                 valve_safe_state(); 
+                state.VVO = CLOSED;
+                state.VVF = CLOSED:
                 state.OPV = OPEN;
                 state.FPV = OPEN;
             }
@@ -349,6 +370,7 @@ control_valve(const bool & valve, const int & fd) {
 // Handles controlling all the valves
 int CentralManager::
 control() { 
+    control_valve(state.APC, APC_fd); //is this correct or should it be in the state.IG formatlike below 
     control_valve(state.VVO, VVO_fd);
     control_valve(state.VVF, VVF_fd);
     control_valve(state.OPV, OPV_fd);
@@ -369,6 +391,7 @@ control() {
 // Handle reading all the I2C sensors
 void CentralManager::
 valve_safe_state() {
+    state.APC = ON;
     state.VVO = OPEN;
     state.VVF = OPEN;
     state.OPV = CLOSED;
