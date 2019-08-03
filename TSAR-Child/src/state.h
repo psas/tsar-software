@@ -34,6 +34,7 @@ struct State {
     bool IG; // ignition
 
     // TODO add any data needed
+    int generic_unamed_dat_that_i_dont_know_what_to_call[16];
 };
 
 #endif // __SYSTEM_STATUS__
