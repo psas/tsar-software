@@ -78,7 +78,7 @@ class CentralManager {
         long long get_time_us() const;
         std::string new_file_name();
         int control_valve(const bool & valve, const int & fd);
-        void valve_safe_state();
+        void safe_state_zero();
 
         long long system_epoch;
         int firetime;

@@ -59,7 +59,7 @@ CentralManager::
 // main loop for central manager, that call the main functions
 void CentralManager::
 CM_loop() {
-    valve_safe_state(); 
+    safe_state_zero(); 
 
     while(1){ // TODO add end state or break
         state.state_mutex.lock();
@@ -108,7 +108,7 @@ state_machine() {
     switch(state.current_state) {
     // general
         case eStandby:
-            valve_safe_state();
+            safe_state_zero();
             if(state.last_command.empty()) {
                 break;
             }
@@ -128,7 +128,7 @@ state_machine() {
             else if(strncmp(state.last_command.c_str(), "chill", strlen("chill")) == 0) {
                 state.current_state = ePreChill;
                 state.current_state_name = "pre-chill";
-                valve_safe_state(); 
+                safe_state_zero(); 
                 state.MFV = CRACKED;
             }
             break;
@@ -140,7 +140,7 @@ state_machine() {
             else if(strncmp(state.last_command.c_str(), "ready", strlen("ready")) == 0) {
                 state.current_state = eReady;
                 state.current_state_name = "ready";
-                valve_safe_state(); 
+                safe_state_zero(); 
             }
             break;
 
@@ -151,7 +151,7 @@ state_machine() {
             else if(strncmp(state.last_command.c_str(), "pressurize", strlen("pressurize")) == 0) {
                 state.current_state = ePressurized;
                 state.current_state_name = "pressurized";
-                valve_safe_state(); 
+                safe_state_zero(); 
                 state.VVO = CLOSED;
                 state.VVF = CLOSED;
                 state.OPV = OPEN;
@@ -196,7 +196,7 @@ state_machine() {
                 state.current_state = eEmergencyPurge;
                 state.current_state_name = "emergency purge";
                 bool temp = state.APC; 
-		valve_safe_state();    //TODO wait for more info
+		safe_state_zero();    //TODO wait for more info
                 state.APC = temp;
                 state.VVO = CLOSED;
                 state.VVF = CLOSED;
@@ -210,7 +210,7 @@ state_machine() {
                 state.current_state = eEmergencySafe;
                 state.current_state_name = "emergency safe";
                 bool temp = state.APC;
-                valve_safe_state();
+                safe_state_zero();
                 state.APC = temp;
 	        wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(EMERGENCY_SAFE_TIME);
 	    }
@@ -339,7 +339,7 @@ state_machine() {
             if(std::chrono::system_clock::now() >= wait_until_time) {
                 state.current_state = ePressurized;
                 state.current_state_name = "pressurized";
-                valve_safe_state(); 
+                safe_state_zero(); 
                 state.VVO = CLOSED;
                 state.VVF = CLOSED:
                 state.OPV = OPEN;
@@ -390,7 +390,7 @@ control() {
 
 // Handle reading all the I2C sensors
 void CentralManager::
-valve_safe_state() {
+safe_state_zero() {
     state.APC = ON;
     state.VVO = OPEN;
     state.VVF = OPEN;
