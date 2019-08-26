@@ -1,3 +1,13 @@
+#include "command_control.h"
+
+ int main(const int argc, const char** argv) {
+    CommandControl CC;
+    CC.start_system();
+    return 0;
+}
+
+/*
+ * TODO get this out main.cpp, move to a test main
 #include <bitset>
 #include <string.h>
 #include <ncurses.h>
@@ -67,3 +77,4 @@ int main(const int argc, const char** argv){
 
 	return 0;
 }
+*/
