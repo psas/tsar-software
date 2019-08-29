@@ -1,16 +1,35 @@
-CC=g++-4.9
-C_FLAGS=-std=c++11 -pthread #-lncurses
-N_FLAGS=-lncurses
-D_FLAGS=-Wall -g3
-PROGS=TSAR-Child
+CC=g++
+CFLAGS=-std=c++11
+LDFLAGS=-lncurses -pthread
+DFLAGS=-Wall -g3
 
-EXCLUDE=src/central_manager.cpp src/command_control.cpp src/GPIO src/GPIO/*.cpp
-#ALLFILES=$(filter-out $(EXCLUDE), $(wildcard src/*.cpp) $(wildcard src/GPIO/*.cpp))
-ALLFILES=src/main.cpp src/mcp342x.cpp src/tsar_lowrate_daq.cpp
 
-run:
-	$(CC) $(C_FLAGS) $(ALLFILES) $(N_FLAGS) -o $(PROGS)
-debug:
-	$(CC) $(C_FLAGS) $(ALLFILES) $(D_FLAGS) $(N_FLAGS) -o $(PROGS)
+TSAR_SRC = ./src
+GPIO_SRC = ./src/GPIO
+
+
+INCLUDE_DIRS =	-I$(TSAR_SRC)	\
+		-I$(GPIO_SRC)
+
+
+SOURCES =	$(GPIO_SRC)/GPIOConst.cpp 	\
+		$(GPIO_SRC)/GPIOManager.cpp 	\
+		$(TSAR_SRC)/command_control.cpp	\
+		$(TSAR_SRC)/central_manager.cpp \
+		$(TSAR_SRC)/main.cpp
+
+
+OBJS =		$(SOURCES:%.cpp=%.o)
+
+
+%.o: %.cpp
+	$(CC) $(CFLAGS) $(DFLAGS) -c $< -o $@
+
+
+tsar-child: $(OBJS)
+	$(CC) $(CFLAGS) $(DFLAGS) $(LDFLAGS) $^ -o $@ 
+
 clean:
-	rm -f *.o $(PROGS)
+	rm -f $(OBJS) tsar-child
+
+
