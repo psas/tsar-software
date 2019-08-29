@@ -107,7 +107,7 @@ state_machine() {
 
     switch(state.current_state) {
     // general
-        case eStandby:
+        case eStandby: {
             safe_state_zero();
             state.APC = OFF;
             if(state.last_command.empty()) {
@@ -117,8 +117,8 @@ state_machine() {
                 state.current_state = eArmed;
             }
             break;
-
-        case eArmed:
+	}
+        case eArmed: {
             state.current_state_name = "armed";
             safe_state_zero();
             state.save_file_name = "data/startup.csv";
@@ -131,8 +131,9 @@ state_machine() {
                 state.current_state = ePreChill;
             }
             break;
+	}
 
-        case ePreChill:
+        case ePreChill: {
             state.current_state_name = "pre-chill";
             safe_state_zero(); 
             state.MFV = CRACKED;
@@ -143,8 +144,9 @@ state_machine() {
                 state.current_state = eReady;
             }
             break;
+	}
 
-        case eReady:
+        case eReady: {
             state.current_state_name = "ready";
             safe_state_zero(); 
             if(state.last_command.empty()) {
@@ -154,8 +156,9 @@ state_machine() {
                 state.current_state = ePressurized;
             }
             break;
+	}
 
-        case ePressurized:
+        case ePressurized: {
             state.current_state_name = "pressurized";
             safe_state_zero(); 
             state.VVO = CLOSED;
@@ -185,8 +188,10 @@ state_machine() {
                 state.current_state = eEmergencyPurge;
             }
             break;
+	}
+
     // emergency-stop
-        case eEmergencyPurge:
+        case eEmergencyPurge: {
             state.current_state_name = "emergency purge";
             bool temp = state.APC; 
 	    safe_state_zero();    //TODO wait for more info
@@ -199,8 +204,9 @@ state_machine() {
                 state.current_state = eEmergencySafe;
 	    }
             break;
+	}
 
-	case eEmergencySafe:
+	case eEmergencySafe: {
             state.current_state_name = "emergency safe";
             bool temp = state.APC;
             safe_state_zero();
@@ -210,8 +216,9 @@ state_machine() {
 	        state.current_state = eLockout;
 	    }
 	    break;
+	}
 
-        case eLockout:
+        case eLockout: {
             state.current_state_name = "lockout";
             safe_state_zero();
             state.APC = OFF;
@@ -219,16 +226,18 @@ state_machine() {
                 state.current_state = eSafeShutdown;
 	    }
             break;
+	}
 
-        case eSafeShutdown: // dead state
+        case eSafeShutdown: {// dead state
             state.current_state_name = "safe shutdown";
             if(datafile.is_open())
                 datafile.close();
             // TODO end this thread
             break;
+	}
 
     // firing sequence
-        case eIgnitionStart:
+        case eIgnitionStart: {
             state.current_state_name = "ignition start";
             state.APC = ON;
             state.VVO = CLOSED;
@@ -246,8 +255,9 @@ state_machine() {
                 state.current_state = eIgnitionOxidize;
             }
             break;
+	}
 
-	case eIgnitionOxidize:
+	case eIgnitionOxidize: {
             state.current_state_name = "ignition oxidize";
             state.APC = ON;
             state.VVO = CLOSED;
@@ -265,10 +275,9 @@ state_machine() {
 		state.current_state = eIgnitionMain;
 	    }
 	    break;
+	}
 
-
-
-        case eIgnitionMain:
+        case eIgnitionMain: {
             state.current_state_name = "ignition main";
             state.APC = ON; 
             state.VVO = CLOSED;
@@ -286,8 +295,9 @@ state_machine() {
                 state.current_state = eFiring;
             }
             break;
+	}
 
-        case eFiring:
+        case eFiring: {
             state.current_state_name = "firing";
             state.APC = ON;
             state.VVO = CLOSED;
@@ -305,8 +315,9 @@ state_machine() {
                 state.current_state = eFiringStop;
             }
             break;
+	}
 
-        case eFiringStop:
+        case eFiringStop: {
             state.current_state_name = "firing stop";
             state.APC = ON;
             state.VVO = CLOSED;
@@ -324,8 +335,9 @@ state_machine() {
                 state.current_state = ePurge;
             }
             break;
+	}
 
-        case ePurge:
+        case ePurge: {
             state.current_state_name = "purge";
             state.APC = ON;
             state.VVO = CLOSED;
@@ -343,11 +355,13 @@ state_machine() {
                 state.current_state = ePressurized;
             }
             break;
+	}
 
-        default: // should never happen
+        default: {// should never happen
             state.current_state = eEmergencyPurge;
             state.current_state_name = "emergency purge";
             break;
+	}
     }
 
     state.last_command = ""; // clear buffer
