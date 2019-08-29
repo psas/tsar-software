@@ -22,6 +22,7 @@ struct State {
     int fire_count; // 0 for start up, 0 > for count
     std::mutex state_mutex;
 
+    bool APC; // Actuator Power Control
     bool VVO; // vent valve oxygen
     bool VVF; // vent valve fuel
     bool OPV; // oxygen pressure valve

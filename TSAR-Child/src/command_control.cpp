@@ -15,7 +15,7 @@ start_system(){
     nodelay(stdscr, TRUE); // dont wait for input
     start_color();
     init_pair(1, COLOR_BLACK, COLOR_RED);
-    init_pair(2, COLOR_BLUE, COLOR_BLACK);
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
     
     interface();
     
@@ -64,16 +64,17 @@ print_labels() {
     mvprintw(0, (col-strlen(mesg))/2, "%s", mesg);
 
     mvprintw(STATE_ROW_0, 0, "Current State: ");
-    mvprintw(STATE_ROW_1, 0, "VVO: ");
-    mvprintw(STATE_ROW_2, 0, "VVF: ");
-    mvprintw(STATE_ROW_3, 0, "OPV: ");
-    mvprintw(STATE_ROW_4, 0, "FPV: ");
-    mvprintw(STATE_ROW_5, 0, "PPV: ");
-    mvprintw(STATE_ROW_6, 0, "IV1: ");
-    mvprintw(STATE_ROW_7, 0, "IV2: ");
-    mvprintw(STATE_ROW_8, 0, "MFV: ");
-    mvprintw(STATE_ROW_9, 0, "MOV: ");
-    mvprintw(STATE_ROW_10, 0, "IG: ");
+    mvprintw(STATE_ROW_1, 0, "APC: ");
+    mvprintw(STATE_ROW_2, 0, "VVO: ");
+    mvprintw(STATE_ROW_3, 0, "VVF: ");
+    mvprintw(STATE_ROW_4, 0, "OPV: ");
+    mvprintw(STATE_ROW_5, 0, "FPV: ");
+    mvprintw(STATE_ROW_6, 0, "PPV: ");
+    mvprintw(STATE_ROW_7, 0, "IV1: ");
+    mvprintw(STATE_ROW_8, 0, "IV2: ");
+    mvprintw(STATE_ROW_9, 0, "MFV: ");
+    mvprintw(STATE_ROW_10, 0, "MOV: ");
+    mvprintw(STATE_ROW_11, 0, "IG: ");
 
     mvprintw(DATA_ROW_0, 0, "DATA HERE");
     mvprintw(DATA_ROW_1, 0, "DATA HERE");
@@ -180,30 +181,31 @@ print_data() {
 
     mvprintw(STATE_ROW_0, 15, "%s", state.current_state_name.c_str());
 
-    print_state_info(state.VVO, STATE_ROW_1); 
-    print_state_info(state.VVF, STATE_ROW_2); 
-    print_state_info(state.OPV, STATE_ROW_3); 
-    print_state_info(state.FPV, STATE_ROW_4); 
-    print_state_info(state.PPV, STATE_ROW_5); 
-    print_state_info(state.IV1, STATE_ROW_6); 
-    print_state_info(state.IV2, STATE_ROW_7); 
-    print_state_info(state.MFV, STATE_ROW_8); 
-
-    move(STATE_ROW_9, STATE_LABEL_LENGTH);
-    clrtoeol();
-    if(state.MOV == OPEN)
-        mvprintw(STATE_ROW_9, STATE_LABEL_LENGTH, "%s", "OPEN");
-    else if(state.MOV == CRACKED)
-        mvprintw(STATE_ROW_9, STATE_LABEL_LENGTH, "%s", "CRACKED");
-    else
-        mvprintw(STATE_ROW_9, STATE_LABEL_LENGTH, "%s", "CLOSED");
+    print_state_info(state.APC, STATE_ROW_1);
+    print_state_info(state.VVO, STATE_ROW_2); 
+    print_state_info(state.VVF, STATE_ROW_3); 
+    print_state_info(state.OPV, STATE_ROW_4); 
+    print_state_info(state.FPV, STATE_ROW_5); 
+    print_state_info(state.PPV, STATE_ROW_6); 
+    print_state_info(state.IV1, STATE_ROW_7); 
+    print_state_info(state.IV2, STATE_ROW_8); 
+    print_state_info(state.MFV, STATE_ROW_9); 
 
     move(STATE_ROW_10, STATE_LABEL_LENGTH);
     clrtoeol();
-    if(state.IG == ON)
-        mvprintw(STATE_ROW_10, STATE_LABEL_LENGTH, "%s", "ON");
+    if(state.MOV == OPEN)
+        mvprintw(STATE_ROW_10, STATE_LABEL_LENGTH, "%s", "OPEN");
+    else if(state.MOV == CRACKED)
+        mvprintw(STATE_ROW_10, STATE_LABEL_LENGTH, "%s", "CRACKED");
     else
-        mvprintw(STATE_ROW_10, STATE_LABEL_LENGTH, "%s", "OFF");
+        mvprintw(STATE_ROW_10, STATE_LABEL_LENGTH, "%s", "CLOSED");
+
+    move(STATE_ROW_11, STATE_LABEL_LENGTH);
+    clrtoeol();
+    if(state.IG == ON)
+        mvprintw(STATE_ROW_11, STATE_LABEL_LENGTH, "%s", "ON");
+    else
+        mvprintw(STATE_ROW_11, STATE_LABEL_LENGTH, "%s", "OFF");
 
     move(SAVE_FILE_ROW, 10);
     clrtoeol();

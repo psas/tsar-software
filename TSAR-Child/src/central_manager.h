@@ -16,10 +16,13 @@
 #define CM_DELAY                100     // milliseconds
 #define PRINT_DELAY             500     // milliseconds
 #define IGNITION_START_TIME     100     // milliseconds
+#define IGNITION_OXIDIZE_TIME   500     // milliseconds
 #define IGNITION_MAIN_TIME      900     // milliseconds
 #define FIRING_STOP_TIME        500     // milliseconds
 #define PURGE_TIME              3       // seconds
+#define EMERGENCY_SAFE_TIME     10      // seconds 
 
+#define APC_PIN                 "P8_18"
 #define VVO_PIN 		"P8_7"
 #define VVF_PIN 		"P8_8"
 #define OPV_PIN			"P8_9"
@@ -41,11 +44,13 @@ enum eStates {
     
     // emergency-stop
     eEmergencyPurge,
+    eEmergencySafe,
     eLockout,
     eSafeShutdown,
     
     // firing sequence
     eIgnitionStart,
+    eIgnitionOxidize,
     eIgnitionMain,
     eFiring,
     eFiringStop,
@@ -73,7 +78,7 @@ class CentralManager {
         long long get_time_us() const;
         std::string new_file_name();
         int control_valve(const bool & valve, const int & fd);
-        void valve_safe_state();
+        void safe_state_zero();
 
         long long system_epoch;
         int firetime;
@@ -83,6 +88,7 @@ class CentralManager {
 
         // GPIO stuff
         GPIO::GPIOManager * gp;
+        int APC_fd;
         int VVO_fd;
         int VVF_fd;
         int OPV_fd;
