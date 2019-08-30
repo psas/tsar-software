@@ -30,8 +30,10 @@
 #define PPV_PIN 		"P8_11"
 #define IV1_PIN 		"P8_12"
 #define IV2_PIN 		"P8_14"
-#define MFV_PIN 		"P8_15" // TODO change to UART later
-#define MOV_PIN 		"P8_16"
+#define MFV0_PIN 		"P8_15" 
+#define MFV1_PIN                "P9_12"             //TODO PLEASE CHANGE
+#define MOV0_PIN 		"P8_16"
+#define MOV1_PIN                "P9_13" //TODO PLEASE CHANGE THESE TO THE CORRECT PINS
 #define IG_PIN 			"P8_17"
 
 enum eStates {
@@ -96,8 +98,10 @@ class CentralManager {
         int PPV_fd;
         int IV1_fd;
         int IV2_fd;
-        int MFV_fd;
-        int MOV_fd;
+        int MFV0_fd;
+	int MFV1_fd;
+	int MOV0_fd;
+        int MOV1_fd;
         int IG_fd;
 };
 

@@ -24,8 +24,10 @@ CentralManager() {
     PPV_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(PPV_PIN);
     IV1_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(IV1_PIN);
     IV2_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(IV2_PIN);
-    MFV_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(MFV_PIN); // TODO swap to uart later
-    MOV_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(MOV_PIN);
+    MFV0_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(MFV0_PIN); 
+    MFV1_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(MFV1_PIN);
+    MOV0_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(MOV0_PIN);
+    MOV1_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(MOV1_PIN);
     IG_fd = GPIO::GPIOConst::getInstance()->getGpioByKey(IG_PIN);
     gp->setDirection(APC_fd, GPIO::OUTPUT);
     gp->setDirection(VVO_fd, GPIO::OUTPUT);
@@ -35,8 +37,10 @@ CentralManager() {
     gp->setDirection(PPV_fd, GPIO::OUTPUT);
     gp->setDirection(IV1_fd, GPIO::OUTPUT);
     gp->setDirection(IV2_fd, GPIO::OUTPUT);
-    gp->setDirection(MOV_fd, GPIO::OUTPUT); //TODO swap to uart later
-    gp->setDirection(MFV_fd, GPIO::OUTPUT);
+    gp->setDirection(MFV0_fd, GPIO::OUTPUT);
+    gp->setDirection(MFV1_fd, GPIO::OUTPUT);    
+    gp->setDirection(MOV0_fd, GPIO::OUTPUT);
+    gp->setDirection(MOV1_fd, GPIO::OUTPUT); 
     gp->setDirection(IG_fd, GPIO::OUTPUT);
 
     //TODO set i2c reg
@@ -107,7 +111,7 @@ state_machine() {
 
     switch(state.current_state) {
     // general
-        case eStandby:
+        case eStandby: {
             safe_state_zero();
             state.APC = OFF;
             if(state.last_command.empty()) {
@@ -117,8 +121,8 @@ state_machine() {
                 state.current_state = eArmed;
             }
             break;
-
-        case eArmed:
+	}
+        case eArmed: {
             state.current_state_name = "armed";
             safe_state_zero();
             state.save_file_name = "data/startup.csv";
@@ -131,8 +135,9 @@ state_machine() {
                 state.current_state = ePreChill;
             }
             break;
+	}
 
-        case ePreChill:
+        case ePreChill: {
             state.current_state_name = "pre-chill";
             safe_state_zero(); 
             state.MFV = CRACKED;
@@ -143,8 +148,9 @@ state_machine() {
                 state.current_state = eReady;
             }
             break;
+	}
 
-        case eReady:
+        case eReady: {
             state.current_state_name = "ready";
             safe_state_zero(); 
             if(state.last_command.empty()) {
@@ -154,8 +160,9 @@ state_machine() {
                 state.current_state = ePressurized;
             }
             break;
+	}
 
-        case ePressurized:
+        case ePressurized: {
             state.current_state_name = "pressurized";
             safe_state_zero(); 
             state.VVO = CLOSED;
@@ -185,8 +192,10 @@ state_machine() {
                 state.current_state = eEmergencyPurge;
             }
             break;
+	}
+
     // emergency-stop
-        case eEmergencyPurge:
+        case eEmergencyPurge: {
             state.current_state_name = "emergency purge";
             bool temp = state.APC; 
 	    safe_state_zero();    //TODO wait for more info
@@ -199,8 +208,9 @@ state_machine() {
                 state.current_state = eEmergencySafe;
 	    }
             break;
+	}
 
-	case eEmergencySafe:
+	case eEmergencySafe: {
             state.current_state_name = "emergency safe";
             bool temp = state.APC;
             safe_state_zero();
@@ -210,8 +220,9 @@ state_machine() {
 	        state.current_state = eLockout;
 	    }
 	    break;
+	}
 
-        case eLockout:
+        case eLockout: {
             state.current_state_name = "lockout";
             safe_state_zero();
             state.APC = OFF;
@@ -219,16 +230,18 @@ state_machine() {
                 state.current_state = eSafeShutdown;
 	    }
             break;
+	}
 
-        case eSafeShutdown: // dead state
+        case eSafeShutdown: {// dead state
             state.current_state_name = "safe shutdown";
             if(datafile.is_open())
                 datafile.close();
             // TODO end this thread
             break;
+	}
 
     // firing sequence
-        case eIgnitionStart:
+        case eIgnitionStart: {
             state.current_state_name = "ignition start";
             state.APC = ON;
             state.VVO = CLOSED;
@@ -246,8 +259,9 @@ state_machine() {
                 state.current_state = eIgnitionOxidize;
             }
             break;
+	}
 
-	case eIgnitionOxidize:
+	case eIgnitionOxidize: {
             state.current_state_name = "ignition oxidize";
             state.APC = ON;
             state.VVO = CLOSED;
@@ -265,10 +279,9 @@ state_machine() {
 		state.current_state = eIgnitionMain;
 	    }
 	    break;
+	}
 
-
-
-        case eIgnitionMain:
+        case eIgnitionMain: {
             state.current_state_name = "ignition main";
             state.APC = ON; 
             state.VVO = CLOSED;
@@ -286,8 +299,9 @@ state_machine() {
                 state.current_state = eFiring;
             }
             break;
+	}
 
-        case eFiring:
+        case eFiring: {
             state.current_state_name = "firing";
             state.APC = ON;
             state.VVO = CLOSED;
@@ -305,8 +319,9 @@ state_machine() {
                 state.current_state = eFiringStop;
             }
             break;
+	}
 
-        case eFiringStop:
+        case eFiringStop: {
             state.current_state_name = "firing stop";
             state.APC = ON;
             state.VVO = CLOSED;
@@ -324,8 +339,9 @@ state_machine() {
                 state.current_state = ePurge;
             }
             break;
+	}
 
-        case ePurge:
+        case ePurge: {
             state.current_state_name = "purge";
             state.APC = ON;
             state.VVO = CLOSED;
@@ -343,11 +359,13 @@ state_machine() {
                 state.current_state = ePressurized;
             }
             break;
+	}
 
-        default: // should never happen
+        default: {// should never happen
             state.current_state = eEmergencyPurge;
             state.current_state_name = "emergency purge";
             break;
+	}
     }
 
     state.last_command = ""; // clear buffer
@@ -367,7 +385,6 @@ control_valve(const bool & valve, const int & fd) {
 // Handles controlling all the valves
 int CentralManager::
 control() { 
-    control_valve(state.APC, APC_fd); //is this correct or should it be in the state.IG formatlike below 
     control_valve(state.VVO, VVO_fd);
     control_valve(state.VVF, VVF_fd);
     control_valve(state.OPV, OPV_fd);
@@ -375,8 +392,34 @@ control() {
     control_valve(state.PPV, PPV_fd);
     control_valve(state.IV1, IV1_fd);
     control_valve(state.IV2, IV2_fd);
-    control_valve(state.MFV, MFV_fd);
-    control_valve(state.MOV, MOV_fd); // TODO UART
+    if(state.MFV == OPEN) {
+	gp->setValue(MFV0_fd, GPIO::HIGH);
+        gp->setValue(MFV1_fd, GPIO::HIGH);
+    }
+    else if(state.MFV == CRACKED) {
+	gp->setValue(MFV0_fd, GPIO::HIGH);
+	gp->setValue(MFV1_fd, GPIO::LOW);
+    }
+    else if(state.MFV == CLOSED) {
+	gp->setValue(MOV0_fd, GPIO::LOW);
+	gp->setValue(MOV1_fd, GPIO::LOW);
+    } 
+    if(state.MOV == OPEN) {
+	gp->setValue(MOV0_fd, GPIO::HIGH);
+        gp->setValue(MOV1_fd, GPIO::HIGH);
+    }
+    else if(state.MOV == CRACKED) {
+	gp->setValue(MOV0_fd, GPIO::HIGH);
+	gp->setValue(MOV1_fd, GPIO::LOW);
+    }
+    else if(state.MOV == CLOSED) {
+	gp->setValue(MOV0_fd, GPIO::LOW);
+	gp->setValue(MOV1_fd, GPIO::LOW);
+    }
+    if(state.APC == ON)
+	gp->setValue(APC_fd, GPIO::HIGH);
+    else if(state.APC == OFF)
+	gp->setValue(APC_fd, GPIO::LOW);
     if(state.IG ==  ON)
         gp->setValue(IG_fd, GPIO::HIGH);
     else if(state.IG == OFF)
