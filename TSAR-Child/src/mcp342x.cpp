@@ -37,6 +37,10 @@ mcp342x::~mcp342x(){
 }
 
 const int mcp342x::convert(const int data, const int bit_count){
+	int nshift = 32 - bit_count;
+	return ((data << nshift) >> nshift);
+
+	/*
 	const int mask = (1<<(bit_count - 1)) - 1;
 	int value = data & mask;
 	bool is_negative = (((1<<bit_count) & data) != 0);
@@ -45,6 +49,7 @@ const int mcp342x::convert(const int data, const int bit_count){
 		return (~value) + 1;
 	else
 		return value;
+  */
 }
 
 const int mcp342x::set_settings(const bool one_shot, const int sample_rate, const int pga_gain){
@@ -128,7 +133,7 @@ const int mcp342x::read_register(){
 	const int SPS = (configuration  & (CFG_S0 | CFG_S1));
 	__u8 data[4];
 	int bit_count;
-	
+
 	switch (SPS){
 		case CFG_3SPS:
 			bit_count = 18;
@@ -148,7 +153,7 @@ const int mcp342x::read_register(){
 
 	if(bit_count == 18){
 		return convert((((int) data[0]) << 16) + (((int) data[1]) << 8) + ((int) data[2]), bit_count);
-	}	
+	}
 	else{
 		return convert((((int) data[0]) << 8) + ((int) data[1]), bit_count);
 	}

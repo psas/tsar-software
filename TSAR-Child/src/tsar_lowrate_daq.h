@@ -5,6 +5,8 @@
 #include <string.h>
 #include "mcp342x.h"
 
+#define S 1
+
 class lowrate_daq{
 	private:
 		int addr_1, addr_2, addr_3, addr_4;
@@ -16,7 +18,7 @@ class lowrate_daq{
 	lowrate_daq(const char*, const int, const int, const int, const int);
 	~lowrate_daq();
 
-	void read_adc(const int*&);
+	void read_adcs(int*&);
 };
 
 #endif
