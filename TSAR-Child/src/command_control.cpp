@@ -189,15 +189,22 @@ print_data() {
     print_state_info(state.PPV, STATE_ROW_6); 
     print_state_info(state.IV1, STATE_ROW_7); 
     print_state_info(state.IV2, STATE_ROW_8); 
-    print_state_info(state.MFV, STATE_ROW_9); 
 
     move(STATE_ROW_10, STATE_LABEL_LENGTH);
     clrtoeol();
+
+    if(state.MFV == OPEN)
+        mvprintw(STATE_ROW_10, STATE_LABEL_LENGTH, "%s", "OPEN");
+    else if(state.MFV == CRACKED)
+        mvprintw(STATE_ROW_10, STATE_LABEL_LENGTH, "%s", "CRACKED");
+    else if(state.MFV == CLOSED)
+        mvprintw(STATE_ROW_10, STATE_LABEL_LENGTH, "%s", "CLOSED");
+
     if(state.MOV == OPEN)
         mvprintw(STATE_ROW_10, STATE_LABEL_LENGTH, "%s", "OPEN");
     else if(state.MOV == CRACKED)
         mvprintw(STATE_ROW_10, STATE_LABEL_LENGTH, "%s", "CRACKED");
-    else
+    else if(state.MOV == CLOSED)
         mvprintw(STATE_ROW_10, STATE_LABEL_LENGTH, "%s", "CLOSED");
 
     move(STATE_ROW_11, STATE_LABEL_LENGTH);
