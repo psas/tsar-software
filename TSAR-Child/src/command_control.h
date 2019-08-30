@@ -28,7 +28,7 @@
 #define STATE_ROW_7         9
 #define STATE_ROW_8         10
 #define STATE_ROW_9         11
-#define STATE_ROW_10        12   //TODO ADD APC
+#define STATE_ROW_10        12   
 #define STATE_ROW_11        13
     // line 14 is empty
 #define DATA_ROW_0          15

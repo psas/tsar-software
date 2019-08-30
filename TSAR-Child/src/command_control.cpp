@@ -72,7 +72,7 @@ print_labels() {
     mvprintw(STATE_ROW_6, 0, "PPV: ");
     mvprintw(STATE_ROW_7, 0, "IV1: ");
     mvprintw(STATE_ROW_8, 0, "IV2: ");
-    mvprintw(STATE_ROW_9, 0, "MFV: ");
+    mvprintw(STATE_ROW_9, 0, "MFV: "); //didn't add second display 2nd pin
     mvprintw(STATE_ROW_10, 0, "MOV: ");
     mvprintw(STATE_ROW_11, 0, "IG: ");
 
