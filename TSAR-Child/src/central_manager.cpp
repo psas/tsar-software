@@ -103,7 +103,6 @@ emergency() {
     return 0;
 }
 
-// Determine if the a transistion can be made for the current state.
 // If the tranistion requriment(s) are met, the settings for the next state 
 // are set as it swap to the next state.
 int CentralManager::
@@ -118,12 +117,13 @@ state_machine() {
                 break;
             }
             else if(strncmp(state.last_command.c_str(), "arm", strlen("arm")) == 0) {
-                state.current_state = eArmed;
+		state.transition_state(state.current_state, eArmed);
             }
             break;
 	}
         case eArmed: {
             state.current_state_name = "armed";
+	   
             safe_state_zero();
             state.save_file_name = "data/startup.csv";
             datafile.open(state.save_file_name, std::ios_base::app);
@@ -371,6 +371,27 @@ state_machine() {
     state.last_command = ""; // clear buffer
     return 1;
 }
+
+
+int CentralManager::
+transition_state(const int from, const int to) {
+	state.current_state = to;
+	switch(to) {
+		case eReady: {
+			//check if file is open adn if so close it
+			//TO OPEN DATA/STARTUP.CSV
+			break;
+		}
+		case ePressurized: {
+			//check if file is open, if so close it
+			//open new file with new unused log name 
+			break;
+		}
+		
+			 
+	}
+}
+
 
 // Handles controlling a valve
 int CentralManager::

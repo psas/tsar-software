@@ -81,6 +81,7 @@ class CentralManager {
         std::string new_file_name();
         int control_valve(const bool & valve, const int & fd);
         void safe_state_zero();
+	void transition_state(const int from, const int to); //for implementing logic that must be called only on transition
 
         long long system_epoch;
         int firetime;
