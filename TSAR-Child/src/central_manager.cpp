@@ -5,7 +5,6 @@ CentralManager::
 CentralManager() {
     system_epoch = get_time_us();
 
-    // make new data foldN folders
 
     // default values in state struct
     state.current_state = 0;
@@ -43,7 +42,9 @@ CentralManager() {
     gp->setDirection(MOV1_fd, GPIO::OUTPUT); 
     gp->setDirection(IG_fd, GPIO::OUTPUT);
 
-    //TODO set i2c reg
+    //TODO: initialize data acquisition class
+    //
+    //TODO: Call data acquisition hooks, populate state struct with data
 }
 
 
@@ -63,7 +64,9 @@ CentralManager::
 // main loop for central manager, that call the main functions
 void CentralManager::
 CM_loop() {
-    safe_state_zero(); 
+    safe_state_zero();
+    state.previous_state_name = "pre-start"; //made-up state name so 
+    					     //the transition function works
 
     while(1){ // TODO add end state or break
         state.state_mutex.lock();
@@ -86,6 +89,9 @@ read_hardware() {
 int CentralManager::
 check_for_emergency() {
     // TODO add this later
+    //
+    // NOTE: this function is for emergency auto detect
+    // the emergency stop command is handled by the state machine function
     return 1;
 }
 
@@ -111,12 +117,12 @@ state_machine() {
     switch(state.current_state) {
     // general
         case eStandby: {
+            state.current_state_name = "standby";
+	    transition_state(state.previous_state_name, state.current_state_name);
             safe_state_zero();
             state.APC = OFF;
-            if(state.last_command.empty()) {
-                break;
-            }
-            else if(strncmp(state.last_command.c_str(), "arm", strlen("arm")) == 0) {
+            if(!state.last_command.empty() &&
+	    strncmp(state.last_command.c_str(), "arm", strlen("arm")) == 0) {
 		state.transition_state(state.current_state, eArmed);
             }
             break;
@@ -128,10 +134,8 @@ state_machine() {
             state.save_file_name = "data/startup.csv";
             datafile.open(state.save_file_name, std::ios_base::app);
             datafile << FILE_HEADER;
-            if(state.last_command.empty()) {
-                break;
-            }
-            else if(strncmp(state.last_command.c_str(), "chill", strlen("chill")) == 0) {
+            if(!state.last_command.empty() &&
+	    strncmp(state.last_command.c_str(), "chill", strlen("chill")) == 0) {
                 state.current_state = ePreChill;
             }
             break;
@@ -140,11 +144,9 @@ state_machine() {
         case ePreChill: {
             state.current_state_name = "pre-chill";
             safe_state_zero(); 
-            state.MFV = CRACKED;
-            if(state.last_command.empty()) {
-                break;
-            }
-            else if(strncmp(state.last_command.c_str(), "ready", strlen("ready")) == 0) {
+            state.MOV = CRACKED;
+            if(!state.last_command.empty() &&
+	    strncmp(state.last_command.c_str(), "ready", strlen("ready")) == 0) {
                 state.current_state = eReady;
             }
             break;
@@ -153,10 +155,8 @@ state_machine() {
         case eReady: {
             state.current_state_name = "ready";
             safe_state_zero(); 
-            if(state.last_command.empty()) {
-                break;
-            }
-            else if(strncmp(state.last_command.c_str(), "pressurize", strlen("pressurize")) == 0) {
+            if(!state.last_command.empty() &&
+	    strncmp(state.last_command.c_str(), "pressurize", strlen("pressurize")) == 0) {
                 state.current_state = ePressurized;
             }
             break;
@@ -169,10 +169,8 @@ state_machine() {
             state.VVF = CLOSED;
             state.OPV = OPEN;
             state.FPV = OPEN;
-            if(state.last_command.empty()) {
-                break;
-            }
-            else if(strncmp(state.last_command.c_str(), "fire", strlen("fire")) == 0) {
+            if(!state.last_command.empty() &&
+	    strncmp(state.last_command.c_str(), "fire", strlen("fire")) == 0) {
                 firetime = parse_fire_command(state.last_command);
                 if(firetime > 1) {
                     ++state.fire_count;
@@ -197,12 +195,18 @@ state_machine() {
     // emergency-stop
         case eEmergencyPurge: {
             state.current_state_name = "emergency purge";
-            bool temp = state.APC; 
-	    safe_state_zero();    //TODO wait for more info
-            state.APC = temp;
+	    bool apc_last = state.APC;
+            state.APC = apc_last;
             state.VVO = CLOSED;
             state.VVF = CLOSED;
+	    state.OPV = CLOSED;
+	    state.FPV = CLOSED;
             state.PPV = OPEN;
+	    state.IV1 = CLOSED;
+	    state.IV2 = CLOSED;
+	    state.MFV = CLOSED;
+	    state.MOV = CLOSED;
+	    state.IG = OFF;
             wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(PURGE_TIME);
 	    if(std::chrono::system_clock::now() >= wait_until_time) {
                 state.current_state = eEmergencySafe;
@@ -212,9 +216,9 @@ state_machine() {
 
 	case eEmergencySafe: {
             state.current_state_name = "emergency safe";
-            bool temp = state.APC;
+            bool apc_last = state.APC;
             safe_state_zero();
-            state.APC = temp;
+            state.APC = apc_last;
 	    wait_until_time = std::chrono::system_clock::now() + std::chrono::seconds(EMERGENCY_SAFE_TIME);
 	    if(std::chrono::system_clock::now() >= wait_until_time) {
 	        state.current_state = eLockout;
@@ -377,6 +381,10 @@ int CentralManager::
 transition_state(const int from, const int to) {
 	state.current_state = to;
 	switch(to) {
+		case eStandby: {
+	        	safe_state_zero();
+                	state.APC = OFF;
+		}
 		case eReady: {
 			//check if file is open adn if so close it
 			//TO OPEN DATA/STARTUP.CSV

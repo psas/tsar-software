@@ -14,6 +14,7 @@
 struct State {
     int current_state;
     std::string current_state_name;
+    std::string previous_state_name;
     std::string last_command;
     bool in_emergency;
 
