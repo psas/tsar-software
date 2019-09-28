@@ -117,10 +117,18 @@ state_machine() {
     switch(state.current_state) {
     // general
         case eStandby: {
+            // TODO 1st time only
+            // if(current state != last state) {
+            //
+            // }
+            
+            // every time
             state.current_state_name = "standby";
-	    transition_state(state.previous_state_name, state.current_state_name);
+	    transition_state(state.previous_state_name, state.current_state_name);// TODO remove this
             safe_state_zero();
             state.APC = OFF;
+
+            // to move to next state
             if(!state.last_command.empty() &&
 	    strncmp(state.last_command.c_str(), "arm", strlen("arm")) == 0) {
 		state.transition_state(state.current_state, eArmed);
