@@ -2,7 +2,7 @@
 Test Stand Automation and Regulation (TSAR) for the Liquid Propellant Engine Test Stand
 
 ## ActuatorController
-Old TSAR value controller program. Out of Date. 
+Old TSAR value controller program (Arduino). Out of Date. 
 
 ## CentralManagert
 Old TSAR controll program for central computer (Raspberry Pi 3). Out of Date. 
