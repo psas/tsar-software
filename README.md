@@ -1,5 +1,5 @@
 # TSAR
-Test Stand Automation and Regulation (TSAR) for the Liquid Propellant Engine Test Stand
+Test Stand Automation and Regulation (TSAR) for the [Liquid Propellant Engine Test Stand](https://github.com/psas/liquid-engine-test-stand)
 
 ## ActuatorController
 Old TSAR value controller program (Arduino). Out of Date. 
