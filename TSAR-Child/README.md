@@ -1,10 +1,5 @@
 # TSAR-Child
 
-- data: temp folder for hold output of TSAR Child
-- doc: Diagrams for TSAR Child
-- src: Source code
-- utils: useful scripts for dev
-
 ## File Structure
 - **main-propellent-value.ino** - Arduino code to cotrol a the main values.
 - **data** - Directory to hold output of TSAR-Child.
