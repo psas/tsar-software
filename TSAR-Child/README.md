@@ -1,4 +1,5 @@
 # TSAR-Child
+TSAR-Child is a two thread program design for a BeagleBone Black. The main thead is the central manager thread. It is the main working thread that handles the state machine, hardware control, and saving data locally on the BeagleBone. The other thread is the user interface thread. It uses ncruses to display data and take in the user input.
 
 ## File Structure
 - **main-propellent-value.ino** - Arduino code to cotrol a the main values.
