@@ -13,7 +13,7 @@
 - **src** - Directory for source code.
     - **central_manager.cpp/.h** - Main work thread. Includes state machine and hardware control.
     - **command_control.cpp/.h** - User interface (ncrueses) thread.
-    - **GPIO** - GPIO library [repo] (https://github.com/mkaczanowski/BeagleBoneBlack-GPIO)
+    - **GPIO** - GPIO library [repo](https://github.com/mkaczanowski/BeagleBoneBlack-GPIO)
     - **lyle_converter.cpp/.h** - ??
     - **main.cpp** - Main function.
     - **mcp234x.cpp/.h** - Driver for MCP232x.
