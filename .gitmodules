@@ -1,0 +1,6 @@
+[submodule "CentralManager/src/BeagleBoneBlack-GPIO"]
+	path = CentralManager/src/BeagleBoneBlack-GPIO
+	url = https://github.com/mkaczanowski/BeagleBoneBlack-GPIO
+[submodule "CentralManager/src/rapidjson"]
+	path = CentralManager/src/rapidjson
+	url = https://github.com/Tencent/rapidjson
