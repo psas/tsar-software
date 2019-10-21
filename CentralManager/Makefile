@@ -5,11 +5,15 @@ DFLAGS=-Wall -g3
 
 
 TSAR_SRC = ./src
-GPIO_SRC = ./src/GPIO
+HARDWARE_DRIVERS_SRC = ./src/hardware_drivers
+GPIO_SRC = ./src/BeagleBoneBlack-GPIO/GPIO
+RAPIDJSON_SRC = ./src/rapidjson/include/rapidjson
 
 
-INCLUDE_DIRS =	-I$(TSAR_SRC)	\
-		-I$(GPIO_SRC)
+INCLUDE_DIRS =	-I$(TSAR_SRC)                   \
+		-I$(HARDWARE_DRIVERS_SRC)       \
+		-I$(GPIO_SRC)                   \
+		-I$(RAPIDJSON_SRC)
 
 
 SOURCES =	$(GPIO_SRC)/GPIOConst.cpp 	\
@@ -31,5 +35,4 @@ tsar-child: $(OBJS)
 
 clean:
 	rm -f $(OBJS) tsar-child
-
 
