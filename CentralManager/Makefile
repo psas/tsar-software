@@ -27,12 +27,12 @@ OBJS =		$(SOURCES:%.cpp=%.o)
 
 
 %.o: %.cpp
-	$(CC) $(CFLAGS) $(DFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(DFLAGS) $(INCLUDE_DIRS) -c $< -o $@
 
 
-tsar-child: $(OBJS)
+central_manager: $(OBJS)
 	$(CC) $(CFLAGS) $(DFLAGS) $(LDFLAGS) $^ -o $@ 
 
 clean:
-	rm -f $(OBJS) tsar-child
+	rm -f $(OBJS) central_manager
 

@@ -9,8 +9,8 @@
 #include <cstring>               // strcmp
 
 #include "state.h"
-#include "GPIO/GPIOManager.h"
-#include "GPIO/GPIOConst.h"
+#include "GPIOManager.h"
+#include "GPIOConst.h"
 
 #define FILE_HEADER "time(ms), state, fire_count\n"
 #define CM_DELAY                100     // milliseconds
