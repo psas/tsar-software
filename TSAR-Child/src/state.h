@@ -13,6 +13,7 @@
 
 struct State {
     int current_state;
+    int previous_state;
     std::string current_state_name;
     std::string previous_state_name;
     std::string last_command;
