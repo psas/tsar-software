@@ -13,7 +13,9 @@
 
 struct State {
     int current_state;
+    int previous_state;
     std::string current_state_name;
+    std::string previous_state_name;
     std::string last_command;
     bool in_emergency;
 
@@ -22,6 +24,7 @@ struct State {
     int fire_count; // 0 for start up, 0 > for count
     std::mutex state_mutex;
 
+    bool APC; // Actuator Power Control
     bool VVO; // vent valve oxygen
     bool VVF; // vent valve fuel
     bool OPV; // oxygen pressure valve
@@ -29,7 +32,7 @@ struct State {
     bool PPV; // purge pressure valve
     bool IV1; // ignition valve 1
     bool IV2; // ignition valve 2
-    bool MFV; // main fuel valve
+    int MFV; // main fuel valve
     int MOV; // main oxygen valve. needs 3 states open, closed, cracked
     bool IG; // ignition
 
