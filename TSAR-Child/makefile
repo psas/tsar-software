@@ -12,14 +12,16 @@ INCLUDE_DIRS =	-I$(TSAR_SRC)	\
 		-I$(GPIO_SRC)
 
 
-SOURCES =	$(GPIO_SRC)/GPIOConst.cpp 	\
-		$(GPIO_SRC)/GPIOManager.cpp 	\
+SOURCES =	$(GPIO_SRC)/GPIOConst.cpp	\
+		$(GPIO_SRC)/GPIOManager.cpp	\
 		$(TSAR_SRC)/command_control.cpp	\
 		$(TSAR_SRC)/central_manager.cpp \
 		$(TSAR_SRC)/main.cpp
 
 
 OBJS =		$(SOURCES:%.cpp=%.o)
+
+EXE=tsar-child
 
 
 %.o: %.cpp
@@ -29,7 +31,12 @@ OBJS =		$(SOURCES:%.cpp=%.o)
 tsar-child: $(OBJS)
 	$(CC) $(CFLAGS) $(DFLAGS) $(LDFLAGS) $^ -o $@ 
 
+run:
+	make clean
+	make tsar-child
+	./$(EXE)
+
 clean:
-	rm -f $(OBJS) tsar-child
+	rm -f $(OBJS) $(EXE)
 
 

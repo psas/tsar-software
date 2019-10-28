@@ -5,9 +5,9 @@ CentralManager::
 CentralManager() {
     system_epoch = get_time_us();
 
-
     // default values in state struct
     state.current_state = 0;
+    state.previous_state = -1;
     state.current_state_name = "standby";
     state.APC = OFF;           //Is this correct??
     state.save_file_name = "";
@@ -65,13 +65,25 @@ void CentralManager::
 CM_loop() {
     safe_state_zero();
     state.previous_state_name = "pre-start"; //made-up state name so
-    					     //the transition function works
+					     //the transition function works
 
     while(1){ // TODO add end state or break
         state.state_mutex.lock();
         read_hardware();
         check_for_emergency();
-        state_machine();
+
+	if(state.last_command == "arm")
+		state.current_state = eArmed;
+	else if(state.last_command == "chill")
+		state.current_state = ePreChill;
+	else if(state.last_command == "ready")
+		state.current_state = eReady;
+	else if(state.last_command == "pressurize")
+		state.current_state = ePressurized;
+	else if(state.last_command == "fire")
+		state.current_state = eIgnitionStart;
+
+        if(state_machine() < 0) exit(1);
         //control();
         state.saving = save();
         state.state_mutex.unlock();
@@ -103,7 +115,7 @@ emergency() {
     }
     else {
         state.current_state = eEmergencyPurge;
-        state.current_state_name = "emergency purge";
+        state.current_state_name = "emergency-purge";
     }
     return 0;
 }
@@ -113,19 +125,172 @@ emergency() {
 int CentralManager::
 state_machine() {
     if(state.current_state != state.previous_state) {
+	// Update the previous state
+	state.previous_state = state.current_state;
+	state.previous_state_name = state.current_state_name;
+
+	// Determine the new state
         switch(state.current_state){
-            case eStandby:
+            // General Cases
+            case eStandby: {
                 state.current_state_name = "standby";
-                // TODO: stuff
-                break;
-            default:
+		safe_state_zero(); // Start with safe state
+		state.APC = OFF;
+                break; }
+            case eArmed: {
+                state.current_state_name = "armed";
+		safe_state_zero(); // Start with safe state
+		save();
+                break; }
+            case ePreChill: {
+                state.current_state_name = "pre-chill";
+		safe_state_zero(); // Start with safe state
+		state.MOV = CRACKED;
+                break; }
+	    case eReady: {
+                state.current_state_name = "ready";
+		safe_state_zero(); // Start with safe state
+                break; }
+            case ePressurized: {
+                state.current_state_name = "pressurized";
+		safe_state_zero(); // Start with safe state
+		state.VVO = CLOSED;
+		state.VVF = CLOSED;
+		state.OPV = OPEN;
+		state.FPV = OPEN;
+
+		// TODO: Add close -> open data file
+
+                break; }
+            // Emergency Stop
+            case eEmergencyPurge: {
+		int last_apc = state.APC;
+                state.current_state_name = "emergency-purge";
+		state.APC = last_apc;
+		state.VVO = CLOSED;
+		state.VVF = CLOSED;
+		state.OPV = CLOSED;
+		state.FPV = CLOSED;
+		state.PPV = OPEN;
+		state.IV1 = CLOSED;
+		state.IV2 = CLOSED;
+		state.MFV = CLOSED;
+		state.MOV = CLOSED;
+		state.IG = OFF;
+                break; }
+            case eEmergencySafe: {
+		int last_apc = state.APC;
+                state.current_state_name = "emergency-safe";
+		safe_state_zero(); // Start with safe state
+		state.APC = last_apc;
+                break; }
+            case eLockout: {
+                state.current_state_name = "lockout";
+		safe_state_zero(); // Start with safe state
+		state.APC = OFF;
+                break; }
+            case eSafeShutdown: {
+                state.current_state_name = "safe-shutdown";
+		safe_state_zero(); // Start with safe state
+
+		// TODO: Add close data file -> system-safe exit
+
+                break; }
+            // Firing Sequence
+            case eIgnitionStart: {
+                state.current_state_name = "ignition-start";
+		state.APC = ON;
+		state.VVO = CLOSED;
+		state.VVF = CLOSED;
+		state.OPV = OPEN;
+		state.FPV = OPEN;
+		state.PPV = CLOSED;
+		state.IV1 = OPEN;
+		state.IV2 = OPEN;
+		state.MFV = CLOSED;
+		state.MOV = CLOSED;
+		state.IG = ON;
+                break; }
+            case eIgnitionOxidize: {
+                state.current_state_name = "ignition-oxidize";
+		state.APC = ON;
+		state.VVO = CLOSED;
+		state.VVF = CLOSED;
+		state.OPV = OPEN;
+		state.FPV = OPEN;
+		state.PPV = CLOSED;
+		state.IV1 = OPEN;
+		state.IV2 = OPEN;
+		state.MFV = CLOSED;
+		state.MOV = OPEN;
+		state.IG = ON;
+                break;  }
+            case eIgnitionMain: {
+                state.current_state_name = "ignition-main";
+		state.APC = ON;
+		state.VVO = CLOSED;
+		state.VVF = CLOSED;
+		state.OPV = OPEN;
+		state.FPV = OPEN;
+		state.PPV = CLOSED;
+		state.IV1 = OPEN;
+		state.IV2 = OPEN;
+		state.MFV = OPEN;
+		state.MOV = OPEN;
+		state.IG = ON;
+                break; }
+            case eFiring: {
+                state.current_state_name = "firing";
+		state.APC = ON;
+		state.VVO = CLOSED;
+		state.VVF = CLOSED;
+		state.OPV = OPEN;
+		state.FPV = OPEN;
+		state.PPV = CLOSED;
+		state.IV1 = CLOSED;
+		state.IV2 = CLOSED;
+		state.MFV = OPEN;
+		state.MOV = OPEN;
+		state.IG = OFF;
+                break; }
+            case eFiringStop: {
+                state.current_state_name = "firing-stop";
+		state.APC = ON;
+		state.VVO = CLOSED;
+		state.VVF = CLOSED;
+		state.OPV = OPEN;
+		state.FPV = OPEN;
+		state.PPV = CLOSED;
+		state.IV1 = CLOSED;
+		state.IV2 = CLOSED;
+		state.MFV = CLOSED;
+		state.MOV = CLOSED;
+		state.IG = OFF;
+                break; }
+            case ePurge: {
+                state.current_state_name = "purge";
+		state.APC = ON;
+		state.VVO = CLOSED;
+		state.VVF = CLOSED;
+		state.OPV = CLOSED;
+		state.FPV = CLOSED;
+		state.PPV = OPEN;
+		state.IV1 = CLOSED;
+		state.IV2 = CLOSED;
+		state.MFV = CLOSED;
+		state.MOV = CLOSED;
+		state.IG = OFF;
+                break; }
+
+            // Just a compiler checkbox, the switch should never default
+            default: {
                 state.current_state = eEmergencyPurge;
-                state.current_state_name = "emergency purge";
+                state.current_state_name = "INVALID STATE";
+		return -1; }
         }
     }
 
-    state.previous_state = state.current_state;
-    state.previous_state_name = state.current_state_name;
+    return state.current_state;
 }
 
 /*
@@ -136,8 +301,8 @@ transition_state(const int from, const int to) {
 	state.current_state = to;
 	switch(to) {
 		case eStandby: {
-	        	safe_state_zero();
-                	state.APC = OFF;
+			safe_state_zero();
+			state.APC = OFF;
 		}
 		case eReady: {
 			//check if file is open adn if so close it

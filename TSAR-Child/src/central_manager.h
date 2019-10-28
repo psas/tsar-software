@@ -23,18 +23,18 @@
 #define EMERGENCY_SAFE_TIME     10      // seconds 
 
 #define APC_PIN                 "P8_18"
-#define VVO_PIN 		"P8_7"
-#define VVF_PIN 		"P8_8"
+#define VVO_PIN			"P8_7"
+#define VVF_PIN			"P8_8"
 #define OPV_PIN			"P8_9"
-#define FPV_PIN 		"P8_10"
-#define PPV_PIN 		"P8_11"
-#define IV1_PIN 		"P8_12"
-#define IV2_PIN 		"P8_14"
-#define MFV0_PIN 		"P8_15" 
+#define FPV_PIN			"P8_10"
+#define PPV_PIN			"P8_11"
+#define IV1_PIN			"P8_12"
+#define IV2_PIN			"P8_14"
+#define MFV0_PIN		"P8_15" 
 #define MFV1_PIN                "P9_12"             //TODO PLEASE CHANGE
-#define MOV0_PIN 		"P8_16"
+#define MOV0_PIN		"P8_16"
 #define MOV1_PIN                "P9_13" //TODO PLEASE CHANGE THESE TO THE CORRECT PINS
-#define IG_PIN 			"P8_17"
+#define IG_PIN			"P8_17"
 
 enum eStates {
     // general
@@ -81,7 +81,6 @@ class CentralManager {
         std::string new_file_name();
         int control_valve(const bool & valve, const int & fd);
         void safe_state_zero();
-	    void transition_state(const int from, const int to); //for implementing logic that must be called only on transition
 
         long long system_epoch;
         int firetime;
@@ -100,8 +99,8 @@ class CentralManager {
         int IV1_fd;
         int IV2_fd;
         int MFV0_fd;
-	    int MFV1_fd;
-    	int MOV0_fd;
+	int MFV1_fd;
+	int MOV0_fd;
         int MOV1_fd;
         int IG_fd;
 };
