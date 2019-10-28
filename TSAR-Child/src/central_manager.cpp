@@ -58,6 +58,8 @@ CentralManager::
         delete gp;
         gp = nullptr;
     }
+
+    running = true;
 }
 
 // main loop for central manager, that call the main functions
@@ -67,28 +69,101 @@ CM_loop() {
     state.previous_state_name = "pre-start"; //made-up state name so
 					     //the transition function works
 
-    while(1){ // TODO add end state or break
+    while(true){
         state.state_mutex.lock();
-        read_hardware();
-        check_for_emergency();
+        //read_hardware();
+        //check_for_emergency();
 
-	if(state.last_command == "arm")
-		state.current_state = eArmed;
-	else if(state.last_command == "chill")
-		state.current_state = ePreChill;
-	else if(state.last_command == "ready")
-		state.current_state = eReady;
-	else if(state.last_command == "pressurize")
-		state.current_state = ePressurized;
-	else if(state.last_command == "fire")
-		state.current_state = eIgnitionStart;
-
-        if(state_machine() < 0) exit(1);
-        //control();
+	interpret_state();   // Interpret the user-inputed-command from CC and change a state
+				// iff the command is valid and the correct previous state exists.
+        if(state_machine() < 0) exit(1); // Make the boolean state changes
+        //control(); // Enable this for physical GPIO controll
         state.saving = save();
         state.state_mutex.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(CM_DELAY));
     }
+}
+
+int CentralManager::
+interpret_state() {
+	if(state.last_command == "arm" && state.previous_state == eStandby) {
+		state.previous_state = state.current_state;
+		state.previous_state_name = state.current_state_name;
+		state.current_state = eArmed;
+	}
+	else if(state.last_command == "chill" && state.previous_state == eArmed) {
+		state.previous_state = state.current_state;
+		state.previous_state_name = state.current_state_name;
+		state.current_state = ePreChill;
+	}
+	else if(state.last_command == "ready" && state.previous_state == ePreChill) {
+		state.previous_state = state.current_state;
+		state.previous_state_name = state.current_state_name;
+		state.current_state = eReady;
+	}
+	else if(state.last_command == "pressurize" && state.previous_state == eReady) {
+		state.previous_state = state.current_state;
+		state.previous_state_name = state.current_state_name;
+		state.current_state = ePressurized;
+	}
+	else if(state.last_command == "fire" && state.previous_state == ePressurized) {
+		state.previous_state = state.current_state;
+		state.previous_state_name = state.current_state_name;
+		state.current_state = eIgnitionStart;
+	}
+	else if(state.last_command == "shutdown" && (state.previous_state == ePressurized || state.previous_state == eLockout)) {
+		state.previous_state = state.current_state;
+		state.previous_state_name = state.current_state_name;
+		state.current_state = eSafeShutdown;
+	}
+	// EMERGENCY SEQUENCE
+	else if(state.previous_state == eEmergencyPurge) {
+        	std::this_thread::sleep_for(std::chrono::milliseconds(PURGE_TIME));
+		state.previous_state = state.current_state;
+		state.current_state = eEmergencySafe;
+	}
+	else if(state.previous_state == eEmergencySafe) {
+        	std::this_thread::sleep_for(std::chrono::milliseconds(EMERGENCY_SAFE_TIME));
+		state.previous_state = state.current_state;
+		state.current_state = eLockout;
+	}
+	// FIRING SEQUENCE
+	else if(state.previous_state == eIgnitionStart) {
+        	std::this_thread::sleep_for(std::chrono::milliseconds(IGNITION_START_TIME));
+		state.previous_state = state.current_state;
+		state.current_state = eIgnitionOxidize;
+	}
+	else if(state.previous_state == eIgnitionOxidize) {
+        	std::this_thread::sleep_for(std::chrono::milliseconds(IGNITION_OXIDIZE_TIME));
+		state.previous_state = state.current_state;
+		state.current_state = eIgnitionMain;
+	}
+	else if(state.previous_state == eIgnitionMain) {
+        	std::this_thread::sleep_for(std::chrono::milliseconds(IGNITION_MAIN_TIME));
+		state.previous_state = state.current_state;
+		state.current_state = eFiring;
+	}
+	else if(state.previous_state == eFiring) {
+        	std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+		state.previous_state = state.current_state;
+		state.current_state = eFiringStop;
+	}
+	else if(state.previous_state == eFiringStop) {
+        	std::this_thread::sleep_for(std::chrono::milliseconds(FIRING_STOP_TIME));
+		state.previous_state = state.current_state;
+		state.current_state = ePurge;
+	}
+	else if(state.previous_state == ePurge) {
+        	std::this_thread::sleep_for(std::chrono::milliseconds(PURGE_TIME));
+		state.previous_state = state.current_state;
+		state.current_state = ePressurized;
+	}
+	else {
+		state.previous_state = state.current_state;
+		return -1;
+	}
+
+	return state.current_state;
 }
 
 // Handle reading all the I2C sensors
@@ -109,14 +184,14 @@ check_for_emergency() {
 int CentralManager::
 emergency() {
     state.in_emergency = true;
-    if(state.current_state == eStandby) {
+    /*if(state.current_state == eStandby) {
         state.current_state = eLockout;
         state.current_state_name = "lockout";
     }
-    else {
+    else {*/
         state.current_state = eEmergencyPurge;
         state.current_state_name = "emergency-purge";
-    }
+    //}
     return 0;
 }
 
@@ -125,10 +200,6 @@ emergency() {
 int CentralManager::
 state_machine() {
     if(state.current_state != state.previous_state) {
-	// Update the previous state
-	state.previous_state = state.current_state;
-	state.previous_state_name = state.current_state_name;
-
 	// Determine the new state
         switch(state.current_state){
             // General Cases
@@ -194,6 +265,8 @@ state_machine() {
 		safe_state_zero(); // Start with safe state
 
 		// TODO: Add close data file -> system-safe exit
+
+		running = false;
 
                 break; }
             // Firing Sequence
@@ -292,33 +365,6 @@ state_machine() {
 
     return state.current_state;
 }
-
-/*
-* TODO: remove this
-*
-int CentralManager::
-transition_state(const int from, const int to) {
-	state.current_state = to;
-	switch(to) {
-		case eStandby: {
-			safe_state_zero();
-			state.APC = OFF;
-		}
-		case eReady: {
-			//check if file is open adn if so close it
-			//TO OPEN DATA/STARTUP.CSV
-			break;
-		}
-		case ePressurized: {
-			//check if file is open, if so close it
-			//open new file with new unused log name
-			break;
-		}
-
-
-	}
-}*/
-
 
 // Handles controlling a valve
 int CentralManager::

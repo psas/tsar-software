@@ -63,6 +63,7 @@ print_labels() {
     char mesg[] = "TSAR-Child "; 
     mvprintw(0, (col-strlen(mesg))/2, "%s", mesg);
 
+    mvprintw(1, 0, "Previous State: "); // Debugging for state machine
     mvprintw(STATE_ROW_0, 0, "Current State: ");
     mvprintw(STATE_ROW_1, 0, "APC: ");
     mvprintw(STATE_ROW_2, 0, "VVO: ");
@@ -179,6 +180,7 @@ print_data() {
 
     attron(COLOR_PAIR(2)); // Color on
 
+    mvprintw(1, 18, "%s                      ", state.previous_state_name.c_str()); // Debugging for state machine
     mvprintw(STATE_ROW_0, 15, "%s", state.current_state_name.c_str());
 
     print_state_info(state.APC, STATE_ROW_1);

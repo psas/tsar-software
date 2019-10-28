@@ -15,12 +15,14 @@
 #define FILE_HEADER "time(ms), state, fire_count\n"
 #define CM_DELAY                100     // milliseconds
 #define PRINT_DELAY             500     // milliseconds
+
 #define IGNITION_START_TIME     100     // milliseconds
 #define IGNITION_OXIDIZE_TIME   500     // milliseconds
 #define IGNITION_MAIN_TIME      900     // milliseconds
 #define FIRING_STOP_TIME        500     // milliseconds
-#define PURGE_TIME              3       // seconds
-#define EMERGENCY_SAFE_TIME     10      // seconds 
+
+#define PURGE_TIME              3000    // milliseconds
+#define EMERGENCY_SAFE_TIME     10000   // milliseconds 
 
 #define APC_PIN                 "P8_18"
 #define VVO_PIN			"P8_7"
@@ -73,6 +75,7 @@ class CentralManager {
     private:
         int read_hardware();
         int check_for_emergency();
+	int interpret_state();
         int state_machine();
         int control();
         int save();
@@ -82,6 +85,7 @@ class CentralManager {
         int control_valve(const bool & valve, const int & fd);
         void safe_state_zero();
 
+	bool running;
         long long system_epoch;
         int firetime;
         std::chrono::system_clock::time_point wait_until_time;
