@@ -7,10 +7,33 @@ int main(int argc, char** argv){
 	string input = "";
 	State tstate;
 
-	while(input != "stop"){
+    cout << tstate << endl;
+
+    /*tstate.machine("standby");
+    cout << tstate << endl;
+    tstate.machine("pressurize");
+    cout << tstate << endl;
+    tstate.machine("ignite");
+    cout << tstate << endl;
+    tstate.machine("oxidize");
+    cout << tstate << endl;
+    tstate.machine("fuel");
+    cout << tstate << endl;
+    tstate.machine("fire");
+    cout << tstate << endl;
+    tstate.machine("purge");
+    cout << tstate << endl;*/
+
+	/*while(input != "stop"){
 		cout << "> ";
 		cin >> input;
-		if(!tstate.machine(input)) cerr << "Invalid state or sequence!" << endl << endl;
-		cout << tstate << endl;
-	}
+        try {
+            tstate.machine(input);
+		    cout << tstate << endl;
+        }
+        catch(BAD_PREREQ e) {
+            cerr << "Invalid sequence: " << endl
+                 << "\t" << e.message << endl;
+        }
+	}*/
 }
