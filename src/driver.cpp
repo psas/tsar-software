@@ -3,20 +3,30 @@
 
 using namespace std;
 
+#define CMDLINE true
+
+void test_happy_path(State& s){
+    for(int t = SS0; t <= PURGE; ++t){
+        s.machine((enum state_type) t);
+        cout << s << endl;
+    }
+}
+
 int main(int argc, char** argv){
-	string input = "";
+    State hp_test;
+    test_happy_path(hp_test);
+
+	string input;
 	State tstate;
 
-	while(input != "stop"){
+	while(CMDLINE && input != "stop"){
 		cout << "> ";
 		cin >> input;
         try {
             tstate.machine(input);
 		    cout << tstate << endl;
         }
-        catch(BAD_PREREQ e) {
-            cerr << "Invalid sequence: " << endl
-                 << "\t" << e.message << endl;
-        }
+        catch(BAD_PREREQ e) { cerr << e.message << endl; }
+        catch(BAD_CMD e) { cerr << e.message << endl; }
 	}
 }

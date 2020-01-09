@@ -2,6 +2,7 @@
 #define TSAR_STATE
 
 #include <iostream>
+#include <string>
 #include <mutex>
 
 #define CLOSED  0
@@ -11,7 +12,13 @@
 enum state_type { SS0, PRESSURIZE, IGNITE, O_START, F_START, FIRE, PURGE };
 
 struct BAD_PREREQ {
-    BAD_PREREQ(std::string);
+    BAD_PREREQ(state_type, state_type, state_type);
+    state_type curr, from, to;
+    std::string message;
+};
+
+struct BAD_CMD {
+    BAD_CMD(std::string);
     std::string message;
 };
 
@@ -26,7 +33,7 @@ class State {
 		bool estop; // Emergency stop
 
         // Special internal functions only
-        void assert_state(state_type);
+        void assert_state(state_type, state_type);
 		void set(bool, bool, bool, bool, bool, bool, bool, bool, bool, bool);
 
 		std::string data_file; // The file to dump DSP/DAQ data to
@@ -50,10 +57,12 @@ class State {
 		State();
 		void safe_state_zero();
 		void machine(const std::string);
+		void machine(const state_type);
 
 		friend std::ostream& operator<< (std::ostream&, const State&);
 };
 
 std::string bool_to_str(bool);
+std::string tolower(const std::string);
 
 #endif

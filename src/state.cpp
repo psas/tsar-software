@@ -1,5 +1,15 @@
 #include "state.h"
 
+const char* cmd_names[] = {
+"standby",
+"pressurize",
+"ignite",
+"oxidize",
+"fuel",
+"fire",
+"purge",
+};
+
 const char* state_names[] = {
 "safe-state-0",
 "pressurized",
@@ -17,7 +27,28 @@ const char* state_modes[] = {
 };
 
 // Error spec implementation
-BAD_PREREQ::BAD_PREREQ(std::string message) : message(message) {}
+BAD_PREREQ::BAD_PREREQ(state_type curr, state_type from, state_type to)
+    : curr(curr), from(from), to(to) {
+        message = "Invalid sequence\n";
+        message += "\tCannot jump from State<";
+        message += state_names[from];
+        message += "> to State<";
+        message += state_names[to];
+        message += ">, while only in State<";
+        message += state_names[curr];
+        message += ">\n";
+}
+
+BAD_CMD::BAD_CMD(std::string input){
+    message = "Command: " + input + " was not recognized!\n\nAvailable Commands:";
+    for(int i = 0; i < 7; ++i){
+        message += "\n\t";
+        message += std::to_string(i + 1);
+        message += ".) ";
+        message += cmd_names[i];
+    }
+    message += "\n";
+}
 
 // State Object implementation
 State::State(){
@@ -36,16 +67,10 @@ State::State(){
 	lock.unlock();
 }
 
-void State::assert_state(state_type expected) {
+void State::assert_state(state_type expected, state_type transition_to) {
     if(curr_state != expected){
         lock.unlock();
-        std::string message("cannot move from: ");
-        message += state_names[expected];
-        message += " to: ";
-        message += user_input;
-        message += " while in: ";
-        message += state_names[curr_state];
-        throw BAD_PREREQ(message);
+        throw BAD_PREREQ(curr_state, expected, transition_to);
     }
 }
 
@@ -67,63 +92,63 @@ void State::safe_state_zero() {
     set(CLOSED, CLOSED, CLOSED, OPEN, CLOSED, CLOSED, CLOSED, OPEN, CLOSED, CLOSED);
 }
 
+void State::machine(const std::string input) {
+    user_input = tolower(input);
+
+    if(user_input == "standby") machine(SS0);
+    else if(user_input == "pressurize") machine(PRESSURIZE);
+    else if(user_input == "ignite") machine(IGNITE);
+    else if(user_input == "oxidize") machine(O_START);
+    else if(user_input == "fuel") machine(F_START);
+    else if(user_input == "fire") machine(FIRE);
+    else if(user_input == "purge") machine(PURGE);
+    else if(user_input == "stop" || user_input == "status") {} // No op
+    else throw BAD_CMD(input);
+}
+
 /*
     The general algorithm for changing state looks like this:
         1.) Acquire the state lock
         2.) Assert that the correct prerequisite state is the current state
-        3.) Log the current state as the new previous state
-        4.) Set the new state properties (Valves, Igniters, etc.)
+        3.) Set the new state properties (Valves, Igniters, etc.)
+        4.) Log the current state as the new previous state
         5.) Update the state + state name strings
         6.) Release the state lock
 */
-void State::machine(const std::string input) {
+void State::machine(const state_type expected) {
 	lock.lock();
-	user_input = input;
 
-	if(user_input == "standby") {
-        assert_state(SS0);
-		prev_state = curr_state;
-        //safe_state_zero();
-        set(CLOSED, CLOSED, CLOSED, OPEN, CLOSED, CLOSED, CLOSED, OPEN, CLOSED, CLOSED);
-		curr_state = SS0;
+	if(expected == SS0) {
+        assert_state(SS0, expected);
+        safe_state_zero();
 	}
-    else if(user_input == "pressurize") {
-        assert_state(SS0);
-		prev_state = curr_state;
+    else if(expected == PRESSURIZE) {
+        assert_state(SS0, expected);
         set(OPEN, OPEN, CLOSED, CLOSED, CLOSED, CLOSED, CLOSED, CLOSED, CLOSED, CLOSED);
-		curr_state = PRESSURIZE;
 	}
-    else if(user_input == "ignite") {
-        assert_state(PRESSURIZE);
-		prev_state = curr_state;
+    else if(expected == IGNITE) {
+        assert_state(PRESSURIZE, expected);
         set(OPEN, OPEN, CLOSED, CLOSED, CLOSED, CLOSED, CLOSED, CLOSED, OPEN, OPEN);
-		curr_state = IGNITE;
 	}
-    else if(user_input == "oxidize") {
-        assert_state(IGNITE);
-		prev_state = curr_state;
+    else if(expected == O_START) {
+        assert_state(IGNITE, expected);
         set(OPEN, OPEN, CLOSED, CLOSED, CLOSED, OPEN, CLOSED, CLOSED, OPEN, OPEN);
-		curr_state = O_START;
 	}
-    else if(user_input == "fuel") {
-        assert_state(O_START);
-		prev_state = curr_state;
+    else if(expected == F_START) {
+        assert_state(O_START, expected);
         set(OPEN, OPEN, CLOSED, CLOSED, OPEN, OPEN, CLOSED, CLOSED, OPEN, OPEN);
-		curr_state = F_START;
 	}
-    else if(user_input == "fire") {
-        assert_state(F_START);
-		prev_state = curr_state;
+    else if(expected == FIRE) {
+        assert_state(F_START, expected);
         set(OPEN, OPEN, CLOSED, CLOSED, OPEN, OPEN, CLOSED, CLOSED, CLOSED, CLOSED);
-		curr_state = FIRE;
 	}
-    else if(user_input == "purge") {
-        assert_state(FIRE);
-		prev_state = curr_state;
+    else if(expected == PURGE) {
+        assert_state(FIRE, expected);
         set(CLOSED, CLOSED, OPEN, CLOSED, CLOSED, CLOSED, CLOSED, CLOSED, CLOSED, CLOSED);
-		curr_state = PURGE;
 	}
 
+	prev_state = curr_state;
+	curr_state = expected;
 	curr_state_name = state_names[curr_state]; // Update curr name
 	prev_state_name = state_names[prev_state]; // Update prev name
 	lock.unlock();
@@ -153,3 +178,9 @@ std::ostream& operator<< (std::ostream& buffer, const State& src){
 }
 
 std::string bool_to_str(bool x){ return x ? "true" : "false"; }
+
+std::string tolower(const std::string input){
+    char* res = new char[input.length() + 1];
+    for(int i = 0; i < input.length(); ++i) res[i] = tolower(input[i]);
+    return std::string(res); 
+}
