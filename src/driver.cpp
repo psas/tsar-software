@@ -28,5 +28,13 @@ int main(int argc, char** argv){
         }
         catch(BAD_PREREQ e) { cerr << e.message << endl; }
         catch(BAD_CMD e) { cerr << e.message << endl; }
+        catch(UNLOCKED_ASSERTION e) {
+            cerr << e.message << endl;
+            exit(-1);
+        }
+        catch(...) {
+            cerr << "fatal: Unknown error!" << endl;
+            exit(-1);
+        }
 	}
 }

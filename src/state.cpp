@@ -50,6 +50,9 @@ BAD_CMD::BAD_CMD(std::string input){
     message += "\n";
 }
 
+UNLOCKED_ASSERTION::UNLOCKED_ASSERTION()
+    : message("fatal: Lock was not obtained before assertion!") {}
+
 // State Object implementation
 State::State(){
 	curr_state = SS0;
@@ -67,8 +70,17 @@ State::State(){
 	lock.unlock();
 }
 
+/*
+    An internal tool to assert the correct state
+    This function will throw errors instead of returning
+        if the state is invalid or if the lock is not held.
+*/
 void State::assert_state(state_type expected, state_type transition_to) {
     if(curr_state != expected){
+        if(lock.try_lock()){
+            lock.unlock();
+            throw UNLOCKED_ASSERTION();
+        }
         lock.unlock();
         throw BAD_PREREQ(curr_state, expected, transition_to);
     }

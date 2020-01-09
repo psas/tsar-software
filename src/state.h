@@ -22,6 +22,11 @@ struct BAD_CMD {
     std::string message;
 };
 
+struct UNLOCKED_ASSERTION {
+    UNLOCKED_ASSERTION();
+    std::string message;
+};
+
 class State {
 	private: 
 		// State management things
