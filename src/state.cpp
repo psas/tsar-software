@@ -63,7 +63,7 @@ void State::set(bool SOV1, bool SOV2, bool SOV3, bool SOV4, bool SOV5, bool SOV6
 	this->IG2 = IG2;
 }
 
-void State::safe_state_zero(){
+void State::safe_state_zero() {
     set(CLOSED, CLOSED, CLOSED, OPEN, CLOSED, CLOSED, CLOSED, OPEN, CLOSED, CLOSED);
 }
 
@@ -132,9 +132,7 @@ void State::machine(const std::string input) {
 std::ostream& operator<< (std::ostream& buffer, const State& src){
 	buffer << "current:  " << src.curr_state_name << std::endl
 	       << "previous: " << src.prev_state_name << std::endl << std::endl
-	       /*<< "input: " << src.user_input << std::endl
-	       << "e-stop: " << bool_to_str(src.estop) << std::endl
-	       << "data-file: " << src.data_file << std::endl*/
+
            << "Properties:" << std::endl
            << "\tPurge N2: " << state_modes[src.SOV3] << std::endl << std::endl
 
