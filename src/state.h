@@ -9,7 +9,7 @@
 #define OPEN    1
 #define CRACKED 2
 
-enum state_type { SS0, PRESSURIZE, IGNITE, O_START, F_START, FIRE, PURGE };
+enum state_type { LOX_PREFILL, LOX_FILL, SS0, PRESSURIZE, IGNITE, O_START, F_START, FIRE, PURGE, LOX_BLOWDOWN };
 
 struct BAD_PREREQ {
     BAD_PREREQ(state_type, state_type, state_type);
@@ -60,9 +60,15 @@ class State {
 	public:
 		// Constructors / Destructors
 		State();
+
+        // Regular Runtime functions
 		void safe_state_zero();
 		void machine(const std::string);
 		void machine(const state_type);
+
+        // Utility Runtime functions
+        void toggle(const std::string);
+        void toggle(bool&);
 
 		friend std::ostream& operator<< (std::ostream&, const State&);
 };
