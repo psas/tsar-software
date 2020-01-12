@@ -1,6 +1,8 @@
 #include "state.h"
 
 const char* cmd_names[] = {
+"prefill",
+"fill",
 "standby",
 "pressurize",
 "ignite",
@@ -8,16 +10,20 @@ const char* cmd_names[] = {
 "fuel",
 "fire",
 "purge",
+"blowdown"
 };
 
 const char* state_names[] = {
+"lox-prefill",
+"lox-fill",
 "safe-state-0",
 "pressurized",
 "ignition",
 "oxidizer-start",
 "fuel-start",
 "firing",
-"purging"
+"purging",
+"lox-blowdown"
 };
 
 const char* state_modes[] = {
@@ -41,7 +47,7 @@ BAD_PREREQ::BAD_PREREQ(state_type curr, state_type from, state_type to)
 
 BAD_CMD::BAD_CMD(std::string input){
     message = "Command: " + input + " was not recognized!\n\nAvailable Commands:";
-    for(int i = 0; i < 7; ++i){
+    for(int i = 0; i < 10; ++i){
         message += "\n\t";
         message += std::to_string(i + 1);
         message += ".) ";
@@ -55,8 +61,8 @@ UNLOCKED_ASSERTION::UNLOCKED_ASSERTION()
 
 // State Object implementation
 State::State(){
-	curr_state = SS0;
-	prev_state = SS0;
+	curr_state = (enum state_type) 0;
+	prev_state = (enum state_type) 0;
 
 	curr_state_name = state_names[curr_state];
 	prev_state_name = "N/A";
@@ -107,7 +113,9 @@ void State::safe_state_zero() {
 void State::machine(const std::string input) {
     user_input = tolower(input);
 
-    if(user_input == "standby") machine(SS0);
+    if(user_input == "prefill") machine(LOX_PREFILL);
+    else if(user_input == "fill") machine(LOX_FILL);
+    else if(user_input == "standby") machine(SS0);
     else if(user_input == "pressurize") machine(PRESSURIZE);
     else if(user_input == "ignite") machine(IGNITE);
     else if(user_input == "oxidize") machine(O_START);
@@ -130,8 +138,16 @@ void State::machine(const std::string input) {
 void State::machine(const state_type expected) {
 	lock.lock();
 
-	if(expected == SS0) {
-        assert_state(SS0, expected);
+    if(expected == LOX_PREFILL) {
+        assert_state(LOX_PREFILL, expected);
+        set(CLOSED, OPEN, CLOSED, CLOSED, CLOSED, OPEN, CLOSED, CLOSED, CLOSED, CLOSED);
+	}
+    else if(expected == LOX_FILL) {
+        assert_state(LOX_PREFILL, expected);
+        set(CLOSED, CLOSED, CLOSED, CLOSED, CLOSED, OPEN, OPEN, OPEN, CLOSED, CLOSED);
+	}
+    else if(expected == SS0) {
+        assert_state(LOX_FILL, expected);
         safe_state_zero();
 	}
     else if(expected == PRESSURIZE) {
@@ -158,6 +174,10 @@ void State::machine(const state_type expected) {
         assert_state(FIRE, expected);
         set(CLOSED, CLOSED, OPEN, CLOSED, CLOSED, CLOSED, CLOSED, CLOSED, CLOSED, CLOSED);
 	}
+    else if(expected == LOX_BLOWDOWN) {
+        assert_state(PURGE, expected);
+        set(CLOSED, OPEN, CLOSED, CLOSED, CLOSED, OPEN, CLOSED, CLOSED, CLOSED, CLOSED);
+	}
 
 	prev_state = curr_state;
 	curr_state = expected;
@@ -166,25 +186,44 @@ void State::machine(const state_type expected) {
 	lock.unlock();
 }
 
+void State::toggle(const std::string input) {
+    user_input = tolower(input);
+
+    if(user_input == "sov1") toggle(SOV1);
+    else if(user_input == "sov2") toggle(SOV2);
+    else if(user_input == "sov3") toggle(SOV3);
+    else if(user_input == "sov4") toggle(SOV4);
+    else if(user_input == "sov5") toggle(SOV5);
+    else if(user_input == "sov6") toggle(SOV6);
+    else if(user_input == "sov7") toggle(SOV7);
+    else if(user_input == "sov8") toggle(SOV8);
+    else if(user_input == "ig1") toggle(IG1);
+    else if(user_input == "ig2") toggle(IG2);
+    else if(user_input == "stop" || user_input == "status") {} // No op
+    else throw BAD_CMD(input);
+}
+
+void State::toggle(bool& valve) { valve = (valve ? false : true); }
+
 std::ostream& operator<< (std::ostream& buffer, const State& src){
 	buffer << "current:  " << src.curr_state_name << std::endl
 	       << "previous: " << src.prev_state_name << std::endl << std::endl
 
            << "Properties:" << std::endl
-           << "\tPurge N2: " << state_modes[src.SOV3] << std::endl << std::endl
+           << "\t[SOV3] Purge N2: " << state_modes[src.SOV3] << std::endl << std::endl
 
-           << "\tFuel Pressure: " << state_modes[src.SOV1] << std::endl
-           << "\tLOX Pressure:  " << state_modes[src.SOV2] << std::endl << std::endl
+           << "\t[SOV1] Fuel Pressure: " << state_modes[src.SOV1] << std::endl
+           << "\t[SOV2] LOX Pressure:  " << state_modes[src.SOV2] << std::endl << std::endl
 
-           << "\tSolenoid Vent Valve 1: " << state_modes[src.SOV4] << std::endl
-           << "\tSolenoid Vent Valve 2: " << state_modes[src.SOV8] << std::endl << std::endl
+           << "\t[SOV4] Solenoid Vent Valve 1: " << state_modes[src.SOV4] << std::endl
+           << "\t[SOV8] Solenoid Vent Valve 2: " << state_modes[src.SOV8] << std::endl << std::endl
 
-           << "\tFuel Main: " << state_modes[src.SOV5] << std::endl
-           << "\tLOX Main:  " << state_modes[src.SOV6] << std::endl
-           << "\tLOX Fill:  " << state_modes[src.SOV7] << std::endl << std::endl
+           << "\t[SOV5] Fuel Main: " << state_modes[src.SOV5] << std::endl
+           << "\t[SOV6] LOX Main:  " << state_modes[src.SOV6] << std::endl
+           << "\t[SOV7] LOX Fill:  " << state_modes[src.SOV7] << std::endl << std::endl
 
-           << "\tIgniter 1: " << state_modes[src.IG1] << std::endl
-           << "\tIgniter 2: " << state_modes[src.IG2] << std::endl;
+           << "\t[IG1] Igniter 1: " << state_modes[src.IG1] << std::endl
+           << "\t[IG2] Igniter 2: " << state_modes[src.IG2] << std::endl;
 
 	return buffer;
 }
@@ -193,6 +232,6 @@ std::string bool_to_str(bool x){ return x ? "true" : "false"; }
 
 std::string tolower(const std::string input){
     char* res = new char[input.length() + 1];
-    for(int i = 0; i < input.length(); ++i) res[i] = tolower(input[i]);
+    for(int i = 0; i < (int) input.length(); ++i) res[i] = tolower(input[i]);
     return std::string(res); 
 }
