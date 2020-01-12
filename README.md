@@ -1,14 +1,7 @@
-# TSAR
-Test Stand Automation and Regulation (TSAR) for the [Liquid Propellant Engine Test Stand](https://github.com/psas/liquid-engine-test-stand)
+# TSAR Manager
 
-## ActuatorController
-Old TSAR value controller program (Arduino). Out of Date. 
+A manager for the test stand.
 
-## CentralManagert
-Old TSAR controll program for central computer (Raspberry Pi 3). Out of Date. 
+### Usage:
 
-## TSAR_ADC
-KiCad design for low data acquistion board.
-
-## TSAR-Child
-Slim down version of CenteralManager made for a BeagleBone Black. Current design.
+`$` `./tsar-man`
