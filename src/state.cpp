@@ -122,6 +122,7 @@ void State::machine(const std::string input) {
     else if(user_input == "fuel") machine(F_START);
     else if(user_input == "fire") machine(FIRE);
     else if(user_input == "purge") machine(PURGE);
+    else if(user_input == "blowdown") machine(LOX_BLOWDOWN);
     else if(user_input == "stop" || user_input == "status") {} // No op
     else throw BAD_CMD(input);
 }
@@ -233,5 +234,5 @@ std::string bool_to_str(bool x){ return x ? "true" : "false"; }
 std::string tolower(const std::string input){
     char* res = new char[input.length() + 1];
     for(int i = 0; i < (int) input.length(); ++i) res[i] = tolower(input[i]);
-    return std::string(res); 
+    return std::string(res);
 }
