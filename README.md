@@ -5,8 +5,8 @@ A manager for the test stand.
 ### Usage:
 
 `$` `./tsar-man [OPTIONS]`
-* `-h/--help	Stop it, get some help`
-* `-u/--utility-mode	Enables utility mode allowing for individual vent toggling instead of running the regular test stand sequence`
+* `-h/--help`	Stop it, get some help
+* `-u/--utility-mode`	Enables utility mode allowing for individual vent toggling instead of running the regular test stand sequence
 
 ##### In-Program commands:
 
@@ -38,13 +38,13 @@ All of the valve-short-names _(SOV1, SOV2, etc.)_, are commands for toggling the
   _(Note: valve-short-names as commands are not case sensitive.)_
 
 ### Valves / Igniters:
-* `SOV1:` `Fuel Pressure`
-* `SOV2:` `LOX Pressure`
-* `SOV3:` `Purge N2`
-* `SOV4:` `Solenoid Vent Valve 1`
-* `SOV5:` `Fuel Main`
-* `SOV6:` `LOX Main`
-* `SOV7:` `LOX Fill`
-* `SOV8:` `Solenoid Vent Valve 2`
-* `IG1:` `Igniter 1`
-* `IG2:` `Igniter 2`
+* `SOV1:` Fuel Pressure
+* `SOV2:` LOX Pressure
+* `SOV3:` Purge N2
+* `SOV4:` Solenoid Vent Valve 1
+* `SOV5:` Fuel Main
+* `SOV6:` LOX Main
+* `SOV7:` LOX Fill
+* `SOV8:` Solenoid Vent Valve 2
+* `IG1:` Igniter 1
+* `IG2:` Igniter 2
