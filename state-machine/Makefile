@@ -6,6 +6,8 @@ SRC 	= $(wildcard ./src/*.cpp)
 OBJS 	= $(SRC:%.cpp=%.o)
 BIN 	= tsar-man
 
+all: build
+
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(DFLAGS) -c $< -o $@
 
