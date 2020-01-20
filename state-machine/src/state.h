@@ -12,7 +12,7 @@
 enum state_type { LOX_PREFILL, LOX_FILL, SS0, PRESSURIZE, IGNITE, O_START, F_START, FIRE, PURGE, LOX_BLOWDOWN };
 
 struct BAD_PREREQ {
-    BAD_PREREQ(state_type, state_type, state_type);
+    BAD_PREREQ(state_type, state_type);
     state_type curr, from, to;
     std::string message;
 };
@@ -28,7 +28,7 @@ struct UNLOCKED_ASSERTION {
 };
 
 class State {
-	private: 
+	private:
 		// State management things
 		state_type curr_state;
 		state_type prev_state;
@@ -65,6 +65,7 @@ class State {
 		void safe_state_zero();
 		void machine(const std::string);
 		void machine(const state_type);
+		void actuate();
 
         // Utility Runtime functions
         void toggle(const std::string);
