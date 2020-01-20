@@ -33,20 +33,18 @@ const char* state_modes[] = {
 };
 
 // Error spec implementation
-BAD_PREREQ::BAD_PREREQ(state_type curr, state_type from, state_type to)
+BAD_PREREQ::BAD_PREREQ(state_type curr, state_type to)
     : curr(curr), from(from), to(to) {
         message = "Invalid sequence\n";
         message += "\tCannot jump from State<";
-        message += state_names[from];
+        message += state_names[curr];
         message += "> to State<";
         message += state_names[to];
-        message += ">, while only in State<";
-        message += state_names[curr];
         message += ">\n";
 }
 
 BAD_CMD::BAD_CMD(std::string input){
-    message = "Command: " + input + " was not recognized!\n\nAvailable Commands:";
+    message = "Command was not recognized: " + input + "\n\nAvailable Commands:";
     for(int i = 0; i < 10; ++i){
         message += "\n\t";
         message += std::to_string(i + 1);
@@ -88,7 +86,7 @@ void State::assert_state(state_type expected, state_type transition_to) {
             throw UNLOCKED_ASSERTION();
         }
         lock.unlock();
-        throw BAD_PREREQ(curr_state, expected, transition_to);
+        throw BAD_PREREQ(curr_state, transition_to);
     }
 }
 
