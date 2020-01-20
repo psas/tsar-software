@@ -1,6 +1,6 @@
 # TSAR Manager
 
-A manager for the test stand.
+A manager for the test stand. Controls valves/igniters, pressure/temperature data aquisition, and safety.
 
 ### Usage:
 
