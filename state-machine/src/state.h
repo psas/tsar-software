@@ -65,6 +65,7 @@ class State {
 		void safe_state_zero();
 		void machine(const std::string);
 		void machine(const state_type);
+		void actuate();
 
         // Utility Runtime functions
         void toggle(const std::string);

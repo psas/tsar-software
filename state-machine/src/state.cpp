@@ -182,7 +182,12 @@ void State::machine(const state_type expected) {
 	curr_state = expected;
 	curr_state_name = state_names[curr_state]; // Update curr name
 	prev_state_name = state_names[prev_state]; // Update prev name
-	lock.unlock();
+	actuate();								   // Actually, actuate the actual valves
+	lock.unlock();							   // Unlock the state object
+}
+
+void State::actuate() {
+	// TODO: Actuate all the valves-n-things
 }
 
 void State::toggle(const std::string input) {
