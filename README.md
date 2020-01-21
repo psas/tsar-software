@@ -1,6 +1,6 @@
 # TSAR Manager
 
-A manager for the test stand. Controls valves/igniters, pressure/temperature data aquisition, and safety.
+An actuator controller manager for the test stand. Controls valves/igniters, pressure/temperature data aquisition, and safety.
 
 ### Usage:
 
@@ -48,3 +48,4 @@ All of the valve-short-names _(SOV1, SOV2, etc.)_, are commands for toggling the
 * `SOV8:` Solenoid Vent Valve 2
 * `IG1:` Igniter 1
 * `IG2:` Igniter 2
+
