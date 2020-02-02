@@ -36,3 +36,8 @@
 *.exe
 *.out
 *.app
+
+# Ignore Eagle Temp Files
+*.b#*
+*.s#*
+*.l#*
