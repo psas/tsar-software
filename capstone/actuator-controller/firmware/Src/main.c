@@ -16,107 +16,36 @@
   *
   ******************************************************************************
   */
-/* USER CODE END Header */
-
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "stateMachine.h"
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
+#include "state_machine.h"
+#include "states_def.h"
 
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 
 LPTIM_HandleTypeDef hlptim1;
 
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_LPTIM1_Init(void);
-/* USER CODE BEGIN PFP */
 
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-  
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
   SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_ADC1_Init();
   MX_LPTIM1_Init();
-  /* USER CODE BEGIN 2 */
 
-  /* USER CODE END 2 */
- 
- 
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
+	  StateMachine(true,SETUP_OPS);
   }
-  /* USER CODE END 3 */
 }
 
-/**
-  * @brief System Clock Configuration
-  * @retval None
-  */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -164,26 +93,11 @@ void SystemClock_Config(void)
   }
 }
 
-/**
-  * @brief ADC1 Initialization Function
-  * @param None
-  * @retval None
-  */
 static void MX_ADC1_Init(void)
 {
-
-  /* USER CODE BEGIN ADC1_Init 0 */
-
-  /* USER CODE END ADC1_Init 0 */
-
   ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
   ADC_ChannelConfTypeDef sConfig = {0};
 
-  /* USER CODE BEGIN ADC1_Init 1 */
-
-  /* USER CODE END ADC1_Init 1 */
-  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
-  */
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
@@ -228,27 +142,10 @@ static void MX_ADC1_Init(void)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN ADC1_Init 2 */
-
-  /* USER CODE END ADC1_Init 2 */
-
 }
 
-/**
-  * @brief LPTIM1 Initialization Function
-  * @param None
-  * @retval None
-  */
 static void MX_LPTIM1_Init(void)
 {
-
-  /* USER CODE BEGIN LPTIM1_Init 0 */
-
-  /* USER CODE END LPTIM1_Init 0 */
-
-  /* USER CODE BEGIN LPTIM1_Init 1 */
-
-  /* USER CODE END LPTIM1_Init 1 */
   hlptim1.Instance = LPTIM1;
   hlptim1.Init.Clock.Source = LPTIM_CLOCKSOURCE_APBCLOCK_LPOSC;
   hlptim1.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV1;
@@ -264,17 +161,8 @@ static void MX_LPTIM1_Init(void)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN LPTIM1_Init 2 */
-
-  /* USER CODE END LPTIM1_Init 2 */
-
 }
 
-/**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -375,6 +263,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.Alternate = GPIO_AF1_SPI2;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+  //TODO ADD PD9 as GPIO Push/pull
+
 
   /*Configure GPIO pins : PB3 PB6 */
   GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_6;
@@ -400,14 +290,6 @@ static void MX_GPIO_Init(void)
 
 }
 
-/* USER CODE BEGIN 4 */
-
-/* USER CODE END 4 */
-
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
