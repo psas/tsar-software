@@ -1,6 +1,6 @@
-// states_machine.h
+// tsar_state_machine.h
 // Portland State Aerospace Society
-// TSAR Capstone 2019-2020
+// TSAR_Capstone 2019-2020
 //
 // Change Log
 // 	-Creation of Document 2/11/2020 [APJ]
@@ -21,7 +21,7 @@ void StateMachine(bool control, enum StateName Incoming)
 {
 	enum StateName _state = Incoming;
 	enum StateName _lastState = Incoming;
-	bool success = false;
+	uint32_t success = FALSE;
 	//enum StateName _nextState = Incoming;
 	while(control)
 	{
@@ -83,6 +83,9 @@ void StateMachine(bool control, enum StateName Incoming)
 					break;
 				case TEST:
 					control = Test(_state,_lastState);
+					break;
+				case SAFETY:
+					control = Safety(_state,_lastState);
 					break;
 
 				default:

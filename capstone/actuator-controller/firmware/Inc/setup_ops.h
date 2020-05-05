@@ -1,4 +1,4 @@
-// setup_ops.h
+// tsar_setup_ops.h
 // Portland State Aerospace Society
 // TSAR Capstone 2019-2020
 //
@@ -12,10 +12,10 @@
 //
 //  System Risk Factor = 0.33 (Catastrophic, Unlikely)
 
-#ifndef SETUP_OPS_H
-#define SETUP_OPS_H
+#ifndef TSAR_SETUP_OPS_H
+#define TSAR_SETUP_OPS_H
 
-#include "states_def.h"
+#include "tsar_states_def.h"
 
 bool SetupOps(enum StateName, enum StateName);
 

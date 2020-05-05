@@ -1,4 +1,4 @@
-// setup_ops.c
+// tsar_setup_ops.c
 // Portland State Aerospace Society
 // TSAR Capstone 2019-2020
 //
@@ -33,13 +33,14 @@ bool SetupOps(enum StateName state, enum StateName lastState)
     		valve_target |= (uint16_t)VV1|(uint16_t)VV2;
     		// Timestamp and Log
     		valve_configuration = StateConfiguration();
-    		// Get current time, Log Pin Configuration
+    		// Get current time, Log  Pin Configuration
     		// Change State conditions
     		lastState=state;
     		state = SETUP_OPS;
     		success = (valve_configuration == valv_target ? true : false);
     	}else{
     		// Log Expected State != Passed State
+
     	}
     }else{
     	// Log Invalid State

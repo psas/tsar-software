@@ -14,12 +14,12 @@
 //  System Risk Factor = 0.33 (Catastrophic, Unlikely)
 #include "utilities.h"
 
-bool VerifyState(int state)
+uint32_t VerifyState(int state)
 {
-	bool success = false;
+	uint32_t success = false;
     if(state <= 0x1FF && state > 0)
     {
-    	success = true;
+    	success = TRUE;
 		switch(state)
 		{
 			case SETUP_OPS:
@@ -148,8 +148,61 @@ bool ValveStateSetter(uint16_t vs)
 			? HAL_GPIO_WritePin(GPIOD, GPIO2_Pin,GPIO_PIN_SET) \
 			: HAL_GPIO_WritePin(GPIOD, GPIO2_Pin,GPIO_PIN_RESET);
 
-	success = (vs == StateConfiguration() ? true : false);
+	success = (vs == StateConfiguration() ? TRUE : FALSE);
 
 	return success;
 }
+
+bool UART_SendMessage(char *message[])
+{
+	uint32_t ofc = 0;
+	uint32_t msg_time = HAL_GetTick();
+	uint32_t success = FALSE;
+	char invalid_length[BUFFER_SIZE] = "Error: Log Message Overflow";
+	char no_message[BUFFER_SIZE] = "Error: Log Message Empty";
+	char time_str[sizeof(uint32_t +1)];
+	char prepare[sizeof(uint32_t+1)];
+	char transmit[BUFFER_SIZE];
+
+	sprintf(time_str, "%d",msg_time);
+	strcat(transmit, time_str);
+	strcat(transmit, " : ");
+
+	ofc += strlen(time_str) + strlen(" : ") + strlen(message);
+	if(message[0] != NULL)
+	{
+		if(ofc < BUFFER_SIZE)
+		{
+			strcat(transmit, message);
+			success = TRUE;
+		}else
+		{
+			strcat(transmit,invalid_length);
+		}
+	}else
+	{
+		strcat(transmit,no_message);
+	}
+
+	USART_SendData(LPUSART1, transmit);
+
+	return success;
 }
+
+bool UART_RecieveMessage(char *message[])
+{
+	uint32_t parity = 0;
+	for(int i = 0; i < BUFFER_SIZE; i++)
+	{
+		parity += message[i] == 1 ? 1 : 0;
+	}
+
+	// Payload Description
+	// Start Byte 		AA
+	// Payload Size 	0D
+	// Payload			--
+	// Valve Out State  0x7FF
+	// Valve
+
+}
+

@@ -30,6 +30,7 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32g0xx_hal.h"
 #include "stm32g0xx_ll_system.h"
+#include "init.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -59,8 +60,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define LOW_POWER_UART2_RX_Pin GPIO_PIN_0
-#define LOW_POWER_UART2_RX_GPIO_Port GPIOC
 #define LOW_POWER_UART1_TX_Pin GPIO_PIN_1
 #define LOW_POWER_UART1_TX_GPIO_Port GPIOC
 #define GPIO13_Pin GPIO_PIN_13

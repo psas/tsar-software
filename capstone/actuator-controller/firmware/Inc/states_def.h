@@ -23,7 +23,7 @@
 
 #include "stdbool.h"
 
-#define PRINT_BUFFER_SIZE = 128
+#define PRINT_BUFFER_SIZE 256
 
 static enum StateName{			// PV1	PV2	PV3	VV1	VV2	IV1	IV2	MV1	MV2
 	SETUP_OPS,					// |11	|11	|11	|11 |11	|11	|11	|11	|11
@@ -47,18 +47,21 @@ static enum StateName{			// PV1	PV2	PV3	VV1	VV2	IV1	IV2	MV1	MV2
 	SAFE_APPROACH,				// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
 	FAILURE,					// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
 	GROUNDSTATION,				// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	TEST						// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
+	TEST,						// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
+	SAFETY						// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
 };
 
 // Definitions of Solenoids
-#define	PV1 = 0x001				// GPIOA GPIO8_Pin (uint_16t)0x0100
-#define PV2 = 0x002				// GPIOA GPIO9_FAST_Pin (uint16_t)0x0200
-#define PV3 = 0x004				// GPIOA GPIO10_FAST_Pin (uint16_t)0x0400
-#define VV1 = 0x008				// GPIOB GPIO13_Pin (uint16_t)0x2000
-#define VV2 = 0x010				// GPIOB GPIO14_Pin (uint16_t)0x4000
-#define IV1 = 0x020				// GPIOB GPIO15_Pin (uint16_t)0x8000
-#define IV2 = 0x040				// GPIOD GPIO8D8_Pin (uint_16t)0x0100
-#define MV1 = 0x080				// GPIOD GPIO9_Pin (uint_16t)0x0200
-#define MV2 = 0x100				// GPIOD GPIO2_Pin (uint_16t)0x0004
+#define	PV1  0x001				// GPIOA GPIO8_Pin (uint_16t)0x0100
+#define PV2  0x002				// GPIOA GPIO9_FAST_Pin (uint16_t)0x0200
+#define PV3  0x004				// GPIOA GPIO10_FAST_Pin (uint16_t)0x0400
+#define VV1  0x008				// GPIOB GPIO13_Pin (uint16_t)0x2000
+#define VV2  0x010				// GPIOB GPIO14_Pin (uint16_t)0x4000
+#define IV1  0x020				// GPIOB GPIO15_Pin (uint16_t)0x8000
+#define IV2  0x040				// GPIOD GPIO8D8_Pin (uint_16t)0x0100
+#define MV1  0x080				// GPIOD GPIO9_Pin (uint_16t)0x0200
+#define MV2  0x100				// GPIOD GPIO2_Pin (uint_16t)0x0004
+#define TRUE  0
+#define FALSE  1
 
 #endif // STATES_DEF_H
