@@ -19,6 +19,6 @@
 #include "utilities.h"
 #include "messages.h"
 
-uint32_t BurnTermination2(enum StateName, enum StateName);
+uint32_t BurnTermination2(enum StateName (*), enum StateName (*));
 
 #endif // BURN_TERMINATION_2_H

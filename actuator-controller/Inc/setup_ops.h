@@ -19,6 +19,6 @@
 #include "utilities.h"
 #include "messages.h"
 
-uint32_t SetupOps(enum StateName, enum StateName);
+uint32_t SetupOps(enum StateName (*), enum StateName (*));
 
 #endif // SETUP_OPS_H

@@ -19,6 +19,6 @@
 #include "utilities.h"
 #include "messages.h"
 
-uint32_t SafeApproach(enum StateName, enum StateName);
+uint32_t SafeApproach(enum StateName (*), enum StateName (*));
 
 #endif // SAFE_APPROACH_H

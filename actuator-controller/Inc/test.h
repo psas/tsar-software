@@ -19,6 +19,6 @@
 #include "utilities.h"
 #include "messages.h"
 
-uint32_t Test(enum StateName, enum StateName);
+uint32_t Test(enum StateName (*), enum StateName (*));
 
 #endif // TEST_H

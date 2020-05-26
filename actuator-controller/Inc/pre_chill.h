@@ -19,6 +19,6 @@
 #include "utilities.h"
 #include "messages.h"
 
-uint32_t PreChill(enum StateName, enum StateName);
+uint32_t PreChill(enum StateName (*), enum StateName (*));
 
 #endif // PRE_CHILL_H

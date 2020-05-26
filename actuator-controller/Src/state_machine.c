@@ -21,6 +21,12 @@ void StateMachine(uint32_t control, enum StateName Incoming, uint32_t isSafetyGr
 {
 	enum StateName _state = Incoming;
 	enum StateName _lastState = Incoming;
+	enum StateName *statePtr;
+	enum StateName *lastStatePtr;
+
+	statePtr = &_state;
+	lastStatePtr = &_lastState;
+
 	uint32_t success = FALSE;
 	//enum StateName _nextState = Incoming;
 	while(TRUE == control)
@@ -31,61 +37,61 @@ void StateMachine(uint32_t control, enum StateName Incoming, uint32_t isSafetyGr
 			switch(_state)
 			{
 				case SETUP_OPS:
-					control = SetupOps(_state, _lastState);
+					control = SetupOps(statePtr, lastStatePtr);
 					break;
 				case LOX_FILL:
-					control = LoxFill(_state,_lastState);
+					control = LoxFill(statePtr,lastStatePtr);
 					break;
 				case SITE_CLEAR_AND_START_UP:
-					control = SiteClear(_state,_lastState);
+					control = SiteClear(statePtr,lastStatePtr);
 					break;
 				case PRESSURIZATION:
-					control = SiteClear(_state,_lastState);
+					control = SiteClear(statePtr,lastStatePtr);
 					break;
 				case PRE_CHILL:
-					control = PreChill(_state,_lastState);
+					control = PreChill(statePtr,lastStatePtr);
 					break;
 				case IGNITION:
-					control = Ignition(_state,_lastState);
+					control = Ignition(statePtr,lastStatePtr);
 					break;
 				case LOX_INTRO:
-					control = LoxIntro(_state,_lastState);
+					control = LoxIntro(statePtr,lastStatePtr);
 					break;
 				case BURN_INITIATED:
-					control = BurnInitiated(_state, _lastState);
+					control = BurnInitiated(statePtr, lastStatePtr);
 					break;
 				case BURN_FEEDBACK:
-					control = BurnFeedback(_state,_lastState);
+					control = BurnFeedback(statePtr,lastStatePtr);
 					break;
 				case BURN_TERMINATION_1:
-					control = BurnTermination1(_state,_lastState);
+					control = BurnTermination1(statePtr,lastStatePtr);
 					break;
 				case BURN_TERMINATION_2:
-					control = BurnTermination2(_state,_lastState);
+					control = BurnTermination2(statePtr,lastStatePtr);
 					break;
 				case BURN_TERMINATION_3:
-					control = BurnTermination3(_state,_lastState);
+					control = BurnTermination3(statePtr,lastStatePtr);
 					break;
 				case PURGE:
-					control = Purge(_state,_lastState);
+					control = Purge(statePtr,lastStatePtr);
 					break;
 				case POST_FIRE:
-					control = PostFire(_state,_lastState);
+					control = PostFire(statePtr,lastStatePtr);
 					break;
 				case SAFE_APPROACH:
-					control = SafeApproach(_state,_lastState);
+					control = SafeApproach(statePtr,lastStatePtr);
 					break;
 				case FAILURE:
-					control = Failure(_state,_lastState);
+					control = Failure(statePtr,lastStatePtr);
 					break;
 				case GROUNDSTATION:
-					control = Groundstation(_state,_lastState);
+					control = Groundstation(statePtr,lastStatePtr);
 					break;
 				case TEST:
-					control = Test(_state,_lastState);
+					control = Test(statePtr,lastStatePtr);
 					break;
 				case SAFETY:
-					control = Safety(_state,_lastState,isSafetyGreen);
+					control = Safety(statePtr,lastStatePtr,isSafetyGreen);
 					break;
 
 				default:

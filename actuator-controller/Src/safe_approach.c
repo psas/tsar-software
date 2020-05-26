@@ -18,7 +18,7 @@
 //  System Risk Factor = 0.33 (Catastrophic, Unlikely)
 #include "safe_approach.h"
 
-uint32_t SafeApproach(enum StateName state, enum StateName lastState)
+uint32_t SafeApproach(enum StateName *statePtr, enum StateName *lastStatePtr)
 {
 	uint32_t success = FALSE;
 	uint32_t valve_configuration = 0;
@@ -26,9 +26,9 @@ uint32_t SafeApproach(enum StateName state, enum StateName lastState)
 	char message[256];
 	char *msgPtr = message;
 
-    if(VerifyState(state) && VerifyState(lastState))
+    if(VerifyState(*statePtr) && VerifyState(*lastStatePtr))
     {
-    	if((state & SAFE_APPROACH) == SAFE_APPROACH){
+    	if((*statePtr & SAFE_APPROACH) == SAFE_APPROACH){
     		// PV1 PV2 PV3 VV1 VV2 IV1 IV2 MV1 MV2
     		// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
     		// Set Valve States
@@ -39,21 +39,21 @@ uint32_t SafeApproach(enum StateName state, enum StateName lastState)
     		valve_configuration = StateConfiguration();
 
     		// Change State conditions
-    		lastState=state;
-    		state = SAFE_APPROACH;
+    		lastStatePtr = statePtr;
+    		*statePtr =SAFE_APPROACH;
     		success = (valve_configuration == valve_target ? TRUE : FALSE);
     		// Create Message and Transmit
     		Get_Valve_State_Status_Msg(msgPtr,valve_configuration,success);
     		UART_SendMessage(&hlpuart1, msgPtr);
     	}else{
     		//Log Expected State != Passed State
-    		Get_State_Disagree_Error_Msg(msgPtr, SAFE_APPROACH, state);
+    		Get_State_Disagree_Error_Msg(msgPtr, SAFE_APPROACH, *statePtr);
     		UART_SendMessage(&hlpuart1,msgPtr);
 
     	}
     }else{
     	// Log Invalid State
-    	Get_Invalid_State_Error_Msg(msgPtr, state, lastState);
+    	Get_Invalid_State_Error_Msg(msgPtr, *statePtr, *lastStatePtr);
     	UART_SendMessage(&hlpuart1, msgPtr);
     }
 	return success;

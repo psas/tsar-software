@@ -18,16 +18,16 @@
 //  System Risk Factor = 0.33 (Catastrophic, Unlikely)
 #include "post_fire.h"
 
-uint32_t PostFire(enum StateName state, enum StateName lastState)
+uint32_t PostFire(enum StateName *statePtr, enum StateName *lastStatePtr)
 {
 	uint32_t success = FALSE;
 	uint32_t valve_configuration = 0;
 	uint32_t valve_target = 0;
 	char message[256];
 	char *msgPtr = message;
-    if(VerifyState(state) && VerifyState(lastState))
+    if(VerifyState(*statePtr) && VerifyState(*lastStatePtr))
     {
-    	if((state & POST_FIRE) == POST_FIRE){
+    	if((*statePtr & POST_FIRE) == POST_FIRE){
     		// PV1 PV2 PV3 VV1 VV2 IV1 IV2 MV1 MV2
     		// | 0| 0|  0|  1|  1|  0|  0|  0|  0
 
@@ -38,21 +38,21 @@ uint32_t PostFire(enum StateName state, enum StateName lastState)
     		valve_configuration = StateConfiguration();
 
     		// Change State conditions
-    		lastState=state;
-    		state = POST_FIRE;
+    		lastStatePtr = statePtr;
+    		*statePtr =POST_FIRE;
     		success = (valve_configuration == valve_target ? TRUE : FALSE);
     		// Create Message and Transmit
     		Get_Valve_State_Status_Msg(msgPtr,valve_configuration,success);
     		UART_SendMessage(&hlpuart1, msgPtr);
     	}else{
     		//Log Expected State != Passed State
-    		Get_State_Disagree_Error_Msg(msgPtr, POST_FIRE, state);
+    		Get_State_Disagree_Error_Msg(msgPtr, POST_FIRE, *statePtr);
     		UART_SendMessage(&hlpuart1,msgPtr);
 
     	}
     }else{
     	    	// Log Invalid State
-    	Get_Invalid_State_Error_Msg(msgPtr, state, lastState);
+    	Get_Invalid_State_Error_Msg(msgPtr, *statePtr, *lastStatePtr);
     	UART_SendMessage(&hlpuart1, msgPtr);
     }
 	return success;

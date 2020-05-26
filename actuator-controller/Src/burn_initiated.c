@@ -18,7 +18,7 @@
 //  System Risk Factor = 0.33 (Catastrophic, Unlikely)
 #include "burn_initiated.h"
 
-uint32_t BurnInitiated(enum StateName state, enum StateName lastState)
+uint32_t BurnInitiated(enum StateName *statePtr, enum StateName *lastStatePtr)
 {
 	uint32_t success = FALSE;
 	uint32_t valve_configuration = 0;
@@ -26,9 +26,9 @@ uint32_t BurnInitiated(enum StateName state, enum StateName lastState)
 	char message[PRINT_BUFFER_SIZE];
 	char *msgPtr = message;
 
-    if(VerifyState(state) && VerifyState(lastState))
+    if(VerifyState(*statePtr) && VerifyState(*lastStatePtr))
     {
-    	if((state & BURN_INITIATED) == BURN_INITIATED){
+    	if((*statePtr & BURN_INITIATED) == BURN_INITIATED){
     		// PV1 PV2 PV3 VV1 VV2 IV1 IV2 MV1 MV2
     		// | 0| 1|  1|  0|  0|  1| 1 | 1 | 1
     		// Set Valve States
@@ -39,20 +39,20 @@ uint32_t BurnInitiated(enum StateName state, enum StateName lastState)
     					 |(uint16_t)MV1 	\
 						 |(uint16_t)MV2);
     		// Change State conditions
-    		lastState=state;
-    		state = BURN_INITIATED;
+    		lastStatePtr = statePtr;
+    		*statePtr =BURN_INITIATED;
     		success = (valve_configuration == valve_target ? TRUE : FALSE);
     		// Create Message and Transmit
     		Get_Valve_State_Status_Msg(msgPtr,valve_configuration,success);
     		UART_SendMessage(&hlpuart1, msgPtr);
     	}else{
     		// Log Expected State != Passed State
-    		Get_State_Disagree_Error_Msg(msgPtr, BURN_INITIATED, state);
+    		Get_State_Disagree_Error_Msg(msgPtr, BURN_INITIATED, *statePtr);
     		UART_SendMessage(&hlpuart1, msgPtr);
     	}
     }else{
     	// Log Invalid State
-    	Get_Invalid_State_Error_Msg(msgPtr, state, lastState);
+    	Get_Invalid_State_Error_Msg(msgPtr, *statePtr, *lastStatePtr);
     	UART_SendMessage(&hlpuart1, msgPtr);
     }
 	return success;

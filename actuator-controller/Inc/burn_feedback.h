@@ -19,6 +19,6 @@
 #include "utilities.h"
 #include "messages.h"
 
-uint32_t BurnFeedback(enum StateName, enum StateName);
+uint32_t BurnFeedback(enum StateName (*), enum StateName (*));
 
 #endif // BURN_FEEDBACK_H

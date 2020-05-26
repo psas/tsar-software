@@ -19,6 +19,6 @@
 #include "utilities.h"
 #include "messages.h"
 
-uint32_t Safety(enum StateName, enum StateName, uint32_t isSafetyGreen);
+uint32_t Safety(enum StateName (*), enum StateName (*), uint32_t isSafetyGreen);
 
 #endif // SAFETY_H

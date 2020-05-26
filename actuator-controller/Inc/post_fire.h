@@ -19,6 +19,6 @@
 #include "utilities.h"
 #include "messages.h"
 
-uint32_t PostFire(enum StateName, enum StateName);
+uint32_t PostFire(enum StateName (*), enum StateName (*));
 
 #endif // POST_FIRE_H
