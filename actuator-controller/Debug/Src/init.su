@@ -1,0 +1,6 @@
+init.c:20:6:SystemClock_Config	144	static
+init.c:72:6:MX_ADC1_Init	48	static
+init.c:142:6:MX_LPUART1_UART_Init	8	static
+init.c:190:6:MX_WWDG_Init	8	static
+init.c:220:6:MX_GPIO_Init	56	static
+init.c:327:6:Error_Handler	8	static
