@@ -1,6 +1,7 @@
 stm32g0xx_ll_system.h:494:22:LL_SYSCFG_DisableDBATT	16	static
-stm32g0xx_hal_msp.c:64:6:HAL_MspInit	16	static
-stm32g0xx_hal_msp.c:90:6:HAL_ADC_MspInit	56	static
-stm32g0xx_hal_msp.c:139:6:HAL_ADC_MspDeInit	16	static
-stm32g0xx_hal_msp.c:179:6:HAL_LPTIM_MspInit	48	static
-stm32g0xx_hal_msp.c:216:6:HAL_LPTIM_MspDeInit	16	static
+stm32g0xx_hal_msp.c:65:6:HAL_MspInit	16	static
+stm32g0xx_hal_msp.c:91:6:HAL_ADC_MspInit	56	static
+stm32g0xx_hal_msp.c:140:6:HAL_ADC_MspDeInit	16	static
+stm32g0xx_hal_msp.c:180:6:HAL_UART_MspInit	56	static
+stm32g0xx_hal_msp.c:228:6:HAL_UART_MspDeInit	16	static
+stm32g0xx_hal_msp.c:262:6:HAL_WWDG_MspInit	24	static

@@ -32,13 +32,16 @@ default.size.stdout \
 OBJDUMP_LIST += \
 Actuator-Controller.list \
 
+OBJCOPY_BIN += \
+Actuator-Controller.bin \
+
 
 # All Target
 all: Actuator-Controller.elf secondary-outputs
 
 # Tool invocations
-Actuator-Controller.elf: $(OBJS) $(USER_OBJS) C:\Users\Susan\Documents\TSAR\capstone\actuator-controller\firmware\STM32G071R8TX_FLASH.ld
-	arm-none-eabi-gcc -o "Actuator-Controller.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\Susan\Documents\TSAR\capstone\actuator-controller\firmware\STM32G071R8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Actuator-Controller.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Actuator-Controller.elf: $(OBJS) $(USER_OBJS) C:\Users\Austin\Documents\ECE\TSAR\actuator-controller\STM32G071R8TX_FLASH.ld
+	arm-none-eabi-gcc -o "Actuator-Controller.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\Users\Austin\Documents\ECE\TSAR\actuator-controller\STM32G071R8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Actuator-Controller.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -52,12 +55,17 @@ Actuator-Controller.list: $(EXECUTABLES)
 	@echo 'Finished building: $@'
 	@echo ' '
 
+Actuator-Controller.bin: $(EXECUTABLES)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "Actuator-Controller.bin"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 # Other Targets
 clean:
 	-$(RM) *
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
 
 .PHONY: all clean dependents
 .SECONDARY:
