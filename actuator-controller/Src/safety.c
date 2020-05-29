@@ -1,4 +1,4 @@
-// tsar_safety.c
+// safety.c
 // Portland State Aerospace Society
 // TSAR Capstone 2019-2020
 // TODO UPDATE header
@@ -37,7 +37,7 @@ uint32_t Safety(enum StateName *statePtr, enum StateName *lastStatePtr, uint32_t
     		ValveStateSetter(valve_target);
     		valve_configuration = StateConfiguration();
     		lastStatePtr = statePtr;
-    		*statePtr =SAFETY;
+    		*statePtr = SAFETY;
     		success = (valve_configuration == valve_target ? TRUE : FALSE);
     		// Create Message and Transmit
     		Get_Valve_State_Status_Msg(msgPtr,valve_configuration,success);

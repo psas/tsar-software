@@ -30,7 +30,6 @@ void Get_State_Disagree_Error_Msg(char *errorMessage, enum StateName expectedSta
 	strcat(state_disagree, temp);
 	memset(errorMessage, '\0', PRINT_BUFFER_SIZE);
 	strcpy(errorMessage, state_disagree);
-
 }
 
 void Get_Invalid_State_Error_Msg(char *errorMessage, enum StateName state, enum StateName lastState)
