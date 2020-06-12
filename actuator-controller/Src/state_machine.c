@@ -17,94 +17,85 @@
 
 #include "state_machine.h"
 
-void StateMachine(uint32_t control, enum StateName Incoming, uint32_t isSafetyGreen)
+void StateMachine(uint32_t control, struct StateVars *ctrl)
 {
-	enum StateName _state = Incoming;
-	enum StateName _lastState = Incoming;
-	enum StateName *statePtr;
-	enum StateName *lastStatePtr;
-
-	statePtr = &_state;
-	lastStatePtr = &_lastState;
-
 	uint32_t success = FALSE;
 	//enum StateName _nextState = Incoming;
 	while(TRUE == control)
 	{
-		if(VerifyState(_state))
+		if(VerifyState(ctrl->currentState))
 		{
-			_lastState = _state;
-			switch(_state)
+			switch(ctrl->currentState)
 			{
 				case SETUP_OPS:
-					control = SetupOps(statePtr, lastStatePtr);
+					control = SetupOps(ctrl);
 					break;
-				case LOX_FILL:
-					control = LoxFill(statePtr,lastStatePtr);
-					break;
+				//case LOX_FILL:
+					//control = LoxFill(ctrl);
+					//break;
 				case SITE_CLEAR_AND_START_UP:
-					control = SiteClear(statePtr,lastStatePtr);
+					control = SiteClear(ctrl);
 					break;
 				case PRESSURIZATION:
-					control = SiteClear(statePtr,lastStatePtr);
+					control = SiteClear(ctrl);
 					break;
 				case PRE_CHILL:
-					control = PreChill(statePtr,lastStatePtr);
+					control = PreChill(ctrl);
 					break;
 				case IGNITION:
-					control = Ignition(statePtr,lastStatePtr);
+					control = Ignition(ctrl);
 					break;
 				case LOX_INTRO:
-					control = LoxIntro(statePtr,lastStatePtr);
+					control = LoxIntro(ctrl);
 					break;
 				case BURN_INITIATED:
-					control = BurnInitiated(statePtr, lastStatePtr);
+					control = BurnInitiated(ctrl);
 					break;
 				case BURN_FEEDBACK:
-					control = BurnFeedback(statePtr,lastStatePtr);
+					control = BurnFeedback(ctrl);
 					break;
 				case BURN_TERMINATION_1:
-					control = BurnTermination1(statePtr,lastStatePtr);
+					control = BurnTermination1(ctrl);
 					break;
 				case BURN_TERMINATION_2:
-					control = BurnTermination2(statePtr,lastStatePtr);
+					control = BurnTermination2(ctrl);
 					break;
 				case BURN_TERMINATION_3:
-					control = BurnTermination3(statePtr,lastStatePtr);
+					control = BurnTermination3(ctrl);
 					break;
 				case PURGE:
-					control = Purge(statePtr,lastStatePtr);
+					control = Purge(ctrl);
 					break;
 				case POST_FIRE:
-					control = PostFire(statePtr,lastStatePtr);
+					control = PostFire(ctrl);
 					break;
-				case SAFE_APPROACH:
-					control = SafeApproach(statePtr,lastStatePtr);
-					break;
+				//case SAFE_APPROACH:
+					//control = SafeApproach(ctrl);
+					//break;
 				case FAILURE:
-					control = Failure(statePtr,lastStatePtr);
+					control = Failure(ctrl);
 					break;
-				case GROUNDSTATION:
-					control = Groundstation(statePtr,lastStatePtr);
-					break;
+				//case GROUNDSTATION:
+					//control = Groundstation(ctrl);
+					//break;
 				case TEST:
-					control = Test(statePtr,lastStatePtr);
+					control = Test(ctrl);
 					break;
 				case SAFETY:
-					control = Safety(statePtr,lastStatePtr,isSafetyGreen);
+					control = Safety(ctrl);
 					break;
 
 				default:
-					_state = FAILURE;
+					ctrl->currentState = FAILURE;
 					break;
 			}
 		}else
 		{
 			char message[PRINT_BUFFER_SIZE];
 			char *msgPtr = message;
-			_state = FAILURE;
+			ctrl->currentState = FAILURE;
 	    	// Log Invalid State
-	    	Get_Invalid_State_Error_Msg(msgPtr, _state, _lastState);
+	    	Get_Invalid_State_Error_Msg(msgPtr, ctrl->currentState, ctrl->lastState);
 	    	UART_SendMessage(&hlpuart1, msgPtr);
 			//ERROR HANDLE
 		}

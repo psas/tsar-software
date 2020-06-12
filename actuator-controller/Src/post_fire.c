@@ -18,18 +18,29 @@
 //  System Risk Factor = 0.33 (Catastrophic, Unlikely)
 #include "post_fire.h"
 
-uint32_t PostFire(enum StateName *statePtr, enum StateName *lastStatePtr)
+uint32_t PostFire(struct StateVars *ctrl)
 {
 	uint32_t success = FALSE;
 	uint32_t valve_configuration = 0;
 	uint32_t valve_target = 0;
+	uint32_t now = HAL_GetTick();
 	char message[256];
 	char *msgPtr = message;
-    if(VerifyState(*statePtr) && VerifyState(*lastStatePtr))
+
+	//TODO Specify a real timeout
+	uint32_t TIMEOUT = 2000;
+
+    if(VerifyState(ctrl->currentState) && VerifyState(ctrl->lastState))
     {
-    	if((*statePtr & POST_FIRE) == POST_FIRE){
+    	if((ctrl->currentState & POST_FIRE) == POST_FIRE){
     		// PV1 PV2 PV3 VV1 VV2 IV1 IV2 MV1 MV2
     		// | 0| 0|  0|  1|  1|  0|  0|  0|  0
+
+    	    // If this is the first time, mark time
+    		if(ctrl->currentState != ctrl->lastState)
+    	    {
+    	    	ctrl->timeStarted = HAL_GetTick();
+    	    }
 
     		// Set Valve States
     		valve_target |= ((uint16_t)VV1 	\
@@ -38,21 +49,29 @@ uint32_t PostFire(enum StateName *statePtr, enum StateName *lastStatePtr)
     		valve_configuration = StateConfiguration();
 
     		// Change State conditions
-    		lastStatePtr = statePtr;
-    		*statePtr =POST_FIRE;
+    		ctrl->lastState = ctrl->currentState;
+    		ctrl->currentState =POST_FIRE;
     		success = (valve_configuration == valve_target ? TRUE : FALSE);
+
+    		//TODO Specify time frame
+    		if(now - ctrl->timeStarted > TIMEOUT)
+    		{
+        		ctrl->isArmed = FALSE;
+        		ctrl->currentState = SAFETY;
+    		}
+
     		// Create Message and Transmit
     		Get_Valve_State_Status_Msg(msgPtr,valve_configuration,success);
     		UART_SendMessage(&hlpuart1, msgPtr);
     	}else{
     		//Log Expected State != Passed State
-    		Get_State_Disagree_Error_Msg(msgPtr, POST_FIRE, *statePtr);
+    		Get_State_Disagree_Error_Msg(msgPtr, POST_FIRE, ctrl->currentState);
     		UART_SendMessage(&hlpuart1,msgPtr);
 
     	}
     }else{
     	    	// Log Invalid State
-    	Get_Invalid_State_Error_Msg(msgPtr, *statePtr, *lastStatePtr);
+    	Get_Invalid_State_Error_Msg(msgPtr, ctrl->currentState, ctrl->lastState);
     	UART_SendMessage(&hlpuart1, msgPtr);
     }
 	return success;

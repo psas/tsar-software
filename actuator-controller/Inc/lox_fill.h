@@ -20,6 +20,6 @@
 #include "messages.h"
 
 
-uint32_t LoxFill(enum StateName (*), enum StateName (*));
+uint32_t LoxFill(struct StateVars (*));
 
 #endif // LOX_FILL_H

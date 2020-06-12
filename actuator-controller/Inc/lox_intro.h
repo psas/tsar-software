@@ -19,6 +19,6 @@
 #include "utilities.h"
 #include "messages.h"
 
-uint32_t LoxIntro(enum StateName (*), enum StateName (*));
+uint32_t LoxIntro(struct StateVars (*));
 
 #endif // LOX_INTRO_H

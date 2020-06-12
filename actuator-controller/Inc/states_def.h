@@ -25,12 +25,12 @@
 
 #define PRINT_BUFFER_SIZE 256
 
-enum StateName{			// PV1	PV2	PV3	VV1	VV2	IV1	IV2	MV1	MV2
+enum StateName{					// PV1	PV2	PV3	VV1	VV2	IV1	IV2	MV1	MV2
 	SETUP_OPS,					// |11	|11	|11	|11 |11	|11	|11	|11	|11
 	//N2_AND_FUEL_FILL,			// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
 	//FUEL_LINE_CLEAR,			// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
 	//MID_FUELING_HOLD,			// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	LOX_FILL,					// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
+	//LOX_FILL,					// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
 	SITE_CLEAR_AND_START_UP,	// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
 	PRESSURIZATION,				// | 0	| 1	| 1	| 0 | 0	| 0	| 0	| 0	| 0
 	PRE_CHILL,					// | 0	| 1	| 1	| 0 | 0	| 0	| 0	|10	| 0
@@ -44,11 +44,21 @@ enum StateName{			// PV1	PV2	PV3	VV1	VV2	IV1	IV2	MV1	MV2
 	BURN_TERMINATION_3,			// | 1	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
 	PURGE,						// | 1	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
 	POST_FIRE,					// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	SAFE_APPROACH,				// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
+	//SAFE_APPROACH,			// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
 	FAILURE,					// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	GROUNDSTATION,				// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	TEST,						// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	SAFETY						// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
+	//GROUNDSTATION,			// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
+	SAFETY,						// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
+	TEST						// | *	| *	| *	| * | *	| *	| *	| *	| *
+};
+
+struct StateVars{
+uint32_t timeStarted;
+uint32_t timeElapsed;
+uint32_t isArmed;
+uint32_t ignition;
+enum StateName lastState;
+enum StateName currentState;
+uint32_t *adr;
 };
 
 // Definitions of Solenoids
@@ -61,7 +71,9 @@ enum StateName{			// PV1	PV2	PV3	VV1	VV2	IV1	IV2	MV1	MV2
 #define IV2  0x040				// GPIOD GPIO8D8_Pin (uint_16t)0x0100
 #define MV1  0x080				// GPIOD GPIO9_Pin (uint_16t)0x0200
 #define MV2  0x100				// GPIOD GPIO2_Pin (uint_16t)0x0004
+
+// Bool Defs
 #define TRUE  1
-#define FALSE  0
+#define FALSE 0
 
 #endif // STATES_DEF_H

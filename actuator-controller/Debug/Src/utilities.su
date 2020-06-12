@@ -1,0 +1,5 @@
+utilities.c:18:10:VerifyState	24	static
+utilities.c:73:10:StateConfiguration	16	static
+utilities.c:106:10:ValveStateSetter	24	static
+utilities.c:159:10:UART_SendMessage	824	static
+utilities.c:197:10:UART_RecieveMessage	288	static

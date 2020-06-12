@@ -19,6 +19,6 @@
 #include "utilities.h"
 #include "messages.h"
 
-uint32_t FuelIntro(enum StateName (*), enum StateName (*));
+uint32_t FuelIntro(struct StateVars (*));
 
 #endif // FUEL_INTRO_H

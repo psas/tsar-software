@@ -18,8 +18,9 @@ UART_HandleTypeDef hlpuart1;
 void SystemClock_Config(void);
 void MX_GPIO_Init(void);
 void MX_ADC1_Init(void);
-void MX_LPTIM1_Init(void);
+void MX_LPUART1_UART_Init(void);
 void MX_WWDG_Init(void);
+void Error_Handler(void);
 
 #define LOW_POWER_UART1_TX_Pin GPIO_PIN_1
 #define LOW_POWER_UART1_TX_GPIO_Port GPIOC

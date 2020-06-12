@@ -20,6 +20,6 @@
 #include "messages.h"
 
 
-uint32_t BurnTermination1(enum StateName (*), enum StateName (*));
+uint32_t BurnTermination1(struct StateVars (*));
 
 #endif // BURN_TERMINATION_1_H

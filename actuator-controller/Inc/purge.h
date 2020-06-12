@@ -19,6 +19,6 @@
 #include "utilities.h"
 #include "messages.h"
 
-uint32_t Purge(enum StateName (*), enum StateName (*));
+uint32_t Purge(struct StateVars (*));
 
 #endif // PURGE_H

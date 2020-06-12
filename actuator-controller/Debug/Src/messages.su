@@ -1,3 +1,3 @@
 messages.c:20:6:Get_State_Disagree_Error_Msg	312	static
-messages.c:36:6:Get_Invalid_State_Error_Msg	312	static
-messages.c:49:6:Get_Valve_State_Status_Msg	320	static
+messages.c:35:6:Get_Invalid_State_Error_Msg	312	static
+messages.c:48:6:Get_Valve_State_Status_Msg	320	static

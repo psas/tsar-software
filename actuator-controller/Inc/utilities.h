@@ -19,6 +19,10 @@
 #include "states_def.h"
 #include "stm32g0xx_hal.h"
 #include "stm32g0xx_ll_system.h"
+#include "stm32g0xx.h"
+#include "stm32g0xx_hal_uart.h"
+#include "stm32g0xx_hal_uart_ex.h"
+#include "stm32g0xx_hal_def.h"
 #include <stdio.h>
 #include <string.h>
 

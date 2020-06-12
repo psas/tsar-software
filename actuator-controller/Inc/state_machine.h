@@ -37,7 +37,7 @@
 #include "test.h"
 #include "utilities.h"
 
-void StateMachine(uint32_t, enum StateName, uint32_t);
+void StateMachine(uint32_t, struct StateVars (*));
 
 #endif
 

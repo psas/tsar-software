@@ -19,6 +19,6 @@
 #include "utilities.h"
 #include "messages.h"
 
-uint32_t SiteClear(enum StateName (*), enum StateName (*));
+uint32_t SiteClear(struct StateVars (*));
 
 #endif // SITE_CLEAR_H

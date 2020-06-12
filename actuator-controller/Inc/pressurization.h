@@ -19,6 +19,6 @@
 #include "utilities.h"
 #include "messages.h"
 
-uint32_t Pressurization(enum StateName (*), enum StateName (*));
+uint32_t Pressurization(struct StateVars (*));
 
 #endif // PRESSURIZATION_H

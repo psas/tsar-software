@@ -19,6 +19,6 @@
 #include "utilities.h"
 #include "messages.h"
 
-uint32_t Groundstation(enum StateName (*), enum StateName (*));
+uint32_t Groundstation(struct StateVars (*));
 
 #endif // GROUNDSTATION_H

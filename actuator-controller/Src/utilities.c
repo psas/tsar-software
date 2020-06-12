@@ -25,7 +25,7 @@ uint32_t VerifyState(int state)
 		{
 			case SETUP_OPS:
 				break;
-			case LOX_FILL:
+			//case LOX_FILL:
 				break;
 			case SITE_CLEAR_AND_START_UP:
 				break;
@@ -51,14 +51,14 @@ uint32_t VerifyState(int state)
 				break;
 			case POST_FIRE:
 				break;
-			case SAFE_APPROACH:
-				break;
+			//case SAFE_APPROACH:
+				//break;
 			case FAILURE:
 				break;
-			case GROUNDSTATION:
-				break;
-			case TEST:
-				break;
+			//case GROUNDSTATION:
+				//break;
+			//case TEST:
+				//break;
 			case SAFETY:
 				break;
 
@@ -166,6 +166,9 @@ uint32_t UART_SendMessage(UART_HandleTypeDef *hlpuart1, char *message)
 	char time_str[(sizeof(uint32_t) + 1)];
 	char transmit[PRINT_BUFFER_SIZE];
 
+	memset(transmit, '\0', PRINT_BUFFER_SIZE);
+	memset(time_str, '\0', sizeof(uint32_t) +1);
+
 	sprintf(time_str, "%d",(int)msg_time);
 	strcat(transmit, time_str);
 	strcat(transmit, " : ");
@@ -186,7 +189,7 @@ uint32_t UART_SendMessage(UART_HandleTypeDef *hlpuart1, char *message)
 		strcat(transmit,no_message);
 	}
 
-	HAL_UART_Transmit_IT(hlpuart1,(uint8_t *)transmit,9);
+	HAL_UART_Transmit_IT(hlpuart1,(uint8_t *)transmit, sizeof(transmit));
 
 	return success;
 }

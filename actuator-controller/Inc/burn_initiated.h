@@ -20,6 +20,6 @@
 #include "messages.h"
 
 
-uint32_t BurnInitiated(enum StateName (*), enum StateName (*));
+uint32_t BurnInitiated(struct StateVars (*));
 
 #endif // BURN_INITIATED_H
