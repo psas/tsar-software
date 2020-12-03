@@ -27,7 +27,7 @@ uint32_t BurnTermination1(struct StateVars *ctrl)
 	char *msgPtr = message;
 
 	uint32_t now = HAL_GetTick();
-	uint32_t TIMEOUT = 2000;
+	uint32_t TIMEOUT= 300;
 
     if(VerifyState(ctrl->currentState) && VerifyState(ctrl->lastState))
     {
@@ -38,7 +38,7 @@ uint32_t BurnTermination1(struct StateVars *ctrl)
     	    // If this is the first time, mark time
     		if(ctrl->currentState != ctrl->lastState)
     	    {
-    	    	ctrl->timeStarted = HAL_GetTick();
+    	    	ctrl->timeStarted = now;
     	    }
 
     		// Set Valve States

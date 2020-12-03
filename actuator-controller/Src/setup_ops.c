@@ -24,13 +24,13 @@ uint32_t SetupOps(struct StateVars *ctrl)
 	uint32_t valve_configuration = 0;
 	uint32_t valve_target = 0;
 	uint32_t now = HAL_GetTick();
-	uint32_t TIMEOUT = 2000;
+	uint32_t TIMEOUT= 300;
 	char message[256];
 	char *msgPtr = message;
 
     if(ctrl->currentState != ctrl->lastState)
     {
-    	ctrl->timeStarted = HAL_GetTick();
+    	ctrl->timeStarted = now;
     }
 
     if(VerifyState(ctrl->currentState) && VerifyState(ctrl->lastState))
@@ -48,8 +48,9 @@ uint32_t SetupOps(struct StateVars *ctrl)
 
     		// Change State conditions
     		ctrl->lastState = ctrl->currentState;
-    		ctrl->currentState =SETUP_OPS;
+    		ctrl->currentState = SETUP_OPS;
     		success = (valve_configuration == valve_target ? TRUE : FALSE);
+
     		// Create Message and Transmit
     		Get_Valve_State_Status_Msg(msgPtr,valve_configuration,success);
     		UART_SendMessage(&hlpuart1, msgPtr);

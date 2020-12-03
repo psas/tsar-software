@@ -161,6 +161,7 @@ uint32_t UART_SendMessage(UART_HandleTypeDef *hlpuart1, char *message)
 	uint32_t ofc = 0;
 	uint32_t msg_time = HAL_GetTick();
 	uint32_t success = FALSE;
+	HAL_StatusTypeDef hal_status = 0x00U;
 	char invalid_length[PRINT_BUFFER_SIZE] = "Error: Log Message Overflow";
 	char no_message[PRINT_BUFFER_SIZE] = "Error: Log Message Empty";
 	char time_str[(sizeof(uint32_t) + 1)];
@@ -170,10 +171,11 @@ uint32_t UART_SendMessage(UART_HandleTypeDef *hlpuart1, char *message)
 	memset(time_str, '\0', sizeof(uint32_t) +1);
 
 	sprintf(time_str, "%d",(int)msg_time);
+	strcat(transmit, "A5A5 ");
 	strcat(transmit, time_str);
 	strcat(transmit, " : ");
 
-	ofc += strlen(time_str) + strlen(" : ") + strlen(message);
+	ofc += strlen("A5A5 ") + strlen(time_str) + strlen(" : ") + strlen(message);
 	if(message[0] != '\0')
 	{
 		if(ofc < PRINT_BUFFER_SIZE)
@@ -189,19 +191,49 @@ uint32_t UART_SendMessage(UART_HandleTypeDef *hlpuart1, char *message)
 		strcat(transmit,no_message);
 	}
 
-	HAL_UART_Transmit_IT(hlpuart1,(uint8_t *)transmit, sizeof(transmit));
-
+	hal_status = HAL_UART_Transmit_IT(hlpuart1,(uint8_t *)transmit, sizeof(transmit));
+	// TODO debug code - investigate timeout
+	while(hal_status != 0x00U)
+	{
+		hal_status = HAL_UART_Transmit_IT(hlpuart1,(uint8_t *)transmit, sizeof(transmit));
+		printf("%d", hal_status);
+	}
+	// TODO Debug code - investigate timeout
 	return success;
 }
 
-uint32_t UART_RecieveMessage(char *message)
+uint32_t UART_RecieveMessage(UART_HandleTypeDef *hlpuart1)
 {
-	uint32_t parity = 0;
-	uint32_t success = FALSE;
-	char incoming[PRINT_BUFFER_SIZE] = "";
+	// 0x4000 8000 - 0x4000 83FF LPUART1
+	// 1C offset for USART_ISR
+	// USART_ISR_RXNE_RXFNE_Msk
+	// USART_ISR_RXNE_RXFNE
+	// hlpuart1->Instance == LPUART1;
 
-	strcpy(incoming, message);
-	for(int i = 0; i < PRINT_BUFFER_SIZE; i++)
+	volatile uint32_t success = FALSE;
+	volatile uint8_t rxBuffer = 0;
+	volatile char incoming[RX_BUFFER_SIZE];
+	volatile uint8_t i = 0;
+
+	memset(incoming, '\0', RX_BUFFER_SIZE);
+
+	while(READ_BIT(hlpuart1->Instance->ISR, USART_ISR_RXFNE) != 0U);
+	{
+		rxBuffer = (uint8_t)(hlpuart1->Instance->RDR & (uint8_t)hlpuart1->Mask);
+		if(i < RX_BUFFER_SIZE)
+		{
+			incoming[i] = rxBuffer;
+			i++;
+		}else
+		{
+			// TODO: OVERFLOW ERROR
+			return success;
+		}
+	}
+
+	success = TRUE;
+
+	for(int i = 0; i < RX_BUFFER_SIZE; i++)
 	{
 		if(incoming[i] != '\0')
 		{
@@ -212,7 +244,7 @@ uint32_t UART_RecieveMessage(char *message)
 			// Set valid/invalid flag
 		}else
 		{
-			i += PRINT_BUFFER_SIZE;
+			i += RX_BUFFER_SIZE;
 		}
 	}
 	// TODO Finish
@@ -224,5 +256,3 @@ uint32_t UART_RecieveMessage(char *message)
 	// Valve
 	return success;
 }
-
-

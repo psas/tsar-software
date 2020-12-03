@@ -36,12 +36,15 @@ uint32_t Safety(struct StateVars *ctrl) {
 			ctrl->lastState = ctrl->currentState;
 			ctrl->currentState = SAFETY;
 			success = (valve_configuration == valve_target ? TRUE : FALSE);
+
 			// Create Message and Transmit
 			Get_Valve_State_Status_Msg(msgPtr, valve_configuration, success);
 			UART_SendMessage(&hlpuart1, msgPtr);
+
 			if (ctrl->isArmed && success) {
 				ctrl->currentState = SETUP_OPS;
 			}
+
 		} else {
 			// Log Expected State != Passed State
 			Get_State_Disagree_Error_Msg(msgPtr, SAFETY, ctrl->currentState);

@@ -21,7 +21,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "init.h"
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -172,6 +171,73 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
 }
 
 /**
+* @brief LPTIM MSP Initialization
+* This function configures the hardware resources used in this example
+* @param hlptim: LPTIM handle pointer
+* @retval None
+*/
+void HAL_LPTIM_MspInit(LPTIM_HandleTypeDef* hlptim)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  if(hlptim->Instance==LPTIM1)
+  {
+  /* USER CODE BEGIN LPTIM1_MspInit 0 */
+
+  /* USER CODE END LPTIM1_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_LPTIM1_CLK_ENABLE();
+  
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+    /**LPTIM1 GPIO Configuration    
+    PC12     ------> LPTIM1_IN1
+    PC2     ------> LPTIM1_IN2
+    PC3     ------> LPTIM1_ETR 
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_2|GPIO_PIN_3;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF0_LPTIM1;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /* USER CODE BEGIN LPTIM1_MspInit 1 */
+
+  /* USER CODE END LPTIM1_MspInit 1 */
+  }
+
+}
+
+/**
+* @brief LPTIM MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param hlptim: LPTIM handle pointer
+* @retval None
+*/
+void HAL_LPTIM_MspDeInit(LPTIM_HandleTypeDef* hlptim)
+{
+  if(hlptim->Instance==LPTIM1)
+  {
+  /* USER CODE BEGIN LPTIM1_MspDeInit 0 */
+
+  /* USER CODE END LPTIM1_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_LPTIM1_CLK_DISABLE();
+  
+    /**LPTIM1 GPIO Configuration    
+    PC12     ------> LPTIM1_IN1
+    PC2     ------> LPTIM1_IN2
+    PC3     ------> LPTIM1_ETR 
+    */
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_12|GPIO_PIN_2|GPIO_PIN_3);
+
+  /* USER CODE BEGIN LPTIM1_MspDeInit 1 */
+
+  /* USER CODE END LPTIM1_MspDeInit 1 */
+  }
+
+}
+
+/**
 * @brief UART MSP Initialization
 * This function configures the hardware resources used in this example
 * @param huart: UART handle pointer
@@ -189,25 +255,16 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     __HAL_RCC_LPUART1_CLK_ENABLE();
   
     __HAL_RCC_GPIOC_CLK_ENABLE();
-    __HAL_RCC_GPIOB_CLK_ENABLE();
     /**LPUART1 GPIO Configuration    
     PC0     ------> LPUART1_RX
-    PC1     ------> LPUART1_TX
-    PB12     ------> LPUART1_DE 
+    PC1     ------> LPUART1_TX 
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_0|LOW_POWER_UART1_TX_Pin;
+    GPIO_InitStruct.Pin = LOW_POWER_UART2_RX_Pin|LOW_POWER_UART1_TX_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF1_LPUART1;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_12;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF1_LPUART1;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /* LPUART1 interrupt Init */
     HAL_NVIC_SetPriority(USART3_4_LPUART1_IRQn, 0, 0);
@@ -237,43 +294,15 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
   
     /**LPUART1 GPIO Configuration    
     PC0     ------> LPUART1_RX
-    PC1     ------> LPUART1_TX
-    PB12     ------> LPUART1_DE 
+    PC1     ------> LPUART1_TX 
     */
-    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_0|LOW_POWER_UART1_TX_Pin);
-
-    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_12);
+    HAL_GPIO_DeInit(GPIOC, LOW_POWER_UART2_RX_Pin|LOW_POWER_UART1_TX_Pin);
 
     /* LPUART1 interrupt DeInit */
     HAL_NVIC_DisableIRQ(USART3_4_LPUART1_IRQn);
   /* USER CODE BEGIN LPUART1_MspDeInit 1 */
 
   /* USER CODE END LPUART1_MspDeInit 1 */
-  }
-
-}
-
-/**
-* @brief WWDG MSP Initialization
-* This function configures the hardware resources used in this example
-* @param hwwdg: WWDG handle pointer
-* @retval None
-*/
-void HAL_WWDG_MspInit(WWDG_HandleTypeDef* hwwdg)
-{
-  if(hwwdg->Instance==WWDG)
-  {
-  /* USER CODE BEGIN WWDG_MspInit 0 */
-
-  /* USER CODE END WWDG_MspInit 0 */
-    /* Peripheral clock enable */
-    __HAL_RCC_WWDG_CLK_ENABLE();
-    /* WWDG interrupt Init */
-    HAL_NVIC_SetPriority(WWDG_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(WWDG_IRQn);
-  /* USER CODE BEGIN WWDG_MspInit 1 */
-
-  /* USER CODE END WWDG_MspInit 1 */
   }
 
 }

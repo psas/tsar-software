@@ -24,6 +24,7 @@
 #include "stdint.h"
 
 #define PRINT_BUFFER_SIZE 256
+#define RX_BUFFER_SIZE 256
 
 enum StateName{					// PV1	PV2	PV3	VV1	VV2	IV1	IV2	MV1	MV2
 	SETUP_OPS,					// |11	|11	|11	|11 |11	|11	|11	|11	|11

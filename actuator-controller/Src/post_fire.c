@@ -28,7 +28,7 @@ uint32_t PostFire(struct StateVars *ctrl)
 	char *msgPtr = message;
 
 	//TODO Specify a real timeout
-	uint32_t TIMEOUT = 2000;
+	uint32_t TIMEOUT= 300;
 
     if(VerifyState(ctrl->currentState) && VerifyState(ctrl->lastState))
     {
@@ -39,7 +39,7 @@ uint32_t PostFire(struct StateVars *ctrl)
     	    // If this is the first time, mark time
     		if(ctrl->currentState != ctrl->lastState)
     	    {
-    	    	ctrl->timeStarted = HAL_GetTick();
+    	    	ctrl->timeStarted = now;
     	    }
 
     		// Set Valve States
@@ -50,13 +50,13 @@ uint32_t PostFire(struct StateVars *ctrl)
 
     		// Change State conditions
     		ctrl->lastState = ctrl->currentState;
-    		ctrl->currentState =POST_FIRE;
+    		ctrl->currentState = POST_FIRE;
     		success = (valve_configuration == valve_target ? TRUE : FALSE);
 
     		//TODO Specify time frame
     		if(now - ctrl->timeStarted > TIMEOUT)
     		{
-        		ctrl->isArmed = FALSE;
+        		// TODO Disabled for Test ctrl->isArmed = FALSE;
         		ctrl->currentState = SAFETY;
     		}
 
