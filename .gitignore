@@ -41,3 +41,10 @@
 *.b#*
 *.s#*
 *.l#*
+
+# Ignore Generated files (Debug, Release)
+*/Debug/*
+*/Release/*
+
+# Ignore Datasheets
+*/datasheets_ignore/*

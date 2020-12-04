@@ -226,11 +226,11 @@ uint32_t UART_RecieveMessage(UART_HandleTypeDef *hlpuart1)
 	volatile uint8_t rxb = 0;
 	volatile uint8_t mask = 0xFF;
 
-	rxBuffer = (uint8_t)(hlpuart1->Instance->RDR & mask);
+	rxb = (uint8_t)(hlpuart1->Instance->RDR & mask);
 
 	if(RxMessagePtr <= RxMemEnd)
 	{
-		&RxMessagePtr = rxb;
+		*RxMessagePtr = rxb;
 		RxMessagePtr += 1;
 		success = TRUE;
 	}
