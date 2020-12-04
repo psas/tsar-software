@@ -7,8 +7,7 @@
 //
 //	This is the main entry point for the TSAR firmware.
 //
-//	This initializes
-//  Initialize State Variables
+//	This initializes StateVars as follows:
 //  Time Elapsed: 0
 //  Time Started: 0
 //  isArmed: FALSE
@@ -16,7 +15,7 @@
 //  Last State: FAILURE
 //  Current State: SAFETY
 //  Address: this
-//  Initializing the initial states this way:
+//  Initializing in this way:
 //	- Ensures system is disarmed
 // 	- guarantees a time-stamp for SAFETY
 //
@@ -35,9 +34,10 @@
 int main(void)
 {
 	struct StateVars controls = {0,0,0,0, FAILURE, SAFETY, &controls};
-	char RxMessageBuffer1[256];
+	// TODO: Move these to init
+	char RxMessageBuffer1[RX_BUFFER_SIZE];
 	char *RxMessagePtr = &RxMessageBuffer1[0];
-	char *RxMemEnd = &RxMessageBuffer1[255];
+	char *RxMemEnd = &RxMessageBuffer1[RX_BUFFER_SIZE - 1];
 	char *RxMemBase = &RxMessageBuffer1;
 	//TODO HACK initialize isArm false
 	controls.isArmed = TRUE;

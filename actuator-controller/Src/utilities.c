@@ -4,6 +4,8 @@
 //
 // Change Log
 // 	-Creation of Document 2/11/2020 [APJ]
+//  ... bad at logging, check GIT
+//  -Added UART_RecieveMessage functionality 12/3/2020 [APJ]
 //
 //	This file contains methods for verification and
 //  manipulation of state changes
@@ -15,6 +17,18 @@
 #include "utilities.h"
 #include "init.h"
 
+/*
+ * 	Function VerifyState()
+ *	TODO: Finish this description
+ *
+ *  Params:
+ *  	state <int>: State to be verified
+ *
+ *  Returns:
+ *  	success <uint32_t>: TRUE | FALSE | 1 | 0
+ *
+ *  Notes:
+ */
 uint32_t VerifyState(int state)
 {
 	uint32_t success = FALSE;
@@ -70,6 +84,19 @@ uint32_t VerifyState(int state)
 	return success;
 }
 
+/*
+ * 	Function StateConfiguration()
+ *	TODO: Finish this description
+ *
+ *  Params:
+ *  	NONE
+ *
+ *  Returns:
+ *  	vc <uint32_t>: Current reported valve states
+ *
+ *  Notes:
+ */
+
 uint32_t StateConfiguration()
 {
 	uint32_t vc = 0;
@@ -102,6 +129,19 @@ uint32_t StateConfiguration()
 
 	return vc;
 }
+
+/*
+ * 	Function ValveSetter()
+ *	TODO: Finish this description
+ *
+ *  Params:
+ *  vs <uint32_t>: Valve settings to be set
+ *
+ *  Returns:
+ *  success <uint32_t>: TRUE | FALSE | 1 | 0
+ *
+ *  Notes:
+ */
 
 uint32_t ValveStateSetter(uint32_t vs)
 {
@@ -156,8 +196,22 @@ uint32_t ValveStateSetter(uint32_t vs)
 	return success;
 }
 
+/*
+ * 	Function UART_SendMessage()
+ *	TODO: Finish this description
+ *
+ *  Params:
+ *  hlpuart <pointer>: Pointer the the lpuart typedef created at initialization.
+ *	message <point>: Pointer to predefined message buffer
+ *
+ *  Returns:
+ *  success <uint32_t>: TRUE | FALSE | 1 | 0
+ *
+ *  Notes:
+ */
 uint32_t UART_SendMessage(UART_HandleTypeDef *hlpuart1, char *message)
 {
+
 	uint32_t ofc = 0;
 	uint32_t msg_time = HAL_GetTick();
 	uint32_t success = FALSE;
@@ -220,7 +274,6 @@ uint32_t UART_RecieveMessage(UART_HandleTypeDef *hlpuart1)
 	 * 		USART_ISR_RXNE_RXFNE 0x20
 	 * 		USART_ISR_RXNE_RXFNE_Msk !0x20
 	 */
-
 
 	volatile uint32_t success = FALSE;
 	volatile uint8_t rxb = 0;
