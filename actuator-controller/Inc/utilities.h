@@ -30,7 +30,7 @@ uint32_t VerifyState(int);
 uint32_t StateConfiguration();
 uint32_t ValveStateSetter(uint32_t);
 uint32_t UART_SendMessage(UART_HandleTypeDef *,char (*));
-uint32_t UART_RecieveMessage(char  *message);
+uint32_t UART_RecieveMessage(UART_HandleTypeDef *);
 
 
 #endif // UTILITIES_H

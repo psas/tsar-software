@@ -20,6 +20,7 @@ extern "C" {
 
 #include "utilities.h"
 
+uint32_t ProcessMessages();
 void Get_State_Disagree_Error_Msg(char (*),enum StateName , enum StateName );
 void Get_Invalid_State_Error_Msg(char (*), enum StateName , enum StateName );
 void Get_Valve_State_Status_Msg(char (*), uint32_t , uint32_t );

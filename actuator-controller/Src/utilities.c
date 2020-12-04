@@ -204,55 +204,36 @@ uint32_t UART_SendMessage(UART_HandleTypeDef *hlpuart1, char *message)
 
 uint32_t UART_RecieveMessage(UART_HandleTypeDef *hlpuart1)
 {
-	// 0x4000 8000 - 0x4000 83FF LPUART1
-	// 1C offset for USART_ISR
-	// USART_ISR_RXNE_RXFNE_Msk
-	// USART_ISR_RXNE_RXFNE
-	// hlpuart1->Instance == LPUART1;
+	/*
+	 *  Called during IRQ interrupts if USART_ISR RXFNE or RXNE flag is set.
+	 *  Reads one byte from hlpuart1 RDR register and adds it to the Receiver Buffer.
+	 *
+	 *  Params:
+	 *  hlpuart <pointer>: Pointer the the lpuart typedef created at initialization.
+	 *
+	 *  Returns:
+	 *  success <uint32_t>: TRUE | FALSE | 1 | 0
+	 *
+	 *  Notes:
+	 * 		0x4000 8000 - 0x4000 83FF (ADDR Range for LPUART1)
+	 * 		1C (offset for USART_ISR)
+	 * 		USART_ISR_RXNE_RXFNE 0x20
+	 * 		USART_ISR_RXNE_RXFNE_Msk !0x20
+	 */
+
 
 	volatile uint32_t success = FALSE;
-	volatile uint8_t rxBuffer = 0;
-	volatile char incoming[RX_BUFFER_SIZE];
-	volatile uint8_t i = 0;
+	volatile uint8_t rxb = 0;
+	volatile uint8_t mask = 0xFF;
 
-	memset(incoming, '\0', RX_BUFFER_SIZE);
+	rxBuffer = (uint8_t)(hlpuart1->Instance->RDR & mask);
 
-	while(READ_BIT(hlpuart1->Instance->ISR, USART_ISR_RXFNE) != 0U);
+	if(RxMessagePtr <= RxMemEnd)
 	{
-		rxBuffer = (uint8_t)(hlpuart1->Instance->RDR & (uint8_t)hlpuart1->Mask);
-		if(i < RX_BUFFER_SIZE)
-		{
-			incoming[i] = rxBuffer;
-			i++;
-		}else
-		{
-			// TODO: OVERFLOW ERROR
-			return success;
-		}
+		&RxMessagePtr = rxb;
+		RxMessagePtr += 1;
+		success = TRUE;
 	}
 
-	success = TRUE;
-
-	for(int i = 0; i < RX_BUFFER_SIZE; i++)
-	{
-		if(incoming[i] != '\0')
-		{
-			// TODO
-			// Convert to binary string
-			// Count set bits
-			// Calculate Parity
-			// Set valid/invalid flag
-		}else
-		{
-			i += RX_BUFFER_SIZE;
-		}
-	}
-	// TODO Finish
-	// Payload Description
-	// Start Byte 		AA
-	// Payload Size 	0D
-	// Payload			--
-	// Valve Out State  0x7FF
-	// Valve
 	return success;
 }

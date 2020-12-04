@@ -1,0 +1,4 @@
+# Ignore /Debug/ and /Release/
+*/Debug/*
+*/Release/*
+*/datasheets_ignore/*

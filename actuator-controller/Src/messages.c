@@ -17,6 +17,18 @@
 // Encode these messages in hex strings
 // Add Parity/Checksum
 
+uint32_t ProcessMessages()
+{
+// TODO Finish
+// Payload Description
+// Start Byte 		AA
+// Payload Size 	0D
+// Payload			--
+// Valve Out State  0x7FF
+// Valve
+	return FALSE;
+}
+
 void Get_State_Disagree_Error_Msg(char *errorMessage, enum StateName expectedState, \
 			enum StateName passedState)
 {

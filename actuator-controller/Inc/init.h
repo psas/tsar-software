@@ -11,9 +11,14 @@ extern "C" {
 
 ADC_HandleTypeDef hadc1;
 
-WWDG_HandleTypeDef hwwdg;
+// WWDG_HandleTypeDef hwwdg;
 
 UART_HandleTypeDef hlpuart1;
+
+extern char RxMessageBuffer1[256];
+extern char *RxMemBase;
+extern char *RxMemEnd;
+extern char *RxMessagePtr;
 
 void SystemClock_Config(void);
 void MX_GPIO_Init(void);
