@@ -29,9 +29,13 @@
  *  	If a message was processed return TRUE Else FALSE
  *
  *	Notes:
+ *		Current message format:
+ *		A5A5 + Size of Command + Command
+ *		Ex: A5A503ARM Is the ARM command (Switches ARM state);
  *	TODO:
  *		Convert to Hex Strings
  *		Implement Buffer Parsing (currently just clears it after reading successful message)
+ *		Implement reading around the ring buffer (edge cases)
  */
 uint32_t ProcessMessages(struct StateVars *ctrl)
 {
@@ -51,14 +55,15 @@ uint32_t ProcessMessages(struct StateVars *ctrl)
 		if(test == comp)
 		{
 			char preamble[4] = {'\0'};
+			match = TRUE;
 			for(int i = iter; i < iter + 4;i++)
 			{
 				preamble[i - iter] = RxMessageBuffer1[i];
+				match &= (preamble[i -iter] == preamble_comp[i-iter]);
 			}
 
-			if(0 == strcmp(preamble, preamble_comp))
+			if(match)
 			{
-				match = TRUE;
 				start = iter;
 				char c_take[2] = {'\0'};
 				for(int i = start + 4; i < start + 6; i++)
@@ -117,6 +122,15 @@ uint32_t ProcessMessages(struct StateVars *ctrl)
 			RxMessageIdx = RxMessageBuffer1;
 			success = TRUE;
 		}
+
+		// Default Case
+		if(!success)
+		{
+			for(int i = start; i <= start + take; i++)
+			{
+				RxMessageBuffer1[i] = 0;
+			}
+		}
 	}
 
 	return success;
@@ -148,7 +162,7 @@ uint32_t SendStatusMessage(struct StateVars *ctrl)
 		success = (ctrl->valveConfiguration == ctrl->valveTarget ? TRUE : FALSE);
 
 		// Create Message and Transmit
-		Get_Valve_State_Status_Msg(TxMessageBuffer1, ctrl->valveConfiguration, success);
+		Get_Valve_State_Status_Msg(TxMessageBuffer1, ctrl, success);
 		UART_SendMessage(&hlpuart1, TxMessageBuffer1);
 	}
 
@@ -184,7 +198,7 @@ void Get_Invalid_State_Error_Msg(char *errorMessage, enum StateName state, enum 
 }
 
 
-void Get_Valve_State_Status_Msg(char *statusMessage, uint32_t valveConfiguration, uint32_t success)
+void Get_Valve_State_Status_Msg(char *statusMessage, struct StateVars *ctrl, uint32_t success)
 {
 	char valve_state[VALVE_STATE_BUFFER_SIZE];
 	char temp[4];
@@ -192,11 +206,14 @@ void Get_Valve_State_Status_Msg(char *statusMessage, uint32_t valveConfiguration
 	memset(valve_state, '\0', VALVE_STATE_BUFFER_SIZE);
 	memset(temp, '\0', 4);
 
-	strcat(valve_state,"Valve Configuration: ");
-	sprintf(temp, "%03x", (int)valveConfiguration);
+	strcat(valve_state,"VC: ");
+	sprintf(temp, "%03x", (int)ctrl->valveConfiguration);
 	strcat(valve_state, temp);
-	strcat(valve_state, ", Success: ");
-	strcat(valve_state, (success > 0 ? "True." : "False."));
+	strcat(valve_state, ", VT: ");
+	strcat(valve_state, (success > 0 ? "True, " : "False, "));
+	strcat(valve_state, "St: ");
+	sprintf(temp, "%02x", (int)ctrl->currentState);
+	strcat(valve_state, temp);
 	memset(statusMessage, '\0', VALVE_STATE_BUFFER_SIZE);
 	strcpy(statusMessage, valve_state);
 }
