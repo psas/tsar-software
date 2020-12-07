@@ -1,13 +1,14 @@
-// burn_initiated.c
+// tsar_groundstation.c
 // Portland State Aerospace Society
 // TSAR Capstone 2019-2020
-// TODO Update this
+// TODO UPDATE THIS
 // Change Log
 // 	-Creation of Document 5/17/2020 [APJ]
+//  - Renamed FUEL_DRAIN, re-included into project 12/7/2020 [APJ]
 //
-//	This file contains methods for the Burn Initiated
+//	This file contains methods for the FUEL DRAIN
 //  state.
-//  SetupOps has two verification Methods
+//  FuelDrain has two verification Methods
 //  It first checks that both current and previous states are valid
 //  It then checks if the expected state is the state passed
 //  At this point the valves are opened and a log entry is created
@@ -16,26 +17,22 @@
 //
 //
 //  System Risk Factor = 0.33 (Catastrophic, Unlikely)
-#include "burn_initiated.h"
+#include <fuel_drain.h>
 
-uint32_t BurnInitiated(struct StateVars *ctrl)
+uint32_t FuelDrain(struct StateVars *ctrl)
 {
 	uint32_t success = FALSE;
 	ctrl->valveConfiguration = StateConfiguration();
-	ctrl->valveTarget  = ((uint16_t)PV2 	\
-			 |(uint16_t)PV3 	\
-			 |(uint16_t)IV1 	\
-			 |(uint16_t)IV2 	\
-			 |(uint16_t)MV1 	\
-			 |(uint16_t)MV2);
+	ctrl->valveTarget  = ((uint16_t)SOV4 	\
+			 |(uint16_t)SOV8);
 	uint32_t now = HAL_GetTick();
+	//TODO Specify a real timeout
 	uint32_t TIMEOUT = 10000;
-
     if(VerifyState(ctrl->currentState) && VerifyState(ctrl->lastState))
     {
-    	if((ctrl->currentState & BURN_INITIATED) == BURN_INITIATED){
-    		// PV1 PV2 PV3 VV1 VV2 IV1 IV2 MV1 MV2
-    		// | 0| 1|  1|  0|  0|  1| 1 | 1 | 1
+    	if((ctrl->currentState & FUEL_DRAIN) == FUEL_DRAIN){
+    		// SOV1   SOV2   SOV3   SOV4   SOV5   SOV6   SOV7   SOV8
+    		//|  0  |   0  |   0  |   1  |   0  |   0  |   0  |   1  |
 
     	    // If this is the first time, initialize state
     		if(ctrl->currentState != ctrl->lastState)
@@ -46,21 +43,26 @@ uint32_t BurnInitiated(struct StateVars *ctrl)
     		// OnTick
     		success = SendStatusMessage(ctrl);
 
+    		// TODO: if(data in buffer) ProcessMessages();
+			ProcessMessages(ctrl);
+			success = (ctrl->valveConfiguration == ctrl->valveTarget ? TRUE : FALSE);
+
     		//TODO Specify time frame
     		if(now - ctrl->timeStarted > TIMEOUT && success)
     		{
-        		ctrl->currentState= BURN_FEEDBACK;
+    			ctrl->isArmed = FALSE;
+        		ctrl->currentState = SAFETY;
     		}
 
     		// Increment state counter
 			ctrl->stateCounter++;
 			if(ctrl->stateCounter >= 4294967295) ctrl->stateCounter = 0;
+
     	}else{
     		// Log Expected State != Passed State
-    		Get_State_Disagree_Error_Msg(TxMessageBuffer1, BURN_INITIATED, ctrl->currentState);
+    		Get_State_Disagree_Error_Msg(TxMessageBuffer1, FUEL_DRAIN, ctrl->currentState);
     		UART_SendMessage(&hlpuart1, TxMessageBuffer1);
     	}
-
     }else{
     	// Log Invalid State
     	Get_Invalid_State_Error_Msg(TxMessageBuffer1, ctrl->currentState, ctrl->lastState);

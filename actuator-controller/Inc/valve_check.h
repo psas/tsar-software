@@ -3,9 +3,9 @@
 // TSAR Capstone 2019-2020
 //
 // Change Log
-// 	-Creation of Document 2/11/2020 [APJ]
-//
-//	This is the header file for setup_ops.c
+// 	- Creation of Document 2/11/2020 [APJ]
+//  - Renamed Valve Check 12/6/220 [APJ]
+//	This is the header file for valve_check.c
 //
 //	References:
 //
@@ -19,6 +19,6 @@
 #include "utilities.h"
 #include "messages.h"
 
-uint32_t SetupOps(struct StateVars (*));
+uint32_t ValveCheck(struct StateVars (*));
 
 #endif // SETUP_OPS_H

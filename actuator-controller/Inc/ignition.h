@@ -1,11 +1,12 @@
-// ignition.h
+// burn_initiated.h
 // Portland State Aerospace Society
 // TSAR Capstone 2019-2020
 //
 // Change Log
 // 	-Creation of Document 2/11/2020 [APJ]
+//  - Renamed IGNITION 12/7/2020 [APJ]
 //
-//	This is the header file for ignition.h
+//	This is the header file for burn_initiated.c
 //
 //	References:
 //
@@ -18,6 +19,7 @@
 #include "states_def.h"
 #include "utilities.h"
 #include "messages.h"
+
 
 uint32_t Ignition(struct StateVars (*));
 

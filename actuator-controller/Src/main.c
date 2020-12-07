@@ -46,7 +46,6 @@ int main(void)
 		&controls	//this address.
 		};
 
-	//TODO HACK initialize isArm false
 	controls.isArmed = FALSE;
 	HAL_Init();
 

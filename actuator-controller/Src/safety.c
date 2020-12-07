@@ -22,12 +22,12 @@ uint32_t Safety(struct StateVars *ctrl) {
 	uint32_t now = HAL_GetTick();
 	uint32_t success = FALSE;
 	ctrl->valveConfiguration = StateConfiguration();
-	ctrl->valveTarget  = (uint16_t) VV1 | (uint16_t) VV2;
+	ctrl->valveTarget  = (uint16_t) SOV4 | (uint16_t) SOV8;
 
 	if (VerifyState(ctrl->currentState) && VerifyState(ctrl->lastState)) {
 		if ((ctrl->currentState & SAFETY) == SAFETY) {
-			// PV1 PV2 PV3 VV1 VV2 IV1 IV2 MV1 MV2
-			// | 0|  0|  0| 1|  1|  0|  0|  0|   0
+			// SOV1   SOV2   SOV3   SOV4   SOV5   SOV6   SOV7   SOV8
+			// | 0  |   0  |   0  |   1  |   0  |   0  |    0|    1  |
 
     	    // If this is the first time, initialize state
     		if(ctrl->currentState != ctrl->lastState)
@@ -41,9 +41,11 @@ uint32_t Safety(struct StateVars *ctrl) {
     		// TODO: if(data in buffer) ProcessMessages();
 			ProcessMessages(ctrl);
 			success = (ctrl->valveConfiguration == ctrl->valveTarget ? TRUE : FALSE);
+
 			if (ctrl->isArmed && success) {
-				ctrl->currentState = SETUP_OPS;
+				ctrl->currentState = VALVE_CHECK;
 			}
+
 			ctrl->stateCounter++;
 			if(ctrl->stateCounter >= 4294967295) ctrl->stateCounter = 0;
 

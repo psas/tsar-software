@@ -30,30 +30,25 @@
 
 #define TICK_LENGTH 2000
 
-enum StateName{					// PV1	PV2	PV3	VV1	VV2	IV1	IV2	MV1	MV2
-	SETUP_OPS,					// |11	|11	|11	|11 |11	|11	|11	|11	|11
-	//N2_AND_FUEL_FILL,			// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	//FUEL_LINE_CLEAR,			// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	//MID_FUELING_HOLD,			// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	//LOX_FILL,					// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	SITE_CLEAR_AND_START_UP,	// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	PRESSURIZATION,				// | 0	| 1	| 1	| 0 | 0	| 0	| 0	| 0	| 0
-	PRE_CHILL,					// | 0	| 1	| 1	| 0 | 0	| 0	| 0	|10	| 0
-	IGNITION,					// | 0	| 1	| 1	| 0 | 0	| 1	| 1	|10	| 0
-	LOX_INTRO,					// | 0	| 1	| 1	| 0 | 0	| 1	| 1	| 1	|10
-	FUEL_INTRO,					// | 0	| 1	| 1	| 0 | 0	| 1	| 1	| 1	| 1
-	BURN_INITIATED,				// | 0	| 1	| 1	| 0 | 0	| 1	| 1	| 1	| 1
-	BURN_FEEDBACK,				// | 0	| 1	| 1	| 0 | 0	| 0	| 0	| 1	| 1
-	BURN_TERMINATION_1,			// | 0	| 1	| 1	| 0 | 0	| 0	| 0	| 1	|10
-	BURN_TERMINATION_2,			// | 1	| 1	| 1	| 1 | 1	| 0	| 0	|10	| 0
-	BURN_TERMINATION_3,			// | 1	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	PURGE,						// | 1	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	POST_FIRE,					// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	//SAFE_APPROACH,			// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	FAILURE,					// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	//GROUNDSTATION,			// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	SAFETY,						// | 0	| 0	| 0	| 1 | 1	| 0	| 0	| 0	| 0
-	TEST						// | *	| *	| *	| * | *	| *	| *	| *	| *
+enum StateName{					//    SOV1   SOV2   SOV3   SOV4   SOV5   SOV6   SOV7   SOV8
+	SAFETY,						// 0 |  0   |  0  |   0  |   1  |   0  |   0  |   0  |   1  |
+	VALVE_CHECK,				// 1 | 1 0  | 1 0 |  1 0 |  1 0 |  1 0 |  1 0 |  1 0 |  1 0 |
+	FUEL_FILL,					// 2 |  0   |  0  |   0  |   1  |   0  |   0  |   0  |   1  |
+	LOX_PRE_FILL,				// 3 |  0   |  1  |   0  |   0  |   0  |   1  |   0  |   0  |
+	LOX_CHILL,					// 4 |  0   |  0  |   0  |   0  |   0  |   1  |   1  |   1  |
+	LOX_FILL,					// 5 |  0   |  0  |   0  |   0  |   0  |   1  |   1  |   1  |
+	READY_STATE,				// 6 |  0   |  0  |   0  |   1  |   0  |   0  |   0  |   1  |
+	PRESSURIZE,					// 7 |  1   |  1  |   0  |   0  |   0  |   0  |   0  |   0  |
+	IGNITION,					// 8 |  1   |  1  |   0  |   0  |   0  |   0  |   0  |   0  |
+	LOX_START,					// 9 |  1   |  1  |   0  |   0  |   0  |   1  |   0  |   0  |
+	FUEL_START,					// A |  1   |  1  |   0  |   0  |   1  |   1  |   0  |   0  |
+	FIRING,						// B |  1   |  1  |   0  |   0  |   1  |   1  |   0  |   0  |
+	PURGE,						// C |  0   |  0  |   1  |   0  |   0  |   0  |   0  |   0  |
+	LOX_BOILOFF,				// D |  0   |  1  |   0  |   0  |   0  |   1  |   0  |   0  |
+	SHUTDOWN,					// E |  0   |  0  |   1  |   0  |   0  |   0  |   0  |   0  |
+	FUEL_DRAIN,					// F |  0   |  0  |   0  |   1  |   0  |   0  |   0  |   1  |
+	FAILURE,					// 10|  0   |  0  |   1  |   0  |   0  |   0  |   0  |   0  |
+	TEST						// 20| 1 0  | 1 0 |  1 0 |  1 0 |  1 0 |  1 0 |  1 0 |  1 0 |
 };
 
 struct StateVars{
@@ -71,15 +66,18 @@ struct StateVars *adr;
 };
 
 // Definitions of Solenoids
-#define	PV1  0x001				// GPIOA GPIO8_Pin (uint_16t)0x0100
-#define PV2  0x002				// GPIOA GPIO9_FAST_Pin (uint16_t)0x0200
-#define PV3  0x004				// GPIOA GPIO10_FAST_Pin (uint16_t)0x0400
-#define VV1  0x008				// GPIOB GPIO13_Pin (uint16_t)0x2000
-#define VV2  0x010				// GPIOB GPIO14_Pin (uint16_t)0x4000
-#define IV1  0x020				// GPIOB GPIO15_Pin (uint16_t)0x8000
-#define IV2  0x040				// GPIOD GPIO8D8_Pin (uint_16t)0x0100
-#define MV1  0x080				// GPIOD GPIO9_Pin (uint_16t)0x0200
-#define MV2  0x100				// GPIOD GPIO2_Pin (uint_16t)0x0004
+#define	SOV1  0x001				// GPIOA GPIO10_FAST_Pin (uint16_t)
+#define SOV2  0x002				// GPIOD GPIO8D8_Pin (uint16_t)
+#define SOV3  0x004				// GPIOD GPIO9_Pin (uint16_t)
+#define SOV4  0x008				// GPIOC GPIO7_Pin (uint16_t)
+#define SOV5  0x010				// GPIOC GPIO6_Pin (uint16_t)
+#define SOV6  0x020				// GPIOA GPIO9_FAST_Pin (uint16_t)
+#define SOV7  0x040				// GPIOA GPIO8_Pin (uint16_t)
+#define SOV8  0x080				// GPIOB GPIO14_Pin (uint16_t)
+// extra
+#define XXX1  0x100				// GPIOB GPIO13_Pin (uint16_t)
+#define XXX2  0x200				// GPIOB GPIO15_Pin (uint16_t)
+#define XXX3  0x400				// GPIOD GPIO2_Pin (uint16_t)
 
 // Bool Defs
 #define TRUE  1

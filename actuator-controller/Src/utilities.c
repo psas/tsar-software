@@ -31,49 +31,48 @@
 uint32_t VerifyState(int state)
 {
 	uint32_t success = FALSE;
-    if(state <= SAFETY && state >= SETUP_OPS)
+    if(state <= TEST && state >= SAFETY)
     {
     	success = TRUE;
 		switch(state)
 		{
-			case SETUP_OPS:
+			case SAFETY:
 				break;
-			//case LOX_FILL:
+			case VALVE_CHECK:
 				break;
-			case SITE_CLEAR_AND_START_UP:
+			case FUEL_FILL:
 				break;
-			case PRESSURIZATION:
+			case LOX_PRE_FILL:
 				break;
-			case PRE_CHILL:
+			case LOX_CHILL:
+				break;
+			case LOX_FILL:
+				break;
+			case READY_STATE:
+				break;
+			case PRESSURIZE:
 				break;
 			case IGNITION:
 				break;
-			case LOX_INTRO:
+			case LOX_START:
 				break;
-			case BURN_INITIATED:
+			case FUEL_START:
 				break;
-			case BURN_FEEDBACK:
-				break;
-			case BURN_TERMINATION_1:
-				break;
-			case BURN_TERMINATION_2:
-				break;
-			case BURN_TERMINATION_3:
+			case FIRING:
 				break;
 			case PURGE:
 				break;
-			case POST_FIRE:
+			case LOX_BOILOFF:
 				break;
-			//case SAFE_APPROACH:
-				//break;
+			case SHUTDOWN:
+				break;
+			case FUEL_DRAIN:
+				break;
 			case FAILURE:
 				break;
-			//case GROUNDSTATION:
-				//break;
-			//case TEST:
-				//break;
-			case SAFETY:
+			case TEST:
 				break;
+
 
 			default:
 				success = FALSE;
@@ -99,32 +98,38 @@ uint32_t VerifyState(int state)
 uint32_t StateConfiguration()
 {
 	uint32_t vc = 0;
-	//PV1
-	vc |= (uint32_t)HAL_GPIO_ReadPin(GPIOA, GPIO8_Pin);
+	//SOV1
+	vc |= (uint32_t)(HAL_GPIO_ReadPin(GPIOA, GPIO10_FAST_Pin));
 
-	//PV2
-	vc |= (uint32_t)(HAL_GPIO_ReadPin (GPIOA, GPIO9_FAST_Pin) << 1);
+	//SOV2
+	vc |= (uint32_t)(HAL_GPIO_ReadPin(GPIOD, GPIO8D8_Pin) << 1);
 
-	//PV3
-	vc |= (uint32_t)(HAL_GPIO_ReadPin(GPIOA, GPIO10_FAST_Pin) << 2);
+	//SOV3
+	vc |= (uint32_t)(HAL_GPIO_ReadPin(GPIOD, GPIO9_Pin) << 2);
 
-	//VV1
-	vc |= (uint32_t)(HAL_GPIO_ReadPin(GPIOB, GPIO13_Pin) << 3);
+	//SOV4
+	vc |= (uint32_t)(HAL_GPIO_ReadPin (GPIOC, GPIO7_Pin) << 3);
 
-	//VV2
-	vc |= (uint32_t)(HAL_GPIO_ReadPin(GPIOB, GPIO14_Pin) << 4);
+	//SOV5
+	vc |= (uint32_t)(HAL_GPIO_ReadPin (GPIOC, GPIO6_Pin) << 4);
 
-	//IV1
-	vc |= (uint32_t)(HAL_GPIO_ReadPin(GPIOB, GPIO15_Pin) << 5);
+	//SOV6
+	vc |= (uint32_t)(HAL_GPIO_ReadPin (GPIOA, GPIO9_FAST_Pin) << 5);
 
-	//IV2
-	vc |= (uint32_t)(HAL_GPIO_ReadPin(GPIOD, GPIO8D8_Pin) << 6);
+	//SOV7
+	vc |= (uint32_t)(HAL_GPIO_ReadPin(GPIOA, GPIO8_Pin) << 6);
 
-	//MV1
-	vc |= (uint32_t)(HAL_GPIO_ReadPin(GPIOD, GPIO9_Pin) << 7);
+	//SOV8
+	vc |= (uint32_t)(HAL_GPIO_ReadPin(GPIOB, GPIO14_Pin) << 7);
 
-	//MV2
-	vc |= (uint32_t)(HAL_GPIO_ReadPin(GPIOD, GPIO2_Pin) << 8);
+	//XXX1
+	vc |= (uint32_t)(HAL_GPIO_ReadPin(GPIOB, GPIO13_Pin) << 8);
+
+	//XXX2
+	vc |= (uint32_t)(HAL_GPIO_ReadPin(GPIOB, GPIO15_Pin) << 9);
+
+	//XXX3
+	vc |= (uint32_t)(HAL_GPIO_ReadPin(GPIOD, GPIO2_Pin) << 10);
 
 	return vc;
 }
@@ -145,48 +150,58 @@ uint32_t StateConfiguration()
 uint32_t ValveStateSetter(uint32_t vs)
 {
 	uint32_t success = FALSE;
-	//PV1
-	(vs & (uint32_t)PV1) == (uint32_t)PV1 \
-			? HAL_GPIO_WritePin(GPIOA, GPIO8_Pin,GPIO_PIN_SET) \
-			: HAL_GPIO_WritePin(GPIOA, GPIO8_Pin,GPIO_PIN_RESET);
-
-	//PV2
-	(vs & (uint32_t)PV2) == (uint32_t)PV2 \
-			? HAL_GPIO_WritePin(GPIOA, GPIO9_FAST_Pin,GPIO_PIN_SET) \
-			: HAL_GPIO_WritePin(GPIOA, GPIO9_FAST_Pin,GPIO_PIN_RESET);
-
-	//PV3
-	(vs & (uint32_t)PV3) == (uint32_t)PV3 \
+	//SOV1
+	(vs & (uint32_t)SOV1) == (uint32_t)SOV1 \
 			? HAL_GPIO_WritePin(GPIOA, GPIO10_FAST_Pin,GPIO_PIN_SET) \
 			: HAL_GPIO_WritePin(GPIOA, GPIO10_FAST_Pin,GPIO_PIN_RESET);
 
-	//VV1
-	(vs & (uint32_t)VV1) == (uint32_t)VV1 \
-			? HAL_GPIO_WritePin(GPIOB, GPIO13_Pin,GPIO_PIN_SET) \
-			: HAL_GPIO_WritePin(GPIOB, GPIO13_Pin,GPIO_PIN_RESET);
-
-	//VV2
-	(vs & (uint32_t)VV2) == (uint32_t)VV2 \
-			? HAL_GPIO_WritePin(GPIOB, GPIO14_Pin,GPIO_PIN_SET) \
-			: HAL_GPIO_WritePin(GPIOB, GPIO14_Pin,GPIO_PIN_RESET);
-
-	//IV1
-	(vs & (uint32_t)IV1) == (uint32_t)IV1 \
-			? HAL_GPIO_WritePin(GPIOB, GPIO15_Pin,GPIO_PIN_SET) \
-			: HAL_GPIO_WritePin(GPIOB, GPIO15_Pin,GPIO_PIN_RESET);
-
-	//IV2
-	(vs & (uint32_t)IV2) == (uint32_t)IV2 \
+	//SOV2
+	(vs & (uint32_t)SOV2) == (uint32_t)SOV2 \
 			? HAL_GPIO_WritePin(GPIOD, GPIO8D8_Pin,GPIO_PIN_SET) \
 			: HAL_GPIO_WritePin(GPIOD, GPIO8D8_Pin,GPIO_PIN_RESET);
 
-	//MV1
-	(vs & (uint32_t)MV1) == (uint32_t)MV1 \
+	//SOV3
+	(vs & (uint32_t)SOV3) == (uint32_t)SOV3 \
 			? HAL_GPIO_WritePin(GPIOD, GPIO9_Pin,GPIO_PIN_SET) \
 			: HAL_GPIO_WritePin(GPIOD, GPIO9_Pin,GPIO_PIN_RESET);
 
-	//MV2
-	(vs & (uint32_t)MV2) == (uint32_t)MV2 \
+	//SOV4
+	(vs & (uint32_t)SOV4) == (uint32_t)SOV4 \
+			? HAL_GPIO_WritePin(GPIOC, GPIO7_Pin,GPIO_PIN_SET) \
+			: HAL_GPIO_WritePin(GPIOC, GPIO7_Pin,GPIO_PIN_RESET);
+
+	//SOV5
+	(vs & (uint32_t)SOV5) == (uint32_t)SOV5 \
+			? HAL_GPIO_WritePin(GPIOC, GPIO6_Pin,GPIO_PIN_SET) \
+			: HAL_GPIO_WritePin(GPIOC, GPIO6_Pin,GPIO_PIN_RESET);
+
+	//SOV6
+	(vs & (uint32_t)SOV6) == (uint32_t)SOV6 \
+			? HAL_GPIO_WritePin(GPIOA, GPIO9_FAST_Pin,GPIO_PIN_SET) \
+			: HAL_GPIO_WritePin(GPIOA, GPIO9_FAST_Pin,GPIO_PIN_RESET);
+
+	//SOV7
+	(vs & (uint32_t)SOV7) == (uint32_t)SOV7 \
+			? HAL_GPIO_WritePin(GPIOA, GPIO8_Pin,GPIO_PIN_SET) \
+			: HAL_GPIO_WritePin(GPIOA, GPIO8_Pin,GPIO_PIN_RESET);
+
+	//SOV8
+	(vs & (uint32_t)SOV8) == (uint32_t)SOV8 \
+			? HAL_GPIO_WritePin(GPIOB, GPIO14_Pin,GPIO_PIN_SET) \
+			: HAL_GPIO_WritePin(GPIOB, GPIO14_Pin,GPIO_PIN_RESET);
+
+	//XXX1
+	(vs & (uint32_t)XXX1) == (uint32_t)XXX1 \
+			? HAL_GPIO_WritePin(GPIOB, GPIO13_Pin,GPIO_PIN_SET) \
+			: HAL_GPIO_WritePin(GPIOB, GPIO13_Pin,GPIO_PIN_RESET);
+
+	//XXX2
+	(vs & (uint32_t)XXX2) == (uint32_t)XXX2 \
+			? HAL_GPIO_WritePin(GPIOB, GPIO15_Pin,GPIO_PIN_SET) \
+			: HAL_GPIO_WritePin(GPIOB, GPIO15_Pin,GPIO_PIN_RESET);
+
+	//XXX3
+	(vs & (uint32_t)XXX3) == (uint32_t)XXX3 \
 			? HAL_GPIO_WritePin(GPIOD, GPIO2_Pin,GPIO_PIN_SET) \
 			: HAL_GPIO_WritePin(GPIOD, GPIO2_Pin,GPIO_PIN_RESET);
 

@@ -1,15 +1,13 @@
-// tsar_burn_termination_3.c
+// tsar_ignition.c
 // Portland State Aerospace Society
 // TSAR Capstone 2019-2020
 // TODO UPDATE THIS
 // Change Log
 // 	-Creation of Document 5/17/2020 [APJ]
-// 	... Check GITHUB, bad at logging
-//  - Utilized Initiate and logging commands
 //
-//	This file contains methods for the Burn Termination 3
+//	This file contains methods for the Setup Operations
 //  state.
-//  BurnTermination3 has two verification Methods
+//  LoxFill has two verification Methods
 //  It first checks that both current and previous states are valid
 //  It then checks if the expected state is the state passed
 //  At this point the valves are opened and a log entry is created
@@ -18,23 +16,22 @@
 //
 //
 //  System Risk Factor = 0.33 (Catastrophic, Unlikely)
-#include "burn_termination_3.h"
+#include "pressurize.h"
 
-uint32_t BurnTermination3(struct StateVars *ctrl)
+uint32_t Pressurize(struct StateVars *ctrl)
 {
 	uint32_t success = FALSE;
 	ctrl->valveConfiguration = StateConfiguration();
-	ctrl->valveTarget  = ((uint16_t)PV1 	\
-			 |(uint16_t)VV1 	\
-			 |(uint16_t)VV2);
+	ctrl->valveTarget = ((uint16_t)SOV1 	\
+			 |(uint16_t)SOV2);
 	uint32_t now = HAL_GetTick();
 	uint32_t TIMEOUT = 10000;
 
     if(VerifyState(ctrl->currentState) && VerifyState(ctrl->lastState))
     {
-    	if((ctrl->currentState & BURN_TERMINATION_3) == BURN_TERMINATION_3){
-    		// PV1 PV2 PV3 VV1 VV2 IV1 IV2 MV1 MV2
-    		// | 1| 0|  0|  1|  1|  0|  0|  0|  0
+    	if((ctrl->currentState & PRESSURIZE) == PRESSURIZE){
+    		// SOV1   SOV2   SOV3   XXX1   SOV5   SOV6   SOV7   SOV8
+    		//|  1  |   1  |   0  |   0  |   0  |   0  |   0  |   0  |
 
     	    // If this is the first time, initialize state
     		if(ctrl->currentState != ctrl->lastState)
@@ -45,19 +42,25 @@ uint32_t BurnTermination3(struct StateVars *ctrl)
     		// OnTick
     		success = SendStatusMessage(ctrl);
 
+    		// TODO: if(data in buffer) ProcessMessages();
+			ProcessMessages(ctrl);
+
     		//TODO Specify time frame
     		if(now - ctrl->timeStarted > TIMEOUT && success)
     		{
-        		ctrl->currentState= PURGE;
+        		ctrl->currentState = IGNITION;
     		}
 
+    		// Increment state counter
+			ctrl->stateCounter++;
+			if(ctrl->stateCounter >= 4294967295) ctrl->stateCounter = 0;
     	}else{
-    		// Log Expected State != Passed State
-    		Get_State_Disagree_Error_Msg(TxMessageBuffer1, BURN_TERMINATION_3, ctrl->currentState);
-    		UART_SendMessage(&hlpuart1, TxMessageBuffer1);
+    		//Log Expected State != Passed State
+    		Get_State_Disagree_Error_Msg(TxMessageBuffer1, PRESSURIZE, ctrl->currentState);
+    		UART_SendMessage(&hlpuart1,TxMessageBuffer1);
     	}
     }else{
-    	// Log Invalid State
+    	    	// Log Invalid State
     	Get_Invalid_State_Error_Msg(TxMessageBuffer1, ctrl->currentState, ctrl->lastState);
     	UART_SendMessage(&hlpuart1, TxMessageBuffer1);
     }

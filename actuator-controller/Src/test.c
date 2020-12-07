@@ -22,12 +22,12 @@ uint32_t Test(struct StateVars *ctrl)
 {
 	uint32_t success = FALSE;
 	ctrl->valveConfiguration = StateConfiguration();
-	ctrl->valveTarget  = ((uint16_t)VV1 	\
-			 |(uint16_t)VV2);
+	ctrl->valveTarget  = ((uint16_t)XXX1 	\
+			 |(uint16_t)SOV8);
     if(VerifyState(ctrl->currentState) && VerifyState(ctrl->lastState))
     {
     	if((ctrl->currentState & TEST) == TEST){
-    		// PV1 PV2 PV3 VV1 VV2 IV1 IV2 MV1 MV2
+    		// SOV1   SOV2   SOV3   XXX1   SOV5   SOV6   SOV7   SOV8
     		// | 0| 0|  0|  1|  1|  0|  0|  0|  0
 
     	    // If this is the first time, initialize state
