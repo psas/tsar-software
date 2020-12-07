@@ -15,11 +15,11 @@ ADC_HandleTypeDef hadc1;
 
 UART_HandleTypeDef hlpuart1;
 
-extern char RxMessageBuffer1[256];
-extern char *RxMemBase;
-extern char *RxMemEnd;
-extern char *RxMessagePtr;
+extern volatile char TxMessageBuffer1[256];
+extern volatile char RxMessageBuffer1[256];
+extern volatile char *RxMessageIdx;
 
+void TransmitBuffer_Init(void);
 void SystemClock_Config(void);
 void MX_GPIO_Init(void);
 void MX_ADC1_Init(void);

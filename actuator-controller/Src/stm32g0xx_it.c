@@ -146,7 +146,7 @@ void USART3_4_LPUART1_IRQHandler(void)
 {
   UART_HandleTypeDef *hlp = &hlpuart1;
   /* USER CODE BEGIN USART3_4_LPUART1_IRQn 0 */
-  if(READ_BIT(hlp->Instance->ISR, USART_ISR_RXNE_RXFNE) == SET)
+  if(READ_BIT(hlp->Instance->ISR, USART_ISR_RXNE_RXFNE) !=0U)
   {
 	UART_RecieveMessage(&hlpuart1);
   }

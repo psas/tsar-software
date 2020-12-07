@@ -25,6 +25,10 @@
 
 #define PRINT_BUFFER_SIZE 256
 #define RX_BUFFER_SIZE 256
+#define TX_BUFFER_SIZE 128
+#define VALVE_STATE_BUFFER_SIZE 96
+
+#define TICK_LENGTH 2000
 
 enum StateName{					// PV1	PV2	PV3	VV1	VV2	IV1	IV2	MV1	MV2
 	SETUP_OPS,					// |11	|11	|11	|11 |11	|11	|11	|11	|11
@@ -55,11 +59,15 @@ enum StateName{					// PV1	PV2	PV3	VV1	VV2	IV1	IV2	MV1	MV2
 struct StateVars{
 uint32_t timeStarted;
 uint32_t timeElapsed;
+uint32_t stateCounter;
 uint32_t isArmed;
 uint32_t ignition;
+uint32_t isStateMachineRunning;
+uint32_t valveConfiguration;
+uint32_t valveTarget;
 enum StateName lastState;
 enum StateName currentState;
-uint32_t *adr;
+struct StateVars *adr;
 };
 
 // Definitions of Solenoids

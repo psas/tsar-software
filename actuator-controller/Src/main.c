@@ -33,17 +33,24 @@
 
 int main(void)
 {
-	struct StateVars controls = {0,0,0,0, FAILURE, SAFETY, &controls};
-	// TODO: Move these to init
-	char RxMessageBuffer1[RX_BUFFER_SIZE];
-	char *RxMessagePtr = &RxMessageBuffer1[0];
-	char *RxMemEnd = &RxMessageBuffer1[RX_BUFFER_SIZE - 1];
-	char *RxMemBase = &RxMessageBuffer1;
+	struct StateVars controls = {0,//timeStarted
+		0,			//timeElapsed
+		0,			//stateCounter
+		FALSE,		//isArmed
+		0,			//ignition
+		TRUE,		//isStateMachineRunning
+		0,			//valveConfiguration
+		0,			//valveTarget
+		FAILURE,	//lastState
+		SAFETY, 	//currentState
+		&controls	//this address.
+		};
+
 	//TODO HACK initialize isArm false
-	controls.isArmed = TRUE;
-	uint32_t isProgramRunning = TRUE;
+	controls.isArmed = FALSE;
 	HAL_Init();
 
+	TransmitBuffer_Init();
 	SystemClock_Config();
 	//MX_WWDG_Init();
 	MX_GPIO_Init();
@@ -51,8 +58,8 @@ int main(void)
 	MX_LPUART1_UART_Init();
 
 
-	while(1)
+	while(controls.isStateMachineRunning)
 	{
-	  StateMachine(isProgramRunning,controls.adr);
+	  StateMachine(controls.isStateMachineRunning,controls.adr);
 	}
 }

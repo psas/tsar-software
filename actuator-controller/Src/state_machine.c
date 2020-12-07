@@ -91,12 +91,12 @@ void StateMachine(uint32_t control, struct StateVars *ctrl)
 			}
 		}else
 		{
-			char message[PRINT_BUFFER_SIZE];
-			char *msgPtr = message;
+			char message[VALVE_STATE_BUFFER_SIZE];
+			
 			ctrl->currentState = FAILURE;
 	    	// Log Invalid State
-	    	Get_Invalid_State_Error_Msg(msgPtr, ctrl->currentState, ctrl->lastState);
-	    	UART_SendMessage(&hlpuart1, msgPtr);
+	    	Get_Invalid_State_Error_Msg(TxMessageBuffer1, ctrl->currentState, ctrl->lastState);
+	    	UART_SendMessage(&hlpuart1, TxMessageBuffer1);
 			//ERROR HANDLE
 		}
 		// WD check

@@ -16,6 +16,7 @@
 #define UTILITIES_H
 
 #include "init.h"
+#include "main.h"
 #include "states_def.h"
 #include "stm32g0xx_hal.h"
 #include "stm32g0xx_ll_system.h"
@@ -29,8 +30,12 @@
 uint32_t VerifyState(int);
 uint32_t StateConfiguration();
 uint32_t ValveStateSetter(uint32_t);
+uint32_t StateInitialize(struct StateVars (*));
 uint32_t UART_SendMessage(UART_HandleTypeDef *,char (*));
 uint32_t UART_RecieveMessage(UART_HandleTypeDef *);
 
+volatile char TxMessageBuffer1[];
+volatile char RxMessageBuffer1[];
+volatile char *RxMessageIdx;
 
 #endif // UTILITIES_H

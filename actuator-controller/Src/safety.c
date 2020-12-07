@@ -19,41 +19,43 @@
 #include "safety.h"
 
 uint32_t Safety(struct StateVars *ctrl) {
+	uint32_t now = HAL_GetTick();
 	uint32_t success = FALSE;
-	uint32_t valve_configuration = 0;
-	uint32_t valve_target = 0;
-	char message[256];
-	char *msgPtr = message;
+	ctrl->valveConfiguration = StateConfiguration();
+	ctrl->valveTarget  = (uint16_t) VV1 | (uint16_t) VV2;
 
 	if (VerifyState(ctrl->currentState) && VerifyState(ctrl->lastState)) {
 		if ((ctrl->currentState & SAFETY) == SAFETY) {
 			// PV1 PV2 PV3 VV1 VV2 IV1 IV2 MV1 MV2
 			// | 0|  0|  0| 1|  1|  0|  0|  0|   0
-			// Set Valve States
-			valve_target |= (uint16_t) VV1 | (uint16_t) VV2;
-			ValveStateSetter(valve_target);
-			valve_configuration = StateConfiguration();
-			ctrl->lastState = ctrl->currentState;
-			ctrl->currentState = SAFETY;
-			success = (valve_configuration == valve_target ? TRUE : FALSE);
 
-			// Create Message and Transmit
-			Get_Valve_State_Status_Msg(msgPtr, valve_configuration, success);
-			UART_SendMessage(&hlpuart1, msgPtr);
+    	    // If this is the first time, initialize state
+    		if(ctrl->currentState != ctrl->lastState)
+    	    {
+    			success = StateInitialize(ctrl);
+    	    }
 
+    		// OnTick
+    		success = SendStatusMessage(ctrl);
+
+    		// TODO: if(data in buffer) ProcessMessages();
+			ProcessMessages(ctrl);
+			success = (ctrl->valveConfiguration == ctrl->valveTarget ? TRUE : FALSE);
 			if (ctrl->isArmed && success) {
 				ctrl->currentState = SETUP_OPS;
 			}
+			ctrl->stateCounter++;
+			if(ctrl->stateCounter >= 4294967295) ctrl->stateCounter = 0;
 
 		} else {
 			// Log Expected State != Passed State
-			Get_State_Disagree_Error_Msg(msgPtr, SAFETY, ctrl->currentState);
-			UART_SendMessage(&hlpuart1, msgPtr);
+			Get_State_Disagree_Error_Msg(TxMessageBuffer1, SAFETY, ctrl->currentState);
+			UART_SendMessage(&hlpuart1, TxMessageBuffer1);
 		}
 	} else {
 		// Log Invalid State
-		Get_Invalid_State_Error_Msg(msgPtr, ctrl->currentState, ctrl->lastState);
-		UART_SendMessage(&hlpuart1, msgPtr);
+		Get_Invalid_State_Error_Msg(TxMessageBuffer1, ctrl->currentState, ctrl->lastState);
+		UART_SendMessage(&hlpuart1, TxMessageBuffer1);
 	}
 	return success;
 }

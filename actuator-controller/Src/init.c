@@ -151,7 +151,7 @@ void MX_LPUART1_UART_Init(void)
   /* USER CODE END LPUART1_Init 1 */
   hlpuart1.Instance = LPUART1;
   hlpuart1.Init.BaudRate = 115200;
-  hlpuart1.Init.WordLength = UART_WORDLENGTH_7B;
+  hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
   hlpuart1.Init.StopBits = UART_STOPBITS_1;
   hlpuart1.Init.Parity = UART_PARITY_NONE;
   hlpuart1.Init.Mode = UART_MODE_TX_RX;
@@ -159,7 +159,7 @@ void MX_LPUART1_UART_Init(void)
   hlpuart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
   hlpuart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
   hlpuart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  hlpuart1.FifoMode = UART_FIFOMODE_DISABLE;
+  hlpuart1.FifoMode = UART_FIFOMODE_ENABLE;
   if (HAL_RS485Ex_Init(&hlpuart1, UART_DE_POLARITY_HIGH, 0, 0) != HAL_OK)
   {
     Error_Handler();
@@ -172,12 +172,13 @@ void MX_LPUART1_UART_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_UARTEx_DisableFifoMode(&hlpuart1) != HAL_OK)
+  if (HAL_UARTEx_EnableFifoMode(&hlpuart1) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN LPUART1_Init 2 */
-
+  /* USER CODE BEGIN LPUART1_Init 2 */\
+// Enable IRQ
+  SET_BIT(hlpuart1.Instance->CR1, 0x20);
   /* USER CODE END LPUART1_Init 2 */
 
 }
@@ -319,6 +320,12 @@ void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void TransmitBuffer_Init(void)
+{
+	memset(TxMessageBuffer1,'\0', TX_BUFFER_SIZE);
+	memset(RxMessageBuffer1,'\0', RX_BUFFER_SIZE);
+	RxMessageIdx = RxMessageBuffer1;
+}
 
 /* USER CODE END 4 */
 

@@ -21,10 +21,10 @@
 uint32_t SafeApproach(struct StateVars *ctrl)
 {
 	uint32_t success = FALSE;
-	uint32_t valve_configuration = 0;
-	uint32_t valve_target = 0;
-	char message[256];
-	char *msgPtr = message;
+	ctrl->valveConfiguration = StateConfiguration();
+	ctrl->valveTarget  =
+
+	
 
     if(VerifyState(ctrl->currentState) && VerifyState(ctrl->lastState))
     {
@@ -43,18 +43,18 @@ uint32_t SafeApproach(struct StateVars *ctrl)
     		ctrl->currentState =SAFE_APPROACH;
     		success = (valve_configuration == valve_target ? TRUE : FALSE);
     		// Create Message and Transmit
-    		Get_Valve_State_Status_Msg(msgPtr,valve_configuration,success);
-    		UART_SendMessage(&hlpuart1, msgPtr);
+    		Get_Valve_State_Status_Msg(TxMessageBuffer1,valve_configuration,success);
+    		UART_SendMessage(&hlpuart1, TxMessageBuffer1);
     	}else{
     		//Log Expected State != Passed State
-    		Get_State_Disagree_Error_Msg(msgPtr, SAFE_APPROACH, ctrl->currentState);
-    		UART_SendMessage(&hlpuart1,msgPtr);
+    		Get_State_Disagree_Error_Msg(TxMessageBuffer1, SAFE_APPROACH, ctrl->currentState);
+    		UART_SendMessage(&hlpuart1,TxMessageBuffer1);
 
     	}
     }else{
     	// Log Invalid State
-    	Get_Invalid_State_Error_Msg(msgPtr, ctrl->currentState, ctrl->lastState);
-    	UART_SendMessage(&hlpuart1, msgPtr);
+    	Get_Invalid_State_Error_Msg(TxMessageBuffer1, ctrl->currentState, ctrl->lastState);
+    	UART_SendMessage(&hlpuart1, TxMessageBuffer1);
     }
 	return success;
 }

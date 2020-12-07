@@ -15,7 +15,6 @@
 //
 //  System Risk Factor = 0.33 (Catastrophic, Unlikely)
 #include "utilities.h"
-#include "init.h"
 
 /*
  * 	Function VerifyState()
@@ -197,15 +196,17 @@ uint32_t ValveStateSetter(uint32_t vs)
 }
 
 /*
- * 	Function UART_SendMessage()
+ * 	Function uint32_t UART_SendMessage(UART_HandleTypeDef *hlpuart1, char *message)
  *	TODO: Finish this description
  *
  *  Params:
  *  hlpuart <pointer>: Pointer the the lpuart typedef created at initialization.
- *	message <point>: Pointer to predefined message buffer
+ *	message <point>: Pointer to TxMessageBufferX (if multiple buffers defined X = integer, default= 1)
  *
  *  Returns:
- *  success <uint32_t>: TRUE | FALSE | 1 | 0
+ *  	success <uint32_t>: TRUE | FALSE | 1 | 0
+ *  		If message is shorter than the maximum length and created, return TRUE, else
+*  			return FALSE and send appropriate error message.
  *
  *  Notes:
  */
@@ -215,44 +216,41 @@ uint32_t UART_SendMessage(UART_HandleTypeDef *hlpuart1, char *message)
 	uint32_t ofc = 0;
 	uint32_t msg_time = HAL_GetTick();
 	uint32_t success = FALSE;
-	HAL_StatusTypeDef hal_status = 0x00U;
-	char invalid_length[PRINT_BUFFER_SIZE] = "Error: Log Message Overflow";
-	char no_message[PRINT_BUFFER_SIZE] = "Error: Log Message Empty";
-	char time_str[(sizeof(uint32_t) + 1)];
-	char transmit[PRINT_BUFFER_SIZE];
+	char *invalidLengthMessage = "Error: Log Message Overflow";
+	char *noMessage = "Error: Log Message Empty";
+	char time_str[11];
 
-	memset(transmit, '\0', PRINT_BUFFER_SIZE);
-	memset(time_str, '\0', sizeof(uint32_t) +1);
+
+	memset(time_str, '\0', 11);
 
 	sprintf(time_str, "%d",(int)msg_time);
-	strcat(transmit, "A5A5 ");
+
+	ofc += strlen("\nA5A5 ") + strlen(time_str) + strlen(" : ") + strlen(message) ;
+
+	char transmit[ofc];
+	memset(transmit, '\0', ofc);
+
+	strcat(transmit, "\nA5A5 ");
 	strcat(transmit, time_str);
 	strcat(transmit, " : ");
-
-	ofc += strlen("A5A5 ") + strlen(time_str) + strlen(" : ") + strlen(message);
 	if(message[0] != '\0')
 	{
-		if(ofc < PRINT_BUFFER_SIZE)
+		if(ofc < VALVE_STATE_BUFFER_SIZE)
 		{
 			strcat(transmit, message);
 			success = TRUE;
 		}else
 		{
-			strcat(transmit,invalid_length);
+			strcpy(transmit,invalidLengthMessage);
 		}
 	}else
 	{
-		strcat(transmit,no_message);
+		strcpy(transmit,noMessage);
 	}
+	memset(message, '\0', TX_BUFFER_SIZE);
+	strcpy(message, transmit);
+	HAL_UART_Transmit_IT(hlpuart1,(uint8_t *)message, sizeof(transmit));
 
-	hal_status = HAL_UART_Transmit_IT(hlpuart1,(uint8_t *)transmit, sizeof(transmit));
-	// TODO debug code - investigate timeout
-	while(hal_status != 0x00U)
-	{
-		hal_status = HAL_UART_Transmit_IT(hlpuart1,(uint8_t *)transmit, sizeof(transmit));
-		printf("%d", hal_status);
-	}
-	// TODO Debug code - investigate timeout
 	return success;
 }
 
@@ -276,17 +274,51 @@ uint32_t UART_RecieveMessage(UART_HandleTypeDef *hlpuart1)
 	 */
 
 	volatile uint32_t success = FALSE;
-	volatile uint8_t rxb = 0;
 	volatile uint8_t mask = 0xFF;
 
-	rxb = (uint8_t)(hlpuart1->Instance->RDR & mask);
+	volatile char rxb = (uint8_t)(hlpuart1->Instance->RDR & mask);
 
-	if(RxMessagePtr <= RxMemEnd)
+	if(RxMessageIdx < &RxMessageBuffer1[RX_BUFFER_SIZE])
 	{
-		*RxMessagePtr = rxb;
-		RxMessagePtr += 1;
+		*RxMessageIdx = rxb;
+		RxMessageIdx+=1;
 		success = TRUE;
 	}
+	if(RxMessageIdx == &RxMessageBuffer1[RX_BUFFER_SIZE]) RxMessageIdx = RxMessageBuffer1;
+	printf("%c",RxMessageBuffer1[0]);
 
+    SET_BIT(hlpuart1->Instance->CR1, 0x20);
 	return success;
 }
+
+/* Function: uint32_t StateInitialize(enum StateName new, struct StateVars *ctrl)
+ *
+ * - Initialize state: Resets stateCounter, Logs entry time, set's new state and alst state
+ *   attempts to set valves
+ *
+ *  Params:
+ *  hlpuart <pointer>: Pointer the the lpuart typedef created at initialization.
+ *
+ *  Returns:
+ *  success <uint32_t>: TRUE | FALSE | 1 | 0
+ *
+ *  Notes:
+ */
+uint32_t StateInitialize(struct StateVars *ctrl)
+{
+	uint32_t success = FALSE;
+	// Reset state counter, log start
+	ctrl->stateCounter = 0;
+	ctrl->timeStarted = HAL_GetTick();;
+
+	// Change State conditions
+	ctrl->lastState = ctrl->currentState;
+
+	// Set Valve States
+	ValveStateSetter(ctrl->valveTarget);
+	ctrl->valveConfiguration = StateConfiguration();
+
+	success = SendStatusMessage(ctrl);
+	return success;
+}
+

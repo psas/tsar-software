@@ -21,12 +21,13 @@
 uint32_t SetupOps(struct StateVars *ctrl)
 {
 	uint32_t success = FALSE;
-	uint32_t valve_configuration = 0;
-	uint32_t valve_target = 0;
+	ctrl->valveConfiguration = StateConfiguration();
+	ctrl->valveTarget  = ((uint16_t)VV1 	\
+			 |(uint16_t)VV2);
 	uint32_t now = HAL_GetTick();
-	uint32_t TIMEOUT= 300;
-	char message[256];
-	char *msgPtr = message;
+	uint32_t TIMEOUT = 10000;
+
+	
 
     if(ctrl->currentState != ctrl->lastState)
     {
@@ -39,38 +40,34 @@ uint32_t SetupOps(struct StateVars *ctrl)
     		// PV1 PV2 PV3 VV1 VV2 IV1 IV2 MV1 MV2
     		// 11 |11 |11 |11 |11 |11 |11 |11 |11
 
-    		// Set Valve States
-    		valve_target |= ((uint16_t)VV1 	\
-						 |(uint16_t)VV2);
-    		// Timestamp and Log
-    		ValveStateSetter(valve_target);
-    		valve_configuration = StateConfiguration();
+    	    // If this is the first time, initialize state
+    		if(ctrl->currentState != ctrl->lastState)
+    	    {
+    			success = StateInitialize(ctrl);
+    	    }
 
-    		// Change State conditions
-    		ctrl->lastState = ctrl->currentState;
-    		ctrl->currentState = SETUP_OPS;
-    		success = (valve_configuration == valve_target ? TRUE : FALSE);
-
-    		// Create Message and Transmit
-    		Get_Valve_State_Status_Msg(msgPtr,valve_configuration,success);
-    		UART_SendMessage(&hlpuart1, msgPtr);
+    		// OnTick
+    		success = SendStatusMessage(ctrl);
 
     		//TODO Specify time frame
-    		if(now - ctrl->timeStarted > TIMEOUT)
+    		if(now - ctrl->timeStarted > TIMEOUT && success)
     		{
         		ctrl->currentState=SITE_CLEAR_AND_START_UP;
     		}
 
+    		// Increment state counter
+			ctrl->stateCounter++;
+			if(ctrl->stateCounter >= 4294967295) ctrl->stateCounter = 0;
     	}else{
     		//Log Expected State != Passed State
-    		Get_State_Disagree_Error_Msg(msgPtr, SETUP_OPS, ctrl->currentState);
-    		UART_SendMessage(&hlpuart1,msgPtr);
+    		Get_State_Disagree_Error_Msg(TxMessageBuffer1, SETUP_OPS, ctrl->currentState);
+    		UART_SendMessage(&hlpuart1,TxMessageBuffer1);
 
     	}
     }else{
     	    	// Log Invalid State
-    	Get_Invalid_State_Error_Msg(msgPtr, ctrl->currentState, ctrl->lastState);
-    	UART_SendMessage(&hlpuart1, msgPtr);
+    	Get_Invalid_State_Error_Msg(TxMessageBuffer1, ctrl->currentState, ctrl->lastState);
+    	UART_SendMessage(&hlpuart1, TxMessageBuffer1);
     }
 	return success;
 }
