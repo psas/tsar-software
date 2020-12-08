@@ -40,7 +40,7 @@ uint32_t Pressurize(struct StateVars *ctrl)
     	    }
 
     		// OnTick
-    		success = SendStatusMessage(ctrl);
+    		success = OnTickStatusMessage(ctrl);
 
     		// TODO: if(data in buffer) ProcessMessages();
 			ProcessMessages(ctrl);

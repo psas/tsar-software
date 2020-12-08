@@ -41,7 +41,7 @@ uint32_t ReadyState(struct StateVars *ctrl)
     	    }
 
     		// OnTick
-    		success = SendStatusMessage(ctrl);
+    		success = OnTickStatusMessage(ctrl);
 
     		// TODO: if(data in buffer) ProcessMessages();
 			ProcessMessages(ctrl);

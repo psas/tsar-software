@@ -39,7 +39,7 @@ uint32_t Failure(struct StateVars *ctrl)
     	    }
 
     		// OnTick
-    		success = SendStatusMessage(ctrl);
+    		success = OnTickStatusMessage(ctrl);
 
     		// Wait for Acknowledge
     		ProcessMessages(ctrl);

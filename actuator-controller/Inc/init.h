@@ -15,9 +15,10 @@ ADC_HandleTypeDef hadc1;
 
 UART_HandleTypeDef hlpuart1;
 
-extern volatile char TxMessageBuffer1[256];
-extern volatile char RxMessageBuffer1[256];
+extern char TxMessageBuffer1[256];
+extern char RxMessageBuffer1[256];
 extern volatile char *RxMessageIdx;
+extern volatile uint32_t RxTxFlags;
 
 void TransmitBuffer_Init(void);
 void SystemClock_Config(void);

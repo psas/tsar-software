@@ -274,6 +274,7 @@ uint32_t UART_RecieveMessage(UART_HandleTypeDef *hlpuart1)
 	/*
 	 *  Called during IRQ interrupts if USART_ISR RXFNE or RXNE flag is set.
 	 *  Reads one byte from hlpuart1 RDR register and adds it to the Receiver Buffer.
+	 *  Sets the Data in Buffer flag in RxTxFlags (0x1)
 	 *
 	 *  Params:
 	 *  hlpuart <pointer>: Pointer the the lpuart typedef created at initialization.
@@ -288,15 +289,16 @@ uint32_t UART_RecieveMessage(UART_HandleTypeDef *hlpuart1)
 	 * 		USART_ISR_RXNE_RXFNE_Msk !0x20
 	 */
 
-	volatile uint32_t success = FALSE;
-	volatile uint8_t mask = 0xFF;
+	uint32_t success = FALSE;
+	uint8_t mask = 0xFF;
 
-	volatile char rxb = (uint8_t)(hlpuart1->Instance->RDR & mask);
+	char rxb = (uint8_t)(hlpuart1->Instance->RDR & mask);
 
 	if(RxMessageIdx < &RxMessageBuffer1[RX_BUFFER_SIZE])
 	{
 		*RxMessageIdx = rxb;
 		RxMessageIdx+=1;
+		RxTxFlags |= 0x1;
 		success = TRUE;
 	}
 	if(RxMessageIdx == &RxMessageBuffer1[RX_BUFFER_SIZE]) RxMessageIdx = RxMessageBuffer1;

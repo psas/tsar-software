@@ -5,7 +5,7 @@
 // 	- Creation of Document 5/18/2020 [APJ]
 //  - ... Check Github, bad at logging
 //	- Created ProcessMessages() 12/6/2020 [APJ]
-//  - Created SendStatusMessage() 12/6/2020 [APJ]
+//  - Created OnTickStatusMessage() 12/6/2020 [APJ]
 //
 //	This file contains methods for getting common actuator controller
 //  messages.
@@ -39,104 +39,116 @@
  */
 uint32_t ProcessMessages(struct StateVars *ctrl)
 {
-	uint32_t match = FALSE;
-	uint32_t success = FALSE;
-	uint32_t iter = 0;
-	uint32_t start = 0;
-	uint32_t take = 0;
-
-	char test;
-	char comp = 'A';
-	char *preamble_comp = "A5A5";
-
-	while(iter < RX_BUFFER_SIZE && !match)
+	uint32_t success = TRUE;
+	if(RxTxFlags & 0x1 != 0)
 	{
-		test = RxMessageBuffer1[iter];
-		if(test == comp)
-		{
-			char preamble[4] = {'\0'};
-			match = TRUE;
-			for(int i = iter; i < iter + 4;i++)
-			{
-				preamble[i - iter] = RxMessageBuffer1[i];
-				match &= (preamble[i -iter] == preamble_comp[i-iter]);
-			}
+		uint32_t match = FALSE;
+		uint32_t iter = 0;
+		uint32_t start = 0;
+		uint32_t take = 0;
 
-			if(match)
+		char test;
+		char comp = 'A';
+		char *preamble_comp = "A5A5";
+
+		success = FALSE;
+		while(iter < RX_BUFFER_SIZE && !match)
+		{
+			test = RxMessageBuffer1[iter];
+			if(test == comp)
 			{
-				start = iter;
-				char c_take[2] = {'\0'};
-				for(int i = start + 4; i < start + 6; i++)
+				char preamble[4] = {'\0'};
+				match = TRUE;
+				for(int i = iter; i < iter + 4;i++)
 				{
-					c_take[i - start - 4] = RxMessageBuffer1[i];
+					preamble[i - iter] = RxMessageBuffer1[i];
+					match &= (preamble[i -iter] == preamble_comp[i-iter]);
 				}
-				take = atoi(c_take) + 6;
+
+				if(match)
+				{
+					start = iter;
+					char c_take[2] = {'\0'};
+					for(int i = start + 4; i < start + 6; i++)
+					{
+						c_take[i - start - 4] = RxMessageBuffer1[i];
+					}
+					take = atoi(c_take) + 6;
+				}
 			}
-		}
-		iter++;
-	}
-
-	if(match)
-	{
-		char message[take + 1];
-		char *armCmd = "A5A503ARM";
-		char *powerOffCmd = "A5A508POWEROFF";
-		char *emergencyStopCmd = "A5A505ESTOP";
-		char *failureAckCmd = "A5A507FAILACK";
-		memset(message, '\0', take + 1);
-		for(int i = start; i <= start + take; i++)
-		{
-			message[i-start] = RxMessageBuffer1[i];
+			iter++;
 		}
 
-		if(0 == strcmp(message, armCmd))
+		if(match)
 		{
-			// Flip ARM switch, clear message buffer, point index back to beginning of buffer
-			ctrl->isArmed = (ctrl->isArmed == TRUE ? FALSE : TRUE);
-			memset(RxMessageBuffer1, '\0', RX_BUFFER_SIZE);
-			RxMessageIdx = RxMessageBuffer1;
-			success = TRUE;
-		}
-
-		if(0 == strcmp(message, powerOffCmd))
-		{
-			// Flip ARM switch, clear message buffer, point index back to beginning of buffer
-			ctrl->isStateMachineRunning = FALSE;
-			memset(RxMessageBuffer1, '\0', RX_BUFFER_SIZE);
-			RxMessageIdx = RxMessageBuffer1;
-			success = TRUE;
-		}
-
-		if(0 == strcmp(message, emergencyStopCmd))
-		{
-			ctrl->currentState = FAILURE;
-			memset(RxMessageBuffer1, '\0', RX_BUFFER_SIZE);
-			RxMessageIdx = RxMessageBuffer1;
-			success = TRUE;
-		}
-
-		if(0 == strcmp(message, failureAckCmd))
-		{
-			ctrl->currentState = SAFETY;
-			memset(RxMessageBuffer1, '\0', RX_BUFFER_SIZE);
-			RxMessageIdx = RxMessageBuffer1;
-			success = TRUE;
-		}
-
-		// Default Case
-		if(!success)
-		{
+			char message[take + 1];
+			char *armCmd = "A5A503ARM";
+			char *powerOffCmd = "A5A508POWEROFF";
+			char *emergencyStopCmd = "A5A505ESTOP";
+			char *failureAckCmd = "A5A507FAILACK";
+			memset(message, '\0', take + 1);
 			for(int i = start; i <= start + take; i++)
 			{
-				RxMessageBuffer1[i] = 0;
+				message[i-start] = RxMessageBuffer1[i];
+			}
+
+			if(0 == strcmp(message, armCmd))
+			{
+				// Flip ARM switch, clear message buffer, point index back to beginning of buffer
+				ctrl->isArmed = (ctrl->isArmed == TRUE ? FALSE : TRUE);
+				memset(RxMessageBuffer1, '\0', RX_BUFFER_SIZE);
+				RxMessageIdx = RxMessageBuffer1;
+				success = TRUE;
+				// Clear data read flag
+				RxTxFlags &= 0xFFFFFFE;
+			}
+
+			if(0 == strcmp(message, powerOffCmd))
+			{
+				// Flip ARM switch, clear message buffer, point index back to beginning of buffer
+				ctrl->isStateMachineRunning = FALSE;
+				memset(RxMessageBuffer1, '\0', RX_BUFFER_SIZE);
+				RxMessageIdx = RxMessageBuffer1;
+				success = TRUE;
+				// Clear data read flag
+				RxTxFlags &= 0xFFFFFFE;
+			}
+
+			if(0 == strcmp(message, emergencyStopCmd))
+			{
+				ctrl->currentState = FAILURE;
+				memset(RxMessageBuffer1, '\0', RX_BUFFER_SIZE);
+				RxMessageIdx = RxMessageBuffer1;
+				success = TRUE;
+				// Clear data read flag
+				RxTxFlags &= 0xFFFFFFE;
+			}
+
+			if(0 == strcmp(message, failureAckCmd))
+			{
+				ctrl->currentState = SAFETY;
+				memset(RxMessageBuffer1, '\0', RX_BUFFER_SIZE);
+				RxMessageIdx = RxMessageBuffer1;
+				success = TRUE;
+				// Clear data read flag
+				RxTxFlags &= 0xFFFFFFE;
+			}
+
+			// Default Case
+			if(!success)
+			{
+				// if start pattern is matched but message is invalid, clear it
+				for(int i = start; i <= start + take; i++)
+				{
+					RxMessageBuffer1[i] = 0;
+				}
 			}
 		}
 	}
-
 	return success;
 }
 
-/* uint32_t SendStatusMessage(struct StateVars *ctrl)
+/* uint32_t OnTickStatusMessage(struct StateVars *ctrl)
  *
  * - Checks if stateCounter is a multiple of  TICK_LENGTH. If the condition is true, generates
  * and sends a status message with the current time, valve configuration, and whether the configuration
@@ -154,7 +166,7 @@ uint32_t ProcessMessages(struct StateVars *ctrl)
  *
  *	Notes:
  */
-uint32_t SendStatusMessage(struct StateVars *ctrl)
+uint32_t OnTickStatusMessage(struct StateVars *ctrl)
 {
 	uint32_t success = FALSE;
 	if(ctrl->stateCounter % TICK_LENGTH == 0 || ctrl->currentState == VALVE_CHECK)
@@ -165,6 +177,37 @@ uint32_t SendStatusMessage(struct StateVars *ctrl)
 		Get_Valve_State_Status_Msg(TxMessageBuffer1, ctrl, success);
 		UART_SendMessage(&hlpuart1, TxMessageBuffer1);
 	}
+
+	return success;
+}
+
+/* uint32_t SendStatusMessage(struct StateVars *ctrl)
+ *
+ * - Generates and sends a status message with the current time, valve configuration,
+ *  and whether the configuration matches the target
+ *
+ * Params:
+ * 		StateVars <struct>: System controls struct
+ * 		ctrl->valveConfiguration <uint32_t>: Valve Configuration
+ * 		ctrl->valveTarget <uint32_t>: Valve Target Configuration
+ *
+ * Returns:
+ *  	success <uint32_t>: TRUE | FALSE | 1 | 0
+ *  		Return TRUE if this is a tick AND valveConfiguration == valveTarget
+ *  		Else return FALSE
+ *
+ *	Notes:
+ */
+uint32_t SendStatusMessage(struct StateVars *ctrl)
+{
+	uint32_t success = FALSE;
+
+	ctrl->valveConfiguration = StateConfiguration();
+	success = (ctrl->valveConfiguration == ctrl->valveTarget ? TRUE : FALSE);
+
+	// Create Message and Transmit
+	Get_Valve_State_Status_Msg(TxMessageBuffer1, ctrl, success);
+	UART_SendMessage(&hlpuart1, TxMessageBuffer1);
 
 	return success;
 }

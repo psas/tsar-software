@@ -37,7 +37,7 @@ uint32_t Test(struct StateVars *ctrl)
     	    }
 
     		// OnTick
-    		success = SendStatusMessage(ctrl);
+    		success = OnTickStatusMessage(ctrl);
 
     		// Increment state counter
 			ctrl->stateCounter++;

@@ -332,6 +332,7 @@ void TransmitBuffer_Init(void)
 	memset(TxMessageBuffer1,'\0', TX_BUFFER_SIZE);
 	memset(RxMessageBuffer1,'\0', RX_BUFFER_SIZE);
 	RxMessageIdx = RxMessageBuffer1;
+	RxTxFlags = 0;
 }
 
 /* USER CODE END 4 */

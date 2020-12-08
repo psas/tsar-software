@@ -34,8 +34,8 @@ uint32_t StateInitialize(struct StateVars (*));
 uint32_t UART_SendMessage(UART_HandleTypeDef *,char (*));
 uint32_t UART_RecieveMessage(UART_HandleTypeDef *);
 
-volatile char TxMessageBuffer1[];
-volatile char RxMessageBuffer1[];
+char TxMessageBuffer1[];
+char RxMessageBuffer1[];
 volatile char *RxMessageIdx;
-
+volatile uint32_t RxTxFlags;
 #endif // UTILITIES_H
