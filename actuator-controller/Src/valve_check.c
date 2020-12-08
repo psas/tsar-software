@@ -21,10 +21,9 @@
 
 uint32_t ValveCheck(struct StateVars *ctrl)
 {
-	uint32_t success = FALSE;
+	uint32_t success = TRUE;
 	ctrl->valveConfiguration = StateConfiguration();
-	ctrl->valveTarget  = ((uint16_t)SOV4 	\
-			 |(uint16_t)SOV8);
+
 	uint32_t now = HAL_GetTick();
 	uint32_t TIMEOUT = 10000;
 
@@ -42,18 +41,29 @@ uint32_t ValveCheck(struct StateVars *ctrl)
     	    // If this is the first time, initialize state
     		if(ctrl->currentState != ctrl->lastState)
     	    {
+    			ctrl->valveTarget  = ((uint16_t)SOV1 \
+    					|(uint16_t)SOV2 \
+    					|(uint16_t)SOV3 \
+    					|(uint16_t)SOV4 \
+    					|(uint16_t)SOV5 \
+    					|(uint16_t)SOV6 \
+    					|(uint16_t)SOV7 \
+    					|(uint16_t)SOV8);
     			success = StateInitialize(ctrl);
     	    }
 
     		// OnTick
-    		success = SendStatusMessage(ctrl);
+    		if(0 == ctrl->stateCounter % 500)
+    		{
+    			success &= CycleValves(ctrl);
+    		}
 
     		// TODO: if(data in buffer) ProcessMessages();
 			ProcessMessages(ctrl);
-			success = (ctrl->valveConfiguration == ctrl->valveTarget ? TRUE : FALSE);
+			success &= (ctrl->valveConfiguration == ctrl->valveTarget ? TRUE : FALSE);
 
     		//TODO Specify time frame
-    		if(now - ctrl->timeStarted > TIMEOUT && success)
+    		if(now - ctrl->timeStarted > TIMEOUT && success )
     		{
         		ctrl->currentState = FUEL_FILL;
     		}
@@ -65,7 +75,6 @@ uint32_t ValveCheck(struct StateVars *ctrl)
     		//Log Expected State != Passed State
     		Get_State_Disagree_Error_Msg(TxMessageBuffer1, VALVE_CHECK, ctrl->currentState);
     		UART_SendMessage(&hlpuart1,TxMessageBuffer1);
-
     	}
     }else{
     	    	// Log Invalid State
@@ -74,3 +83,22 @@ uint32_t ValveCheck(struct StateVars *ctrl)
     }
 	return success;
 }
+
+uint32_t CycleValves(struct StateVars *ctrl)
+{
+	uint32_t success = TRUE;
+
+	ctrl->valveTarget *= 2;
+
+	if(ctrl->valveTarget > 0xFF)
+	{
+		ctrl->valveTarget = 0x1;
+	}
+
+	success &= ValveStateSetter(ctrl->valveTarget);
+	ctrl->valveConfiguration = StateConfiguration();
+	success &= SendStatusMessage(ctrl);
+
+	return success;
+}
+

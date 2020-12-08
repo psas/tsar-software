@@ -22,7 +22,7 @@ uint32_t ReadyState(struct StateVars *ctrl)
 {
 	uint32_t success = FALSE;
 	ctrl->valveConfiguration = StateConfiguration();
-	ctrl->valveTarget  = ((uint16_t)XXX1 	\
+	ctrl->valveTarget  = ((uint16_t)SOV4 	\
 			 |(uint16_t)SOV8);
 	uint32_t now = HAL_GetTick();
 	//TODO Specify a real timeout
@@ -31,7 +31,7 @@ uint32_t ReadyState(struct StateVars *ctrl)
     if(VerifyState(ctrl->currentState) && VerifyState(ctrl->lastState))
     {
     	if((ctrl->currentState & READY_STATE) == READY_STATE){
-    		// SOV1   SOV2   SOV3   XXX1   SOV5   SOV6   SOV7   SOV8
+    		// SOV1   SOV2   SOV3   SOV4   SOV5   SOV6   SOV7   SOV8
     		//|  0  |   0  |   0  |   1  |   0  |   0  |   0  |   1  |
 
     	    // If this is the first time, initialize state

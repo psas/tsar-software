@@ -157,7 +157,7 @@ uint32_t ProcessMessages(struct StateVars *ctrl)
 uint32_t SendStatusMessage(struct StateVars *ctrl)
 {
 	uint32_t success = FALSE;
-	if(ctrl->stateCounter % TICK_LENGTH == 0)
+	if(ctrl->stateCounter % TICK_LENGTH == 0 || ctrl->currentState == VALVE_CHECK)
 	{
 		success = (ctrl->valveConfiguration == ctrl->valveTarget ? TRUE : FALSE);
 

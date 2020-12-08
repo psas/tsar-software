@@ -32,7 +32,7 @@ uint32_t LoxBoiloff(struct StateVars *ctrl)
     if(VerifyState(ctrl->currentState) && VerifyState(ctrl->lastState))
     {
     	if((ctrl->currentState & LOX_BOILOFF) == LOX_BOILOFF){
-    		// SOV1   SOV2   SOV3   XXX1   SOV5   SOV6   SOV7   SOV8
+    		// SOV1   SOV2   SOV3   SOV4   SOV5   SOV6   SOV7   SOV8
     		//|  0  |   1  |   0  |   0  |   0  |   2  |   0  |   0  |
 
     	    // If this is the first time, initialize state
