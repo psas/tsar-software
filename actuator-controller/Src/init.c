@@ -327,11 +327,13 @@ void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void TransmitBuffer_Init(void)
+void RxTxBuffer_Init(void)
 {
 	memset(TxMessageBuffer1,'\0', TX_BUFFER_SIZE);
 	memset(RxMessageBuffer1,'\0', RX_BUFFER_SIZE);
 	RxMessageIdx = RxMessageBuffer1;
+	RxEndofBuffer = RxMessageBuffer1 + RX_BUFFER_SIZE - 1;
+	RxMessageReader=RxMessageBuffer1;
 	RxTxFlags = 0;
 }
 

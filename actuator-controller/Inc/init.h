@@ -17,10 +17,13 @@ UART_HandleTypeDef hlpuart1;
 
 extern char TxMessageBuffer1[256];
 extern char RxMessageBuffer1[256];
+extern char *RxEndofBuffer;
+extern char *RxMessageReader;
+
 extern volatile char *RxMessageIdx;
 extern volatile uint32_t RxTxFlags;
 
-void TransmitBuffer_Init(void);
+void RxTxBuffer_Init(void);
 void SystemClock_Config(void);
 void MX_GPIO_Init(void);
 void MX_ADC1_Init(void);

@@ -49,7 +49,7 @@ int main(void)
 	controls.isArmed = FALSE;
 	HAL_Init();
 
-	TransmitBuffer_Init();
+	RxTxBuffer_Init();
 	SystemClock_Config();
 	//MX_WWDG_Init();
 	MX_GPIO_Init();

@@ -30,6 +30,11 @@
 
 #define TICK_LENGTH 2000
 
+// Buffer Flags Definitions
+#define RX_DATA_READY (1 << 0)
+#define TX_DATA_READY (1 << 1)
+//#define RX_BUFFER_OVERFLOW (1 << 2)
+
 enum StateName{					//    SOV1   SOV2   SOV3   SOV4   SOV5   SOV6   SOV7   SOV8
 	SAFETY,						// 0 |  0   |  0  |   0  |   1  |   0  |   0  |   0  |   1  |
 	VALVE_CHECK,				// 1 | 1 0  | 1 0 |  1 0 |  1 0 |  1 0 |  1 0 |  1 0 |  1 0 |

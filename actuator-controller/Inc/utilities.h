@@ -36,6 +36,7 @@ uint32_t UART_RecieveMessage(UART_HandleTypeDef *);
 
 char TxMessageBuffer1[];
 char RxMessageBuffer1[];
+char *RxEndofBuffer;
 volatile char *RxMessageIdx;
 volatile uint32_t RxTxFlags;
 #endif // UTILITIES_H

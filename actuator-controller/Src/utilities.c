@@ -294,23 +294,29 @@ uint32_t UART_RecieveMessage(UART_HandleTypeDef *hlpuart1)
 
 	char rxb = (uint8_t)(hlpuart1->Instance->RDR & mask);
 
-	if(RxMessageIdx < &RxMessageBuffer1[RX_BUFFER_SIZE])
+	if(RxMessageIdx <= RxEndofBuffer)
 	{
 		*RxMessageIdx = rxb;
-		RxMessageIdx+=1;
 		RxTxFlags |= 0x1;
 		success = TRUE;
 	}
-	if(RxMessageIdx == &RxMessageBuffer1[RX_BUFFER_SIZE]) RxMessageIdx = RxMessageBuffer1;
-	printf("%c",RxMessageBuffer1[0]);
+
+	if(RxMessageIdx == RxEndofBuffer)
+	{
+		RxMessageIdx = RxMessageBuffer1;
+	}else
+	{
+		RxMessageIdx++;
+	}
 
     SET_BIT(hlpuart1->Instance->CR1, 0x20);
-	return success;
+
+    return success;
 }
 
 /* Function: uint32_t StateInitialize(enum StateName new, struct StateVars *ctrl)
  *
- * - Initialize state: Resets stateCounter, Logs entry time, set's new state and alst state
+ * - Initialize state: Resets stateCounter, Logs entry time, set's new state and last state
  *   attempts to set valves
  *
  *  Params:

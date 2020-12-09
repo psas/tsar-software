@@ -6,6 +6,8 @@
 //  - ... Check Github, bad at logging
 //	- Created ProcessMessages() 12/6/2020 [APJ]
 //  - Created OnTickStatusMessage() 12/6/2020 [APJ]
+//  - Created FindMessageReturnSize() 12/8/2020 [APJ]
+// 	- Optimized Processmessages(), Read around the ring 12/8/2020 [APJ]
 //
 //	This file contains methods for getting common actuator controller
 //  messages.
@@ -30,122 +32,174 @@
  *
  *	Notes:
  *		Current message format:
- *		A5A5 + Size of Command + Command
+ *		A5A5 + Size of Command (2bytes) + Command
  *		Ex: A5A503ARM Is the ARM command (Switches ARM state);
  *	TODO:
  *		Convert to Hex Strings
- *		Implement Buffer Parsing (currently just clears it after reading successful message)
- *		Implement reading around the ring buffer (edge cases)
  */
 uint32_t ProcessMessages(struct StateVars *ctrl)
 {
 	uint32_t success = TRUE;
-	if(RxTxFlags & 0x1 != 0)
+	if((RxTxFlags & RX_DATA_READY) != 0)
 	{
-		uint32_t match = FALSE;
-		uint32_t iter = 0;
-		uint32_t start = 0;
-		uint32_t take = 0;
+		uint32_t take = FindMessageReturnSize(preamble);
 
-		char test;
-		char comp = 'A';
-		char *preamble_comp = "A5A5";
-
-		success = FALSE;
-		while(iter < RX_BUFFER_SIZE && !match)
-		{
-			test = RxMessageBuffer1[iter];
-			if(test == comp)
-			{
-				char preamble[4] = {'\0'};
-				match = TRUE;
-				for(int i = iter; i < iter + 4;i++)
-				{
-					preamble[i - iter] = RxMessageBuffer1[i];
-					match &= (preamble[i -iter] == preamble_comp[i-iter]);
-				}
-
-				if(match)
-				{
-					start = iter;
-					char c_take[2] = {'\0'};
-					for(int i = start + 4; i < start + 6; i++)
-					{
-						c_take[i - start - 4] = RxMessageBuffer1[i];
-					}
-					take = atoi(c_take) + 6;
-				}
-			}
-			iter++;
-		}
-
-		if(match)
+		if(take)
 		{
 			char message[take + 1];
-			char *armCmd = "A5A503ARM";
-			char *powerOffCmd = "A5A508POWEROFF";
-			char *emergencyStopCmd = "A5A505ESTOP";
-			char *failureAckCmd = "A5A507FAILACK";
-			memset(message, '\0', take + 1);
-			for(int i = start; i <= start + take; i++)
-			{
-				message[i-start] = RxMessageBuffer1[i];
-			}
+			GetMessage(message, take + 1);
 
-			if(0 == strcmp(message, armCmd))
-			{
-				// Flip ARM switch, clear message buffer, point index back to beginning of buffer
-				ctrl->isArmed = (ctrl->isArmed == TRUE ? FALSE : TRUE);
-				memset(RxMessageBuffer1, '\0', RX_BUFFER_SIZE);
-				RxMessageIdx = RxMessageBuffer1;
-				success = TRUE;
-				// Clear data read flag
-				RxTxFlags &= 0xFFFFFFE;
-			}
-
-			if(0 == strcmp(message, powerOffCmd))
-			{
-				// Flip ARM switch, clear message buffer, point index back to beginning of buffer
-				ctrl->isStateMachineRunning = FALSE;
-				memset(RxMessageBuffer1, '\0', RX_BUFFER_SIZE);
-				RxMessageIdx = RxMessageBuffer1;
-				success = TRUE;
-				// Clear data read flag
-				RxTxFlags &= 0xFFFFFFE;
-			}
-
-			if(0 == strcmp(message, emergencyStopCmd))
-			{
-				ctrl->currentState = FAILURE;
-				memset(RxMessageBuffer1, '\0', RX_BUFFER_SIZE);
-				RxMessageIdx = RxMessageBuffer1;
-				success = TRUE;
-				// Clear data read flag
-				RxTxFlags &= 0xFFFFFFE;
-			}
-
-			if(0 == strcmp(message, failureAckCmd))
-			{
-				ctrl->currentState = SAFETY;
-				memset(RxMessageBuffer1, '\0', RX_BUFFER_SIZE);
-				RxMessageIdx = RxMessageBuffer1;
-				success = TRUE;
-				// Clear data read flag
-				RxTxFlags &= 0xFFFFFFE;
-			}
-
-			// Default Case
-			if(!success)
-			{
-				// if start pattern is matched but message is invalid, clear it
-				for(int i = start; i <= start + take; i++)
-				{
-					RxMessageBuffer1[i] = 0;
-				}
-			}
+			success = ProcessCommands(ctrl, message);
 		}
 	}
 	return success;
+}
+
+uint32_t ProcessCommands(struct StateVars * ctrl, char *message)
+{
+	uint32_t success = FALSE;
+	// TODO: Faster validation
+	if(0 == strcmp(message, armCmd))
+	{
+		// Flip ARM switch, clear message
+		ctrl->isArmed = (ctrl->isArmed == TRUE ? FALSE : TRUE);
+
+		success = TRUE;
+
+		// Clear data read flag
+		RxTxFlags &= !RX_DATA_READY;
+	}
+
+	if(0 == strcmp(message, powerOffCmd))
+	{
+		// Flip ARM switch, clear message buffer, point index back to beginning of buffer
+		ctrl->isStateMachineRunning = FALSE;
+		success = TRUE;
+		// Clear data read flag
+		RxTxFlags &= !RX_DATA_READY;
+	}
+
+	if(0 == strcmp(message, emergencyStopCmd))
+	{
+		ctrl->currentState = FAILURE;
+		success = TRUE;
+		// Clear data read flag
+		RxTxFlags &= !RX_DATA_READY;
+	}
+
+	if(0 == strcmp(message, failureAckCmd))
+	{
+		ctrl->currentState = SAFETY;
+		success = TRUE;
+		// Clear data read flag
+		RxTxFlags &= !RX_DATA_READY;
+	}
+
+	// Clear the message, move the reader
+	for(int i = 0; i < strlen(message) + 1;i++)
+	{
+		*RxMessageReader = 0;
+		RxMessageReader++;
+	}
+
+	return success;
+}
+
+void GetMessage(char *message, uint32_t take)
+{
+	memset(message, '\0', take);
+	for(int i = 0; i < take; i++)
+	{
+		if((RxMessageReader + i) > RxEndofBuffer)
+		{
+			message[i] = *(RxMessageBuffer1 + (RxMessageReader - RxEndofBuffer + i - 1));
+		}else
+		{
+			message[i] = *(RxMessageReader + i);
+		}
+	}
+}
+
+/* uint32_t FindMessageReturnSize()
+ *
+ *  Starts reading *RxMessageBuffer1 at *RxMessageReader Searches
+ *  the buffer until it finds a match to the preamble symbol defined in
+ *  messages.h. It returns the size of the message detected or 0 if no
+ *  message is detected.
+ *
+ *  Params:
+ * 		*RxMessageReader GLOBAL<ptr>: Points to last read in RxMessageBuffer1
+ * 		*RxMessageBuffer GLOBAL<ptr>: Points to rx ring buffer
+ * 		*RxEndofBuffer GLOBAL<ptr>: Points to the end of the ring buffer
+ *
+ *  Returns:
+ *  	take <uint32_t>: 0 | Number of chars <bytes> to take
+ *
+ *	Notes:
+ *	TODO:
+ *		Test reading around the ring buffer (edge cases)
+ */
+
+uint32_t FindMessageReturnSize(char * preamble)
+{
+	uint32_t valid = FALSE;
+	uint32_t noMessage = FALSE;
+	uint32_t take = 0;
+	char *start = RxMessageReader;
+	while(!valid && !noMessage)
+	{
+		if(preamble[0] == *RxMessageReader)
+		{
+			valid = TRUE;
+			for(int i = 1; i < strlen(preamble); i++)
+			{
+				//
+				if((RxMessageReader + i) > RxEndofBuffer)
+				{
+					valid &= (preamble[i] == *(RxMessageBuffer1 + (RxMessageReader - RxEndofBuffer + i - 1)));
+				}else
+				{
+					valid &= (preamble[i] == *(RxMessageReader + i));
+				}
+			}
+
+			if(valid)
+			{
+				char c_take[2] = {'\0'};
+				// Case 1 splits the ring: 255 | 0
+				if(RxMessageReader + 4 == RxEndofBuffer)
+				{
+					c_take[0] = *RxEndofBuffer;
+					c_take[1] = *RxMessageBuffer1;
+				// Case 2 Overshoots
+				}else if((RxMessageReader + 4) > RxEndofBuffer)
+				{
+					c_take[0] = *(RxMessageBuffer1 + (RxMessageReader + 4 - RxEndofBuffer));
+					c_take[1] = *(RxMessageBuffer1 + (RxMessageReader + 5 - RxEndofBuffer));
+				// Generic case
+				}else
+				{
+					c_take[0] = *(RxMessageReader+4);
+					c_take[1] = *(RxMessageReader+5);
+				}
+				take = atoi(c_take) + strlen(preamble) + strlen(c_take);
+			}
+		}
+
+		if(RxMessageReader >= RxEndofBuffer && !valid)
+		{
+			RxMessageReader = RxMessageBuffer1;
+		}else if (!valid)
+		{
+			RxMessageReader++;
+		}
+		if(RxMessageReader == start)
+		{
+			noMessage = TRUE;
+		}
+	}
+
+	return take;
 }
 
 /* uint32_t OnTickStatusMessage(struct StateVars *ctrl)
@@ -260,3 +314,41 @@ void Get_Valve_State_Status_Msg(char *statusMessage, struct StateVars *ctrl, uin
 	memset(statusMessage, '\0', VALVE_STATE_BUFFER_SIZE);
 	strcpy(statusMessage, valve_state);
 }
+/*
+		uint32_t match = FALSE;
+		uint32_t iter = 0;
+		uint32_t start = 0;
+		uint32_t take = 0;
+
+		char test;
+		char comp = 'A';
+		char *preamble_comp = "A5A5";
+
+		success = FALSE;
+		while(iter < RX_BUFFER_SIZE && !match)
+		{
+			test = RxMessageBuffer1[iter];
+			if(test == comp)
+			{
+				char preamble[4] = {'\0'};
+				match = TRUE;
+				for(int i = iter; i < iter + 4;i++)
+				{
+					preamble[i - iter] = RxMessageBuffer1[i];
+					match &= (preamble[i -iter] == preamble_comp[i-iter]);
+				}
+
+				if(match)
+				{
+					start = iter;
+					char c_take[2] = {'\0'};
+					for(int i = start + 4; i < start + 6; i++)
+					{
+						c_take[i - start - 4] = RxMessageBuffer1[i];
+					}
+					take = atoi(c_take) + 6;
+				}
+			}
+			iter++;
+		}
+*/
