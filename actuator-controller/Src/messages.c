@@ -55,6 +55,24 @@ uint32_t ProcessMessages(struct StateVars *ctrl)
 	return success;
 }
 
+/* uint32_t ProcessCommands(struct StateVars * ctrl, char *message)
+ *
+ *  This method compares a c_string with commands defined in messages.h
+ *  if a successful comparison is made, the appropriate command is executed.
+ *  Whether successful or not, clears the message in the buffer.
+ *
+ *  Params:
+ * 		ctrl <struct ptr>: State Machine Control Structure
+ * 		message <c_string>: Command to parse
+ * 		RxTxFlags GLOBAL<uint32_t>:  Rx Tx Flags
+ *
+ *  Returns:
+ *  	success <uint32_t>: TRUE | FALSE | 1 | 0,
+ *  	If a command was processed successfully return TRUE Else FALSE
+ *
+ *	Notes:
+ */
+
 uint32_t ProcessCommands(struct StateVars * ctrl, char *message)
 {
 	uint32_t success = FALSE;
