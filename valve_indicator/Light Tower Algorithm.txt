@@ -1,0 +1,56 @@
+﻿Set standby (no signal received) state on LEDs (or everything good state if we don’t use a standby state)
+While waiting for signal, check power to make sure that we have not switched to battery (power loss)
+If power loss, switch to power loss state
+Assert LEDs
+Keep checking for power to be restored
+If power gets restored, go back to waiting for signal
+
+
+Wait for signal from AI (state change)
+(If we can get an interrupt signal from the source, that would be ideal so that we don’t miss a state change.  Otherwise, we just need a quick, busy poll to see when the state changes.)
+
+
+        If interrupt:
+Check interrupt to make sure it came from the state change
+If not our interrupt, go back to waiting
+else...
+Turn off interrupts
+Read what state we are changing to
+Save changed state to current state variable
+Enable interrupts again and go to changed state function
+        If polling:
+Keep checking line to see if state changes
+When state changes, check to see if state is valid (what we got is actually a state change)
+If state is not valid (state did not change or other signal was seen)
+else...
+Save changed state to current state variable
+Go to state changed function
+
+
+When state changes…
+Sleep for time it takes for valves to change (1 sec?)
+Get state of each valve
+Save individual value states to value state variables
+Combine individual states to be one variable for quicker checking (store in hex with each bit being open/closed to make unique hex codes to quickly check)
+
+
+Compare actual state hex to expected state hex
+        If state matches:
+Set current state to be everything good
+Assert LEDs for state
+Go back to waiting
+        If state does not match: 
+(optional check: check previous state to see if machine did not change states)
+Check valves one by one (high priority to low priority) to see which valve(s) is in the wrong state
+Depending on which valve(s) did not change, set current state to error level
+Assert LEDs for error level (flashing, 3-5 seconds)
+Switch LEDs to show which values are in error (higher priority first, 1 second each)
+After this LED cycle, check each faulty valves to see if anything has been fixed (or just took too long to change)
+Check if any valves are still in error
+If so...
+Reset error state
+Loop back through error protocol for state and LEDs
+        Else…
+Set state back to all good
+Assert LEDs
+Go back to waiting for signal

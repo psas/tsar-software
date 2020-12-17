@@ -1,0 +1,16 @@
+main.c:116:5:main	672	static
+main.c:212:6:SystemClock_Config	88	static
+main.c:247:13:MX_SPI1_Init	8	static
+main.c:287:13:MX_GPIO_Init	48	static
+main.c:333:5:mainCheck	80	static
+main.c:366:5:checkState	32	static
+main.c:416:5:errorFound	24	static
+main.c:453:5:isError	24	static
+main.c:481:6:buzzOn	8	static
+main.c:485:6:buzzOff	8	static
+main.c:489:6:ledOn	16	static
+main.c:527:6:ledOff	8	static
+main.c:535:6:powerFailureState	8	static
+main.c:555:8:SizeOfFile	24	static
+main.c:564:6:WriteFile	608	static
+main.c:599:6:Error_Handler	8	static
