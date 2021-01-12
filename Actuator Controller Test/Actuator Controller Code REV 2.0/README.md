@@ -11,9 +11,9 @@ Python Script Usage:
 		- Show status of valves/Igniters: status
 
  GPIO Configuration:
- 
-    ![github-small](images/gpio_config_rev2.0.PNG) 
+    <img src="images/gpio_config_rev2.0.PNG" width= "100">
+              
  
  Python script usage:
  
-    ![github_small](images/sample_rev2.0.PNG) 
+   ![github_small](images/sample_rev2.0.PNG) 
