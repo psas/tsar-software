@@ -9,5 +9,4 @@ Python Script Usage:
         - Turn OFF valve SOV1: sov1off
         - Terminate the python script: exit
         
-        
-        
+ ![](images/example.PNG)  
