@@ -9,3 +9,13 @@ Python Script Usage:
         - Turn OFF valve SOV1: sov1off
         - Terminate the python script: exit
 		- Show status of valves/Igniters: status
+
+ GPIO Configuration:
+ 
+ <img src="images/gpio_config_rev2.0.PNG" width= "600">
+              
+ 
+ Python script usage:
+ 
+ <img src="images/sample_rev2.0.PNG" width= "600">
+ 
