@@ -13,3 +13,6 @@ Python Script Usage:
  GPIO Configuration:
  
  ![github-small](images/gpio_config_rev2.0.PNG) 
+ 
+ Python script usage:
+  ![](images/sample_rev2.0.PNG) 
