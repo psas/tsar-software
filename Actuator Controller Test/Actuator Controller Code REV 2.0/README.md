@@ -12,4 +12,4 @@ Python Script Usage:
 
  GPIO Configuration:
  
- ![](images/gpio_config_rev2.0.PNG) 
+ ![small](images/gpio_config_rev2.0.PNG) 
