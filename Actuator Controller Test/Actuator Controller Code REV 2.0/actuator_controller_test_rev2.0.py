@@ -24,13 +24,8 @@ def opening_port():
        bytesize= serial.EIGHTBITS, 
        parity= serial.PARITY_NONE, 
        stopbits= serial.STOPBITS_ONE, 
-       timeout= 1)
-    
-    
-    #serial_port.reset_input_buffer() #If the port is open flush the Input Buffer.
-    #serial_port.reset_output_buffer()# also flush the output buffer.
-       
-       
+       timeout= 0.5)
+         
 def greeting():
     
     print ("\n* PSAS ACTUATOR CONTROLLER TEST *\n")
@@ -49,15 +44,13 @@ def write_comand(comand):
     # serial Write 
     try:
         serial_port.write(bytes(comand,'utf8'))
-        time.sleep(0.3)
+        
     except (OSError,serial.serialutil.SerialException) as e:
           print(e)
           print ("Attempting to reestablish connection ...")
           serial_port.close()
           opening_port()
  
-
-
 def read_comand(chunk_size=180):
     read_buffer = byte_chunk = b''
     
@@ -73,27 +66,17 @@ def read_comand(chunk_size=180):
         read_buffer += byte_chunk
       
         if not len(byte_chunk) == chunk_size:
-            # Check if the chunck of data is empty or contain spaces only
+            # Check if the chunck of data is empty or contain spaces only using regex
             message = read_buffer.decode('utf8')
             
             if not message or re.search("^\s*$", message) :
-                print ("Comand was sent but no Data was received. Reestablishing connection...")
-                
+                print ("Comand was sent but no Data was received. Reestablishing connection...")               
                 serial_port.close()
                 opening_port()
-                
-                '''
-                #Attempt the status command again
-                #time.sleep(0.3)
-                write_comand('21\r')
-                time.sleep(0.3) # wait some time before reading 
-                read_comand()
-                '''
-                
                 break
+ 
             else:
-                #there is data 
-                #time.sleep(0.5)
+                #there is data                
                 # Print status only when valid Data is received.
                 print ("Received: ",message)
                 break
@@ -176,13 +159,9 @@ def comand_check(argument):
             help_menu()
         
         elif argument == 'exit':
-            #Turn off all the valves and igniters
-            try:
-                serial_port.write(bytes('24\r','utf8'))
-                time.sleep(0.3)
-            except (OSError,serial.serialutil.SerialException) as e:
-                 print(e)
-        
+            #Turn off all the valves and igniters            
+            write_comand('24\r')
+            time.sleep(0.3)
             serial_port.close()
             sys.exit()
             
