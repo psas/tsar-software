@@ -1,0 +1,5 @@
+utilities.c:13:6:StateStatus	80	static
+utilities.c:48:10:VerifyState	24	static
+utilities.c:105:10:StateConfiguration	16	static
+utilities.c:153:10:ValveStateSetter	24	static
+utilities.c:226:10:StateInitialize	24	static
