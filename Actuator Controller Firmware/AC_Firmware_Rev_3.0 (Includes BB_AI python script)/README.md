@@ -1,4 +1,4 @@
-Actuator Controller Test REV 3.0.
+Actuator Controller Firmware REV 3.0.
 - The Beagle Bone AI will communicate with the Nucleo STM32 board via serial over USB. 
 - A python script will run in the BB_AI communicating with the Nucleo board allowing the GPIO manipulation of the Nucleo board.
 
