@@ -31,4 +31,6 @@ Python Script Usage:
  Python script usage:
  
   <img src="images/script.PNG" width= "600">
+  
+  <img src="images/AC_rev3.0.PNG" width= "600">
  
