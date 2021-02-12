@@ -30,7 +30,5 @@ Python Script Usage:
  
  Python script usage:
  
- <img src="images/sample_rev3.0.PNG" width= "600">
- 
   <img src="images/script.PNG" width= "600">
  
