@@ -2,7 +2,7 @@ Actuator Controller Firmware REV 3.0.
 - The Beagle Bone AI will communicate with the Nucleo STM32 board via serial over USB. 
 - A python script will run in the BB_AI communicating with the Nucleo board allowing the GPIO manipulation of the Nucleo board.
 
-Changes from REV 2.0:
+##Changes from REV 2.0:
 - Added two methods to check the valves 
 	- Automatic sequence that turn ON/OFF from SOv1 to IG one by one.
 	- Check individual valves.
