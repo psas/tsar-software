@@ -32,5 +32,9 @@
  
   <img src="images/script.PNG" width= "600">
   
+  ## State Transition Diagram 
+  
+   <img src="images/fsm_ac_rev3.0.PNG" width= "600">
+  
  
  
