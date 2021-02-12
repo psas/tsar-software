@@ -1,0 +1,8 @@
+messages.c:14:6:UART_SendMessage	24	static
+messages.c:25:6:HAL_UART_RxCpltCallback	24	static
+messages.c:68:6:hexadecimalToDecimal	32	static
+messages.c:101:10:ProcessCommands	24	static
+messages.c:368:10:getWords	32	static
+messages.c:389:10:NominalValueCheck	24	static
+messages.c:439:6:Get_State_Disagree_Error_Msg	152	static
+messages.c:454:6:Get_Invalid_State_Error_Msg	152	static
