@@ -1,0 +1,16 @@
+main.c:117:5:ApndThis	296	static
+main.c:224:5:mainCheck	80	static
+main.c:265:5:checkState	32	static
+main.c:326:5:errorFound	24	static
+main.c:364:5:isError	24	static
+main.c:400:6:buzzOn	8	static
+main.c:408:6:buzzOff	8	static
+main.c:417:6:ledOn	32	static
+main.c:491:6:ledOff	8	static
+main.c:503:6:powerFailureState	8	static
+main.c:536:5:main	2448	static
+main.c:730:6:SystemClock_Config	232	static
+main.c:780:13:MX_SPI2_Init	8	static
+main.c:820:13:MX_USART1_UART_Init	8	static
+main.c:855:13:MX_GPIO_Init	40	static
+main.c:901:6:Error_Handler	4	static
