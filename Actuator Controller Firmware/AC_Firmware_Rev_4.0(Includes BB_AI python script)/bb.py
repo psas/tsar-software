@@ -1,8 +1,4 @@
-##################################################################################
-# PSAS BB_AI python script
-# This script handles the communication and interaction of the Actuator Controller
-# and the Marionette.
-##################################################################################
+
 
 import serial, sys, time, readline, re, curses
 import concurrent.futures # uses the tHread pool executor 
@@ -130,13 +126,13 @@ def acController(q):
             dash = '-' * 93 
             for i in range(len(commands)):
                 if i == 0:
-                    print(dash)
-                    print('|{:^28s}|{:^40s}|{:^21}|'.format(commands[i][0],commands[i][1],commands[i][2]))
-                    print(dash)
+                    print(dash+ "\r")
+                    print('|{:^28s}|{:^40s}|{:^21}|'.format(commands[i][0],commands[i][1],commands[i][2])+ "\r")
+                    print(dash+ "\r")
                 else:
-                    print('|{:<28s}|{:^40s}|{:<21}|'.format(commands[i][0],commands[i][1], commands[i][2]))
+                    print('|{:<28s}|{:^40s}|{:<21}|'.format(commands[i][0],commands[i][1], commands[i][2])+ "\r")
                 
-            print(dash)     
+            print(dash+ "\r")     
 
 
             valid_transitions=[[' VALID TRANSITIONS BETWEEN STATES '],['Start Handler -> Valve Check -> OFF'],
@@ -146,13 +142,13 @@ def acController(q):
             dash = '-' * 100 
             for i in range(len(valid_transitions)):
                 if i == 0:
-                    print(dash)
-                    print('|{:^98s}|'.format(valid_transitions[i][0]))
-                    print(dash)
+                    print(dash+ "\r")
+                    print('|{:^98s}|'.format(valid_transitions[i][0])+ "\r")
+                    print(dash+ "\r")
                 else:
-                    print('|{:<98s}|'.format(valid_transitions[i][0]))
+                    print('|{:<98s}|'.format(valid_transitions[i][0])+ "\r")
                 
-            print(dash)     
+            print(dash+ "\r") 
     
         # Reading serial for cases where using readline() is not possible.
         comand = b''
@@ -189,7 +185,7 @@ def acController(q):
                         break
                 else:
                         #there is data 
-                        print ("Received: ",byte_chunk, end='\r\n', flush = True)
+                        print ("Received: ",byte_chunk, end='\n\r', flush = True)
                         serial_port.flushInput() 
                         break
     
@@ -523,6 +519,8 @@ def main():
             executor._threads.clear()
             concurrent.futures.thread._threads_queues.clear()
             curses.endwin()
+            #resets echo 
+            #os.system('stty sane')
             sys.exit()
 
 if __name__ == '__main__':
