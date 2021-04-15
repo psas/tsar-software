@@ -1,0 +1,2 @@
+ring_buffer.c:4:6:ringBuffer	32	static
+ring_buffer.c:61:6:ringBufferRead	32	static
