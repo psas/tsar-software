@@ -1,0 +1,22 @@
+
+---------------------------------------------------------------------------------------------
+|     GENERAL COMMANDS       |          VALVE CHECK COMMANDS          |       Valves        |
+---------------------------------------------------------------------------------------------
+| status: Current state.     |   cyclevalves: Automatic valve check.  | SOV1: Fuel Pressure |
+| loxprefill                 |   cyclevoff: Automatic sequence OFF.   | SOV2: Lox Pressure  |
+| loxfill                    |         Turn ON valve: sov1on          | SOV3: Fuel Purge N2 |
+| loxchill                   |        Turn OFF Valve: sov1off         | SOV4: Fuel Vent     |
+| safety                     |                                        | SOV5: Fuel Main     |
+| pressurize                 |                                        | SOV6: Lox Main      |
+| ignition                   |                                        | SOV7: Lox Fill      |
+| off: Terminate AC software.|                                        | SOV8: Lox Vent      |
+| valvecheck                 |                                        | SOV9: Lox Purge     |
+| exit: ends the python scri |                                        | IG:   Igniter       |
+---------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+|                                 VALID TRANSITIONS BETWEEN STATES                                 |
+----------------------------------------------------------------------------------------------------
+|Start Handler -> Valve Check -> OFF                                                               |
+|Start Handler -> Lox Pre Fill -> Lox Fill -> Lox Chill -> Safety -> Pressurize -> Ignition        |
+|(Auto Start):Ignition (5s) -> Oxidizer Start (.2s) -> Firing(3s) -> Purge(3s) -> Safety (Auto End)|
+----------------------------------------------------------------------------------------------------
