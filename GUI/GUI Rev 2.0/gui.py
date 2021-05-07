@@ -78,7 +78,10 @@ def openfile():
     os.system('log_gui.txt')
 '''
 def help_window():
-   os.system('help.txt')
+   def h_w(): 
+     os.system('help.txt')
+   help_t = threading.Thread(target=h_w)
+   help_t.start()
 #########################   
 # Closing PID window
 def on_closing_pid():
