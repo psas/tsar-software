@@ -1,0 +1,5 @@
+init.c:25:6:SystemClock_Config	232	static
+init.c:81:6:MX_USART2_UART_Init	8	static
+init.c:116:6:MX_USART3_UART_Init	8	static
+init.c:152:7:MX_GPIO_Init	48	static
+init.c:230:6:Error_Handler	4	static,ignoring_inline_asm

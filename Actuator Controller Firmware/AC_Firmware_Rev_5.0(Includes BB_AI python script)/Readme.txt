@@ -1,0 +1,1 @@
+In revision 5.0 small changes are done to the AC firmware but lots of bugs are fixed in the multibb.py

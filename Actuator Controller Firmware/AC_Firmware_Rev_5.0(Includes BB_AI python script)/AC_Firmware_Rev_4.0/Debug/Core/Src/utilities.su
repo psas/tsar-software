@@ -1,0 +1,8 @@
+utilities.c:15:6:StateStatus	80	static
+utilities.c:54:10:VerifyState	24	static
+utilities.c:109:6:ValveStatus	32	static
+utilities.c:243:10:StateConfiguration	16	static
+utilities.c:291:10:ValveStateSetter	24	static
+utilities.c:364:10:StateInitialize	24	static
+utilities.c:384:6:ValveCheckCmd	88	static
+utilities.c:720:10:CycleValves	24	static
