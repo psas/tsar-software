@@ -105,10 +105,10 @@ def open_port_marionette():
 
 def init_marionette(q, q2, tty):  
       # SEtup and Initialization of the Marionette  
-      tty.write("\r\n".encode('utf-8'))
+      #tty.write("\r\n".encode('utf-8'))
       tty.write("+noecho\r\n".encode('utf-8'))
       tty.write("+noprompt\r\n".encode('utf-8'))
-      tty.write("\r\n".encode('utf-8'))
+      #tty.write("\r\n".encode('utf-8'))
       
       # Set Marionette to 16 samples per second
       tty.write('adc.config(0,16)\r\n'.encode('utf-8'))
@@ -135,24 +135,29 @@ def init_marionette(q, q2, tty):
 def opening_port(q2):
     global serial_port
     try:
-        ac =""
-        for p in ports:
-            #if 'COM9' in p.device: #for windows
-            ##if "066BFF343633464257245637" in p.serial_number: #my nucleo 
-            if '0662FF544856846687095229' in p.serial_number: # PSAS nucleo 
-                ac = p.device
-                # Port initialization 
-                serial_port = serial.Serial( 
-                port= ac,
-                baudrate=9600, 
-                bytesize= serial.EIGHTBITS, 
-                parity= serial.PARITY_NONE, 
-                stopbits= serial.STOPBITS_ONE, 
-                timeout= 0.5)
-        # Discarding anything in the I/O buffer.        
-        serial_port.reset_output_buffer()
-        serial_port.reset_input_buffer()        
-        return serial_port
+            ac =""
+            for p in ports:
+                #if 'COM9' in p.device: #for windows
+                #if "066BFF343633464257245637" in p.serial_number: #my nucleo 
+                if '0662FF544856846687095229' in p.serial_number: # PSAS nucleo 
+                    ac = p.device
+                    # Port initialization 
+                    serial_port = serial.Serial( 
+                    port= ac,
+                    baudrate=9600, 
+                    bytesize= serial.EIGHTBITS, 
+                    parity= serial.PARITY_NONE, 
+                    stopbits= serial.STOPBITS_ONE, 
+                    timeout= 3)#, 
+                    #write_timeout = 1)#,
+                    #timeout  is for pyserial .read()
+                    #write_timeout=0)
+                    
+            # Discarding anything in the I/O buffer.        
+            serial_port.reset_output_buffer()
+            serial_port.reset_input_buffer()     
+
+            return serial_port
 
     except (OSError,serial.serialutil.SerialException) as e:
         print(f" Problem stablishing serial connection with Actuator Controller: {e})")
@@ -202,24 +207,30 @@ def help_menu():
             print('|{:<98s}|'.format(valid_transitions[i][0])+ "\r")
         
     print(dash+ "\r") 
-
-# Reading serial for cases where using readline() is not possible.
-def write_comand(comand):
-    # serial Write 
     
+    
+# This function writes all the commands to the AC
+def write_comand(comand):
     try:
         #Reset the buffer before sending a command 
         serial_port.reset_output_buffer()
         #serial_port.reset_input_buffer()
-
-        serial_port.write(bytes(comand,'utf8'))
-        # Testing wheter the Queue is getting the user commands and if we are actually sending them 
+        #time.sleep(0.002)
+        #serial_port.write(bytes(comand,'utf8'))
+        
+        if serial_port.inWaiting() == 0:
+        	for index in comand:
+        		serial_port.write(bytes(index, 'UTF-8'))
+        		time.sleep(0.0008)
+        		
+        #serial_port.write(comand.encode())
+        # Testing wheter the Queue is getting the user commands and if we are actually sending them!
         '''
         if '3F99' in str(comand):
             pass
         else : 
             print(f" cmd sent {comand}\n")
-        '''   
+        '''
         '''
         while stop -start < 0.003:
             stop = time.time()
@@ -227,12 +238,14 @@ def write_comand(comand):
             '''
         # After testing time.sleep() induces a wait time after writing, needed otherwise 
         # commands may be missed sometimes.        
-        time.sleep(0.007)
+        #time.sleep(0.005)
 
     except (OSError,serial.serialutil.SerialException) as e:
             print (f" There was a problem communicating with AC: {e}\n")
             print('Resetting Actuator Controller...\n')
             write_comand('B6D8\r')# reset command
+
+
 
 ###############################################################################################
 # Writer Process that writes anything in stdout
@@ -240,30 +253,19 @@ def write_comand(comand):
 ################################################################################################
 def writeall(serial_port, q2):
     all_bytes = []
-    count = 0
     while True:
-            #lock.acquire()    
+   
             try:
-                #count += 1
-                #print(f"Working{count}", end = "\r", flush = True)
                 bytesToRead = serial_port.inWaiting()
-                #print("Locking READ\n")
-                #lock.acquire()
                 data = serial_port.read(bytesToRead).decode('utf-8')
-                #lock.release()
-                #print("Unlocking READ")
-                num = int(bytesToRead)
                 
                 if not data:
                     pass
                     
                 else:
                     
-                    
                     if data == '\n':
                         data = ''.join(all_bytes)
-                        #print(data, flush = True)
-
                         #Print to screen everything the AC sends
                         print(data, end = '\033[K\n\n', flush=True)
                         all_bytes.clear()
@@ -272,10 +274,7 @@ def writeall(serial_port, q2):
                     else:
                         #append all the bytes that are being received
                         all_bytes.append(str(data))
-                        #print("Appending chars\n")
-                        #print(str(data) + "\n")
-                
-
+                        
             except (OSError,serial.serialutil.SerialException) as e:
                 print(f'Actuator Controller: {e}')
 
@@ -419,8 +418,7 @@ def comand_check(argument, q2, q):
                 '''
                 
 # This function handles the average of the sensors coming from the data packet
-# The average is set to be 16 samples per second
-                    
+# The average is set to be 16 samples per second            
 def averagin_sensor_values(new_argument):
                 
                 #get the string values and put them in a list
@@ -431,7 +429,7 @@ def averagin_sensor_values(new_argument):
                 multi_list.append(values) 
                 global var                     
                 var = var +  1
-                #print(var)
+
                 #was set to 16 before
                 if var == 11:
                     # calculate the averages
@@ -467,9 +465,9 @@ def main():
       # example of how set a global variable that different processes can share
       #running_flag = multiprocessing.Value("i", 1)
       
-      q = Queue(maxsize = 16)   #This FIFO Queue handles the processing of data packets and commands. 
-      q2  = Queue() # To pass a signal from AC to Marionette to reset the marionette. 
-      
+      q = Queue(maxsize = 5)   #This FIFO Queue handles the processing of data packets and commands. 
+      q2 = Queue() # To pass a signal from AC to Marionette to reset the marionette. 
+      q3 = Queue() 
       #opening AC port
       serial_port = opening_port(q2)
       #open marionette port 
@@ -489,7 +487,6 @@ def main():
       m.daemon = True
       m.start()
       
-      
       # Process writer
       # This process writes to screen everything the AC outputs.
       writer = multiprocessing.Process(target=writeall, args=(serial_port,q2))
@@ -497,6 +494,7 @@ def main():
       #Deamon = True automatically finishes the process as soon as main ends.
       writer.daemon = True
       writer.start()
+
       
       
       # This while loop gets the user commands and saves them in the FIFO QUEUE designed
