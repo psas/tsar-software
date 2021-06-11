@@ -148,7 +148,7 @@ def opening_port(q2):
                     bytesize= serial.EIGHTBITS, 
                     parity= serial.PARITY_NONE, 
                     stopbits= serial.STOPBITS_ONE, 
-                    timeout= 3)#, 
+                    timeout= .5)#, 
                     #write_timeout = 1)#,
                     #timeout  is for pyserial .read()
                     #write_timeout=0)
