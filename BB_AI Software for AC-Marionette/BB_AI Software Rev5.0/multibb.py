@@ -6,7 +6,7 @@
 # This script merges the Actuator Controller and Marionette using threads.
 # - Data packets containing the sensor values and valve  position is parse in this script
 # File name: multibb.py
-#
+# Python version 3.9.2 | Pyserial version 3.5 | Multiprocessing is preinstalled in python
 ##########################################################################################
 import serial, sys, time, readline, re
 import concurrent.futures # uses the tHread pool executor 

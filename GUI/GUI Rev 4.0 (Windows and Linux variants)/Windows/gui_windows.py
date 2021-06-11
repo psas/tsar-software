@@ -7,7 +7,8 @@
 #This script handles the Tkinter graphical interface as well as the Paramiko SSH to the 
 # BB_AI script. From paramiko we can read all the stdout data and parse it to what we want to
 # display in the GUI.
-#
+# Paramiko version 2.7.2  |   Python version 3.9.2 | Tkinter version 8.6Python version 3.9.2  
+# Multithreading is preinstalled in Python
 ##########################################################################################
 from tkinter import *
 from tkinter.messagebox import showinfo
