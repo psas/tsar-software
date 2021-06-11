@@ -392,7 +392,7 @@ def user_command_event(command):
 def init_paramiko():
     # needed parameters for connection    
     port = 22
-    hostname = 'beaglebone'
+    hostname = 'beaglebone.local'
     username = 'debian'
     password = 'Capstone2020'
     #For testing with usb 
@@ -636,12 +636,12 @@ def init_paramiko():
                             
                             if 'Sensor' in str(x): 
                                 continue
-                            if  str(data) == 'status' or str(data) == 'loxprefill' or str(data) == 'loxfill' or \
-                                str(data) == 'loxchill' or str(data) == 'safety' or str(data) == 'valvecheck'or \
-                                str(data) == 'cyclevalves' or str(data) == 'pressurize' or str(data) == 'ignition' or\
-                                str(data) == 'resetac' or str(data) == 'resetm' or str(data) == 'shutdown'   :
-                                        if not '\r\n' in data:
-                                            data = str(data)+'\r\n' 
+                            if  str(x) == 'status' or str(x) == 'loxprefill' or str(x) == 'loxfill' or \
+                                str(x) == 'loxchill' or str(x) == 'safety' or str(x) == 'valvecheck'or \
+                                str(x) == 'cyclevalves' or str(x) == 'pressurize' or str(x) == 'ignition' or\
+                                str(x) == 'resetac' or str(x) == 'resetm' or str(x) == 'shutdown'   :
+                                        if not '\r\n' in x:
+                                            x = str(x)+'\r\n' 
                                             #print("Got here\n")
                             
                             #Display to the output BOX   
